@@ -27,13 +27,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
 import javax.management.MBeanServer;
+
 import org.kaazing.gateway.server.Gateway;
 
-public class GatewayConfiguration implements Configuration<SuppressibleGatewayConfiguration> {
+public class GatewayConfiguration implements Configuration {
 
-    private final SuppressibleGatewayConfiguration _configuration;
     private final Map<String, String> properties;
     private File webRootDirectory;
     private File tempDirectory;
@@ -46,8 +46,6 @@ public class GatewayConfiguration implements Configuration<SuppressibleGatewayCo
     private NetworkConfiguration networkConfiguration;
 
     public GatewayConfiguration() {
-        _configuration = new SuppressibleGatewayConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
         services = new LinkedList<>();
         properties = new HashMap<>();
     }
@@ -55,11 +53,6 @@ public class GatewayConfiguration implements Configuration<SuppressibleGatewayCo
     @Override
     public void accept(ConfigurationVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public SuppressibleGatewayConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     public File getWebRootDirectory() {
@@ -90,18 +83,8 @@ public class GatewayConfiguration implements Configuration<SuppressibleGatewayCo
         return services;
     }
 
-    public void setServices(List<ServiceConfiguration> newServices) {
-        services.clear();
-        services.addAll(newServices);
-    }
-
     public Map<String, String> getProperties() {
         return properties;
-    }
-
-    public void setProperties(Map<String, String> newProperties) {
-        properties.clear();
-        properties.putAll(newProperties);
     }
 
     public ClusterConfiguration getCluster() {
@@ -140,19 +123,4 @@ public class GatewayConfiguration implements Configuration<SuppressibleGatewayCo
         return properties.get(Gateway.GATEWAY_CONFIG_DIRECTORY_PROPERTY);
     }
 
-    private class SuppressibleGatewayConfigurationImpl extends SuppressibleGatewayConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression>
-                                                   suppressions) {
-            _suppressions = suppressions;
-        }
-
-    }
 }

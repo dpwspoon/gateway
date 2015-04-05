@@ -21,29 +21,18 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.AuthorizationConstraintConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public abstract class AbstractAuthorizationConstraintConfigurationBuilder<R> extends
         AbstractConfigurationBuilder<AuthorizationConstraintConfiguration, R> {
 
     public AbstractAuthorizationConstraintConfigurationBuilder<R> requireRole(String requireRole) {
-        configuration.getSuppressibleConfiguration().addRequiredRole(
-                new Suppressible<>(requireRole, getCurrentSuppressions()));
+        configuration.addRequiredRole(requireRole);
         return this;
     }
 
-    protected AbstractAuthorizationConstraintConfigurationBuilder(AuthorizationConstraintConfiguration configuration,
-                                                                  R result, Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
-    }
-
-    @Override
-    public AbstractAuthorizationConstraintConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
+    protected AbstractAuthorizationConstraintConfigurationBuilder(AuthorizationConstraintConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
 }

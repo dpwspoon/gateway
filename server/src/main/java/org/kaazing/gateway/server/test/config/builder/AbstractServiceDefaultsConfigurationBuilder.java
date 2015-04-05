@@ -21,34 +21,22 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.ServiceDefaultsConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public class AbstractServiceDefaultsConfigurationBuilder<R> extends
         AbstractConfigurationBuilder<ServiceDefaultsConfiguration, R> {
 
-    protected AbstractServiceDefaultsConfigurationBuilder(ServiceDefaultsConfiguration configuration, R result,
-                                                          Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    protected AbstractServiceDefaultsConfigurationBuilder(ServiceDefaultsConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public AbstractServiceDefaultsConfigurationBuilder<R> mimeMapping(String extension, String type) {
-        configuration.getSuppressibleConfiguration().addMimeMapping(extension,
-                new Suppressible<>(type, getCurrentSuppressions()));
+        configuration.addMimeMapping(extension, type);
         return this;
     }
 
     public AbstractServiceDefaultsConfigurationBuilder<R> acceptOption(String option, String version) {
-        configuration.getSuppressibleConfiguration().addAcceptOption(option,
-                new Suppressible<>(version, getCurrentSuppressions()));
-        return this;
-    }
-
-    @Override
-    public AbstractServiceDefaultsConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
+        configuration.addAcceptOption(option, version);
         return this;
     }
 

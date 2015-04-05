@@ -21,20 +21,13 @@
 
 package org.kaazing.gateway.server.test.config;
 
-import java.util.Set;
+public class CrossOriginConstraintConfiguration implements Configuration {
 
-public class CrossOriginConstraintConfiguration implements
-        Configuration<SuppressibleCrossOriginConstraintConfiguration> {
-
-    private final SuppressibleCrossOriginConstraintConfiguration _configuration;
-
-    private Suppressible<String> _allowOrigin;
-    private Suppressible<String> _allowMethods;
-    private Suppressible<String> _allowHeaders;
+    private String _allowOrigin;
+    private String _allowMethods;
+    private String _allowHeaders;
 
     public CrossOriginConstraintConfiguration() {
-        _configuration = new SuppressibleCrossOriginConstraintConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
     @Override
@@ -42,86 +35,37 @@ public class CrossOriginConstraintConfiguration implements
         visitor.visit(this);
     }
 
-    @Override
-    public SuppressibleCrossOriginConstraintConfiguration getSuppressibleConfiguration() {
-        return _configuration;
-    }
-
     public String getAllowOrigin() {
         if (_allowOrigin == null) {
             return null;
         }
-        return _allowOrigin.value();
+        return _allowOrigin;
     }
 
     public void setAllowOrigin(String allowOrigin) {
-        this._allowOrigin = new Suppressible<>(allowOrigin);
+        this._allowOrigin = allowOrigin;
     }
 
     public String getAllowMethods() {
         if (_allowMethods == null) {
             return null;
         }
-        return _allowMethods.value();
+        return _allowMethods;
     }
 
     public void setAllowMethods(String allowMethods) {
-        this._allowOrigin = new Suppressible<>(allowMethods);
+        this._allowMethods = allowMethods;
     }
 
     public String getAllowHeaders() {
         if (_allowHeaders == null) {
             return null;
         }
-        return _allowHeaders.value();
+        return _allowHeaders;
     }
 
     public void setAllowHeaders(String allowHeaders) {
-        this._allowOrigin = new Suppressible<>(allowHeaders);
+        this._allowHeaders = allowHeaders;
     }
 
-    private class SuppressibleCrossOriginConstraintConfigurationImpl extends
-            SuppressibleCrossOriginConstraintConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<Suppression> suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Suppressible<String> getAllowOrigin() {
-            return _allowOrigin;
-        }
-
-        @Override
-        public void setAllowOrigin(Suppressible<String> allowOrigin) {
-            _allowOrigin = allowOrigin;
-        }
-
-        @Override
-        public Suppressible<String> getAllowMethods() {
-            return _allowMethods;
-        }
-
-        @Override
-        public void setAllowMethods(Suppressible<String> allowMethods) {
-            _allowMethods = allowMethods;
-        }
-
-        @Override
-        public Suppressible<String> getAllowHeaders() {
-            return _allowHeaders;
-        }
-
-        @Override
-        public void setAllowHeaders(Suppressible<String> allowHeaders) {
-            _allowHeaders = allowHeaders;
-        }
-    }
 }

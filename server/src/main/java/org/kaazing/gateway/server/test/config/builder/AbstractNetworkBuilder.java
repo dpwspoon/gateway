@@ -22,14 +22,12 @@
 package org.kaazing.gateway.server.test.config.builder;
 
 import org.kaazing.gateway.server.test.config.NetworkConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
-import org.kaazing.gateway.server.test.config.Suppressibles;
 
 public class AbstractNetworkBuilder<R> extends AbstractConfigurationBuilder<NetworkConfiguration, R> {
 
     // Always none suppressed because it is deprecated
     protected AbstractNetworkBuilder(NetworkConfiguration configuration, R result) {
-        super(configuration, result, Suppressibles.getDefaultSuppressions());
+        super(configuration, result);
     }
 
     /**
@@ -41,12 +39,6 @@ public class AbstractNetworkBuilder<R> extends AbstractConfigurationBuilder<Netw
     @Deprecated
     public AbstractNetworkBuilder<R> mapping(String internalAddress, String[] externalAddresses) {
         configuration.addMapping(internalAddress, externalAddresses);
-        return this;
-    }
-
-    @Override
-    public AbstractNetworkBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
         return this;
     }
 

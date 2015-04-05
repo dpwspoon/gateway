@@ -27,40 +27,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-public class RealmConfiguration implements Configuration<SuppressibleRealmConfiguration> {
+public class RealmConfiguration implements Configuration {
 
-    private SuppressibleRealmConfiguration _configuration;
-    private Suppressible<String> _name;
-    private Suppressible<String> _description;
-    private Suppressible<String> _httpChallengeScheme;
-    private Suppressible<String> _authorizationMode;
-    private Suppressible<String> _sessionTimeout;
-    private final List<Suppressible<String>> httpHeaders = new ArrayList<>();
-    private final List<Suppressible<String>> httpQueryParameters = new ArrayList<>();
-    private final List<Suppressible<String>> httpCookies = new ArrayList<>();
+    private String _name;
+    private String _description;
+    private String _httpChallengeScheme;
+    private String _authorizationMode;
+    private String _sessionTimeout;
+    private final List<String> httpHeaders = new ArrayList<>();
+    private final List<String> httpQueryParameters = new ArrayList<>();
+    private final List<String> httpCookies = new ArrayList<>();
     private final List<LoginModuleConfiguration> loginModules = new LinkedList<>();
-    private final List<String> unsuppressibleHttpHeaders = Suppressibles.unsuppressibleList(httpHeaders);
-    private final List<String> unsuppressibleHttpQueryParameters = Suppressibles
-            .unsuppressibleList(httpQueryParameters);
-    private final List<String> unsuppressibleHttpCookies = Suppressibles.unsuppressibleList(httpCookies);
-    private static CharsetEncoder asciiEncoder =
-            Charset.forName("US-ASCII").newEncoder();
+    private static CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
 
     public RealmConfiguration() {
-        _configuration = new SuppressibleRealmConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
     @Override
     public void accept(ConfigurationVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public SuppressibleRealmConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     public Collection<LoginModuleConfiguration> getLoginModules() {
@@ -77,11 +63,11 @@ public class RealmConfiguration implements Configuration<SuppressibleRealmConfig
         if (_name == null) {
             return null;
         }
-        return _name.value();
+        return _name;
     }
 
     public void setName(String name) {
-        this._name = new Suppressible<>(name);
+        this._name = name;
     }
 
     // description
@@ -89,12 +75,12 @@ public class RealmConfiguration implements Configuration<SuppressibleRealmConfig
         if (_description == null) {
             return null;
         }
-        return _description.value();
+        return _description;
     }
 
     public void setDescription(String description) {
         if (description == null || asciiEncoder.canEncode(description)) {
-            this._description = new Suppressible<>(description);
+            this._description = description;
         } else {
             throw new RuntimeException(
                     "Invalid non US-ASCII character in Realm description. Realm description can only contain US-ASCII values");
@@ -106,11 +92,11 @@ public class RealmConfiguration implements Configuration<SuppressibleRealmConfig
         if (_httpChallengeScheme == null) {
             return null;
         }
-        return _httpChallengeScheme.value();
+        return _httpChallengeScheme;
     }
 
     public void setHttpChallengeScheme(String httpChallengeScheme) {
-        this._httpChallengeScheme = new Suppressible<>(httpChallengeScheme);
+        this._httpChallengeScheme = httpChallengeScheme;
     }
 
     // authorization mode
@@ -118,11 +104,11 @@ public class RealmConfiguration implements Configuration<SuppressibleRealmConfig
         if (_authorizationMode == null) {
             return null;
         }
-        return _authorizationMode.value();
+        return _authorizationMode;
     }
 
     public void setAuthorizationMode(String authorizationMode) {
-        this._authorizationMode = new Suppressible<>(authorizationMode);
+        this._authorizationMode = authorizationMode;
     }
 
     // session timeout
@@ -130,16 +116,16 @@ public class RealmConfiguration implements Configuration<SuppressibleRealmConfig
         if (_sessionTimeout == null) {
             return null;
         }
-        return _sessionTimeout.value();
+        return _sessionTimeout;
     }
 
     public void setSessionTimeout(String sessionTimeout) {
-        this._sessionTimeout = new Suppressible<>(sessionTimeout);
+        this._sessionTimeout = sessionTimeout;
     }
 
     // http headers
     public List<String> getHttpHeaders() {
-        return unsuppressibleHttpHeaders;
+        return httpHeaders;
     }
 
     public void addHttpHeader(String httpHeader) {
@@ -148,114 +134,20 @@ public class RealmConfiguration implements Configuration<SuppressibleRealmConfig
 
     // http query parameters
     public List<String> getHttpQueryParameters() {
-        return unsuppressibleHttpQueryParameters;
+        return httpQueryParameters;
     }
 
     public void addHttpQueryParameter(String httpQueryParameter) {
-        getHttpQueryParameters().add(httpQueryParameter);
+        httpQueryParameters.add(httpQueryParameter);
     }
 
     // http cookies
     public List<String> getHttpCookies() {
-        return unsuppressibleHttpCookies;
+        return httpCookies;
     }
 
     public void addHttpCookie(String httpCookie) {
-        getHttpCookies().add(httpCookie);
+        httpCookies.add(httpCookie);
     }
 
-    private class SuppressibleRealmConfigurationImpl extends SuppressibleRealmConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression>
-                                                   suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Suppressible<String> getName() {
-            return _name;
-        }
-
-        @Override
-        public void setName(Suppressible<String> name) {
-            _name = name;
-        }
-
-        @Override
-        public Suppressible<String> getDescription() {
-            return _description;
-        }
-
-        @Override
-        public void setDescription(Suppressible<String> description) {
-            _description = description;
-        }
-
-        @Override
-        public Suppressible<String> getHttpChallengeScheme() {
-            return _httpChallengeScheme;
-        }
-
-        @Override
-        public void setHttpChallengeScheme(Suppressible<String> httpChallengeScheme) {
-            _httpChallengeScheme = httpChallengeScheme;
-        }
-
-        @Override
-        public Suppressible<String> getAuthorizationMode() {
-            return _authorizationMode;
-        }
-
-        @Override
-        public void setAuthorizationMode(Suppressible<String> authorizationMode) {
-            _authorizationMode = authorizationMode;
-        }
-
-        @Override
-        public Suppressible<String> getSessionTimeout() {
-            return _sessionTimeout;
-        }
-
-        @Override
-        public void setSessionTimeout(Suppressible<String> sessionTimeout) {
-            _sessionTimeout = sessionTimeout;
-        }
-
-        @Override
-        public List<Suppressible<String>> getHttpHeaders() {
-            return httpHeaders;
-        }
-
-        @Override
-        public void addHttpHeader(Suppressible<String> httpHeader) {
-            httpHeaders.add(httpHeader);
-        }
-
-        @Override
-        public List<Suppressible<String>> getHttpQueryParameters() {
-            return httpQueryParameters;
-        }
-
-        @Override
-        public void addHttpQueryParameter(Suppressible<String> httpQueryParameter) {
-            httpQueryParameters.add(httpQueryParameter);
-        }
-
-        @Override
-        public List<Suppressible<String>> getHttpCookies() {
-            return httpCookies;
-        }
-
-        @Override
-        public void addHttpCookie(Suppressible<String> httpCookie) {
-            httpCookies.add(httpCookie);
-        }
-    }
 }

@@ -25,32 +25,19 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ClusterConfiguration implements Configuration<SuppressibleClusterConfiguration> {
+public class ClusterConfiguration implements Configuration {
 
-    private final SuppressibleClusterConfiguration _configuration;
+    private final Set<URI> accepts;
+    private final Set<URI> connects;
 
-    private final Set<Suppressible<URI>> accepts;
-    private final Set<URI> unsurpressibleAccepts;
-    private final Set<Suppressible<URI>> connects;
-    private final Set<URI> unsurpressibleConnects;
-
-    private Suppressible<String> _name;
-    private Suppressible<String> _awsAccessKeyId;
-    private Suppressible<String> _awsSecretKeyId;
+    private String _name;
+    private String _awsAccessKeyId;
+    private String _awsSecretKeyId;
 
     public ClusterConfiguration() {
-        _configuration = new SuppressibleClusterConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
 
         accepts = new HashSet<>();
-        unsurpressibleAccepts = Suppressibles.unsuppressibleSet(accepts);
         connects = new HashSet<>();
-        unsurpressibleConnects = Suppressibles.unsuppressibleSet(connects);
-    }
-
-    @Override
-    public SuppressibleClusterConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     @Override
@@ -60,20 +47,20 @@ public class ClusterConfiguration implements Configuration<SuppressibleClusterCo
 
     // accepts
     public void addAccept(URI acceptURI) {
-        unsurpressibleAccepts.add(acceptURI);
+        accepts.add(acceptURI);
     }
 
     public Set<URI> getAccepts() {
-        return unsurpressibleAccepts;
+        return accepts;
     }
 
     // connect
     public void addConnect(URI connectURI) {
-        unsurpressibleAccepts.add(connectURI);
+        accepts.add(connectURI);
     }
 
     public Set<URI> getConnects() {
-        return unsurpressibleConnects;
+        return connects;
     }
 
     // AwsAccessKey
@@ -82,11 +69,11 @@ public class ClusterConfiguration implements Configuration<SuppressibleClusterCo
         if (_awsAccessKeyId == null) {
             return null;
         }
-        return _awsAccessKeyId.value();
+        return _awsAccessKeyId;
     }
 
     public void setAwsAccessKeyId(String awsAccessKeyId) {
-        this._awsAccessKeyId = new Suppressible<>(awsAccessKeyId);
+        this._awsAccessKeyId = awsAccessKeyId;
     }
 
     // AwsSecretKey
@@ -94,11 +81,11 @@ public class ClusterConfiguration implements Configuration<SuppressibleClusterCo
         if (_awsSecretKeyId == null) {
             return null;
         }
-        return _awsSecretKeyId.value();
+        return _awsSecretKeyId;
     }
 
     public void setAwsSecretKeyId(String awsSecretKeyId) {
-        this._awsSecretKeyId = new Suppressible<>(awsSecretKeyId);
+        this._awsSecretKeyId = awsSecretKeyId;
     }
 
     // Name
@@ -106,79 +93,11 @@ public class ClusterConfiguration implements Configuration<SuppressibleClusterCo
         if (_name == null) {
             return null;
         }
-        return _name.value();
+        return _name;
     }
 
     public void setName(String name) {
-        this._name = new Suppressible<>(name);
+        this._name = name;
     }
 
-    private class SuppressibleClusterConfigurationImpl extends SuppressibleClusterConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<Suppression> suppressions) {
-            _suppressions = suppressions;
-        }
-
-        // Secret Key
-        @Override
-        public Suppressible<String> getAwsSecretKeyId() {
-            return _awsSecretKeyId;
-        }
-
-        @Override
-        public void setAwsSecretKeyId(Suppressible<String> awsSecretKeyId) {
-            _awsSecretKeyId = awsSecretKeyId;
-        }
-
-        // Access Key
-        @Override
-        public Suppressible<String> getAwsAccessKeyId() {
-            return _awsAccessKeyId;
-        }
-
-        @Override
-        public void setAwsAccessKeyId(Suppressible<String> awsAccessKeyId) {
-            _awsAccessKeyId = awsAccessKeyId;
-        }
-
-        // Name
-        @Override
-        public Suppressible<String> getName() {
-            return _name;
-        }
-
-        @Override
-        public void setName(Suppressible<String> name) {
-            _name = name;
-        }
-
-        // Connects
-        @Override
-        public Set<Suppressible<URI>> getConnects() {
-            return connects;
-        }
-
-        @Override
-        public void addConnect(Suppressible<URI> connect) {
-            connects.add(connect);
-        }
-
-        // Accepts
-        @Override
-        public Set<Suppressible<URI>> getAccepts() {
-            return accepts;
-        }
-
-        @Override
-        public void addAccept(Suppressible<URI> accept) {
-            accepts.add(accept);
-        }
-    }
 }

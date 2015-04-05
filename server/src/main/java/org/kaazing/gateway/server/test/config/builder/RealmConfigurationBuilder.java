@@ -21,22 +21,20 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.RealmConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public class RealmConfigurationBuilder extends AbstractRealmConfigurationBuilder<RealmConfiguration> {
 
-    public RealmConfigurationBuilder(Set<Suppression> suppressions) {
-        this(new RealmConfiguration(), suppressions);
+    public RealmConfigurationBuilder() {
+        this(new RealmConfiguration());
     }
 
     public AddLoginModuleBuilder<RealmConfigurationBuilder> loginModule() {
-        return new AddLoginModuleBuilder<>(this, getCurrentSuppressions());
+        return new AddLoginModuleBuilder<>(this);
     }
 
-    private RealmConfigurationBuilder(RealmConfiguration configuration, Set<Suppression> suppressions) {
-        super(configuration, configuration, suppressions);
+    private RealmConfigurationBuilder(RealmConfiguration configuration) {
+        super(configuration, configuration);
     }
 
 }

@@ -21,40 +21,31 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.LoginModuleConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public abstract class AbstractLoginModuleConfigurationBuilder<R> extends
         AbstractConfigurationBuilder<LoginModuleConfiguration, R> {
 
     public AbstractLoginModuleConfigurationBuilder<R> type(String type) {
-        configuration.getSuppressibleConfiguration().setType(new Suppressible<>(type, getCurrentSuppressions()));
+        configuration.setType(type);
         return this;
     }
 
     public AbstractLoginModuleConfigurationBuilder<R> option(String optionType, String optionContent) {
-        configuration.getSuppressibleConfiguration().addOption(optionType,
-                new Suppressible<>(optionContent, getCurrentSuppressions()));
+        configuration.addOption(optionType,
+                optionContent);
         return this;
     }
 
     public AbstractLoginModuleConfigurationBuilder<R> success(String success) {
-        configuration.getSuppressibleConfiguration().setSuccess(
-                new Suppressible<>(success, getCurrentSuppressions()));
+        configuration.setSuccess(
+                success);
         return this;
     }
 
-    protected AbstractLoginModuleConfigurationBuilder(LoginModuleConfiguration configuration, R result,
-                                                      Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
-    }
-
-    @Override
-    public AbstractLoginModuleConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
+    protected AbstractLoginModuleConfigurationBuilder(LoginModuleConfiguration configuration, R result
+                                                      ) {
+        super(configuration, result);
     }
 
 }

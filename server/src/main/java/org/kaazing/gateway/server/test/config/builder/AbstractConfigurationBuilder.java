@@ -21,77 +21,19 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.EnumSet;
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.Configuration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
-public abstract class AbstractConfigurationBuilder<C extends Configuration<?>, R> {
+public abstract class AbstractConfigurationBuilder<C extends Configuration, R> {
 
     protected final C configuration;
     protected final R result;
-    protected final Set<Suppression> defaultSuppressions;
-    protected final Deque<Set<Suppression>> currentSuppressions = new ArrayDeque<>();
 
     public R done() {
         return result;
     }
 
-    protected AbstractConfigurationBuilder(C configuration, R result, Set<Suppression> defaultSuppressions) {
+    protected AbstractConfigurationBuilder(C configuration, R result) {
         this.configuration = configuration;
         this.result = result;
-        this.defaultSuppressions = defaultSuppressions;
-        configuration.getSuppressibleConfiguration().setSuppression(defaultSuppressions);
-    }
-
-    public Set<Suppression> getCurrentSuppressions() {
-        if (currentSuppressions.isEmpty()) {
-            return defaultSuppressions;
-        }
-        return currentSuppressions.peek();
-    }
-
-    protected void unresolvedSuppress(Set<UnresolvedSuppression> suppressions) {
-        Set<Suppression> newSuppressions = EnumSet.noneOf(Suppression.class);
-        for (UnresolvedSuppression suppression : suppressions) {
-            switch (suppression) {
-                case INHERITED:
-                    currentSuppressions.clear();
-                    newSuppressions.clear();
-                    break;
-                case NONE:
-                    newSuppressions.add(Suppression.NONE);
-                    break;
-                case UNIFIED:
-                    newSuppressions.add(Suppression.UNIFIED);
-                    break;
-            }
-        }
-        if (newSuppressions.isEmpty()) {
-            return;
-        }
-        currentSuppressions.push(newSuppressions);
-    }
-
-    public abstract AbstractConfigurationBuilder<?, ?> suppress(Suppression... suppressions);
-
-    protected void addCurrentSuppressions(Suppression... suppressions) {
-        // The last suppression is the most significant
-        Set<Suppression> newSuppressions = EnumSet.noneOf(Suppression.class);
-        for (int i = suppressions.length; i > 0;) {
-            Suppression currentSuppression = suppressions[--i];
-            if (currentSuppression == Suppression.NONE) {
-                newSuppressions.add(Suppression.NONE);
-                currentSuppressions.push(newSuppressions);
-                return;
-            } else if (currentSuppression == Suppression.UNIFIED) {
-                newSuppressions.add(Suppression.UNIFIED);
-                currentSuppressions.push(newSuppressions);
-                return;
-            }
-        }
-        return;
     }
 }

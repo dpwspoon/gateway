@@ -25,22 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ServiceDefaultsConfiguration implements Configuration<SuppressibleServiceDefaultsConfiguration> {
-    private final SuppressibleServiceDefaultsConfiguration _configuration;
+public class ServiceDefaultsConfiguration implements Configuration {
 
-    private final Map<String, Suppressible<String>> acceptOptions = new HashMap<>();
-    private final Map<String, String> unsuppressibleAcceptOptions = Suppressibles.unsuppressibleMap(acceptOptions);
-    private final Map<String, Suppressible<String>> mimeMappings = new HashMap<>();
-    private final Map<String, String> unsuppressibleMimeMappings = Suppressibles.unsuppressibleMap(mimeMappings);
+    private final Map<String, String> acceptOptions = new HashMap<>();
+    private final Map<String, String> mimeMappings = new HashMap<>();
 
     public ServiceDefaultsConfiguration() {
-        _configuration = new SuppressibleServiceDefaultsConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
-    }
-
-    @Override
-    public SuppressibleServiceDefaultsConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     @Override
@@ -49,53 +39,19 @@ public class ServiceDefaultsConfiguration implements Configuration<SuppressibleS
     }
 
     public Map<String, String> getAcceptOptions() {
-        return unsuppressibleAcceptOptions;
+        return acceptOptions;
     }
 
     public void addAcceptOption(String key, String value) {
-        unsuppressibleAcceptOptions.put(key, value);
+        acceptOptions.put(key, value);
     }
 
     public Map<String, String> getMimeMappings() {
-        return unsuppressibleMimeMappings;
+        return mimeMappings;
     }
 
     public void addMimeMapping(String key, String value) {
-        unsuppressibleMimeMappings.put(key, value);
+        mimeMappings.put(key, value);
     }
 
-    private class SuppressibleServiceDefaultsConfigurationImpl extends SuppressibleServiceDefaultsConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression>
-                                                   suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getAcceptOptions() {
-            return acceptOptions;
-        }
-
-        @Override
-        public void addAcceptOption(String key, Suppressible<String> value) {
-            acceptOptions.put(key, value);
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getMimeMappings() {
-            return mimeMappings;
-        }
-
-        @Override
-        public void addMimeMapping(String key, Suppressible<String> value) {
-            mimeMappings.put(key, value);
-        }
-    }
 }

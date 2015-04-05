@@ -24,21 +24,11 @@ package org.kaazing.gateway.server.test.config;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AuthorizationConstraintConfiguration implements
-        Configuration<SuppressibleAuthorizationConstraintConfiguration> {
+public class AuthorizationConstraintConfiguration implements Configuration {
 
-    private final SuppressibleAuthorizationConstraintConfiguration _configuration;
-    private final Set<Suppressible<String>> requiredRoles = new HashSet<>();
-    private final Set<String> unsuppressibleRequiredRoles = Suppressibles.unsuppressibleSet(requiredRoles);
+    private final Set<String> requiredRoles = new HashSet<>();
 
     public AuthorizationConstraintConfiguration() {
-        _configuration = new SuppressibleAuthorizationConstraintConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
-    }
-
-    @Override
-    public SuppressibleAuthorizationConstraintConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     @Override
@@ -46,38 +36,12 @@ public class AuthorizationConstraintConfiguration implements
         visitor.visit(this);
     }
 
-    public void addRequireRole(String requiredRole) {
-        unsuppressibleRequiredRoles.add(requiredRole);
+    public void addRequiredRole(String requiredRole) {
+        requiredRoles.add(requiredRole);
     }
 
     public Set<String> getRequiredRoles() {
-        return unsuppressibleRequiredRoles;
-    }
-
-    private class SuppressibleAuthorizationConstraintConfigurationImpl extends
-            SuppressibleAuthorizationConstraintConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression>
-                                                   suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public void addRequiredRole(Suppressible<String> requiredRole) {
-            requiredRoles.add(requiredRole);
-        }
-
-        @Override
-        public Set<Suppressible<String>> getRequiredRoles() {
-            return requiredRoles;
-        }
+        return requiredRoles;
     }
 
 }

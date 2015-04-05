@@ -21,23 +21,21 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.SecurityConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public class SecurityConfigurationBuilder extends AbstractSecurityConfigurationBuilder<SecurityConfiguration> {
 
-    public SecurityConfigurationBuilder(Set<Suppression> suppressions) {
-        this(new SecurityConfiguration(), suppressions);
+    public SecurityConfigurationBuilder() {
+        this(new SecurityConfiguration());
     }
 
     @Override
     public AddRealmBuilder<SecurityConfigurationBuilder> realm() {
-        return new AddRealmBuilder<>(this, getCurrentSuppressions());
+        return new AddRealmBuilder<>(this);
     }
 
-    private SecurityConfigurationBuilder(SecurityConfiguration configuration, Set<Suppression> suppressions) {
-        super(configuration, configuration, suppressions);
+    private SecurityConfigurationBuilder(SecurityConfiguration configuration) {
+        super(configuration, configuration);
     }
 
 }

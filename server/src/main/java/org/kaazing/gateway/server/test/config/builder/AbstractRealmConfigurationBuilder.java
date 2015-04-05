@@ -21,36 +21,31 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.LoginModuleConfiguration;
 import org.kaazing.gateway.server.test.config.RealmConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public abstract class AbstractRealmConfigurationBuilder<R> extends AbstractConfigurationBuilder<RealmConfiguration, R> {
 
     public AbstractRealmConfigurationBuilder<R> name(String name) {
-        configuration.getSuppressibleConfiguration().setName(new Suppressible<>(name, getCurrentSuppressions()));
+        configuration.setName(name);
         return this;
     }
 
     public AbstractRealmConfigurationBuilder<R> description(String description) {
-        configuration.getSuppressibleConfiguration().setDescription(
-                new Suppressible<>(description, getCurrentSuppressions()));
+        configuration.setDescription(description);
         return this;
     }
 
     public abstract AbstractLoginModuleConfigurationBuilder<? extends AbstractRealmConfigurationBuilder<R>> loginModule();
 
-    protected AbstractRealmConfigurationBuilder(RealmConfiguration configuration, R result,
-                                                Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    protected AbstractRealmConfigurationBuilder(RealmConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public static class AddLoginModuleBuilder<R extends AbstractRealmConfigurationBuilder<?>> extends
             AbstractLoginModuleConfigurationBuilder<R> {
-        protected AddLoginModuleBuilder(R result, Set<Suppression> suppressions) {
-            super(new LoginModuleConfiguration(), result, suppressions);
+        protected AddLoginModuleBuilder(R result) {
+            super(new LoginModuleConfiguration(), result);
         }
 
         @Override
@@ -62,44 +57,32 @@ public abstract class AbstractRealmConfigurationBuilder<R> extends AbstractConfi
     }
 
     public AbstractRealmConfigurationBuilder<R> httpChallengeScheme(String httpChallengeScheme) {
-        configuration.getSuppressibleConfiguration().setHttpChallengeScheme(
-                new Suppressible<>(httpChallengeScheme, getCurrentSuppressions()));
+        configuration.setHttpChallengeScheme(httpChallengeScheme);
         return this;
     }
 
     public AbstractRealmConfigurationBuilder<R> httpHeader(String header) {
-        configuration.getSuppressibleConfiguration().addHttpHeader(
-                new Suppressible<>(header, getCurrentSuppressions()));
+        configuration.addHttpHeader(header);
         return this;
     }
 
     public AbstractRealmConfigurationBuilder<R> httpQueryParameter(String queryParameter) {
-        configuration.getSuppressibleConfiguration().addHttpQueryParameter(
-                new Suppressible<>(queryParameter, getCurrentSuppressions()));
+        configuration.addHttpQueryParameter(queryParameter);
         return this;
     }
 
     public AbstractRealmConfigurationBuilder<R> httpCookie(String cookie) {
-        configuration.getSuppressibleConfiguration().addHttpCookie(
-                new Suppressible<>(cookie, getCurrentSuppressions()));
+        configuration.addHttpCookie(cookie);
         return this;
     }
 
     public AbstractRealmConfigurationBuilder<R> authorizationMode(String chars) {
-        configuration.getSuppressibleConfiguration().setAuthorizationMode(
-                new Suppressible<>(chars, getCurrentSuppressions()));
+        configuration.setAuthorizationMode(chars);
         return this;
     }
 
     public AbstractRealmConfigurationBuilder<R> sessionTimeout(String chars) {
-        configuration.getSuppressibleConfiguration().setSessionTimeout(
-                new Suppressible<>(chars, getCurrentSuppressions()));
-        return this;
-    }
-
-    @Override
-    public AbstractRealmConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
+        configuration.setSessionTimeout(chars);
         return this;
     }
 

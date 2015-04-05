@@ -27,20 +27,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-public class NestedServicePropertiesConfiguration implements
-        Configuration<SuppressibleNestedServicePropertiesConfiguration> {
+public class NestedServicePropertiesConfiguration implements Configuration {
 
     private String configElementName;
-    private final SuppressibleNestedServicePropertiesConfiguration _configuration;
-    private final Map<String, Suppressible<String>> suppressibleSimpleProperties = new HashMap<>();
-    private final Map<String, String> simpleProperties = Suppressibles.unsuppressibleMap(suppressibleSimpleProperties);
-    private final Stack<NestedServicePropertiesConfiguration> nestedServiceProperties =
-            new Stack<>();
+    private final Map<String, String> suppressibleSimpleProperties = new HashMap<>();
+    private final Map<String, String> simpleProperties = new HashMap<String, String>();
+    private final Stack<NestedServicePropertiesConfiguration> nestedServiceProperties = new Stack<>();
 
     public NestedServicePropertiesConfiguration(String configElementName) {
         this.configElementName = configElementName;
-        _configuration = new SuppressibleNestedServicePropertiesConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
     public Map<String, String> getSimpleProperties() {
@@ -66,41 +61,6 @@ public class NestedServicePropertiesConfiguration implements
     @Override
     public void accept(ConfigurationVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public SuppressibleNestedServicePropertiesConfiguration getSuppressibleConfiguration() {
-        return _configuration;
-    }
-
-    private class SuppressibleNestedServicePropertiesConfigurationImpl extends
-            SuppressibleNestedServicePropertiesConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<Suppression> suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getSimpleProperties() {
-            return suppressibleSimpleProperties;
-        }
-
-        @Override
-        public void addSimpleProperty(String key, Suppressible<String> value) {
-            suppressibleSimpleProperties.put(key, value);
-        }
-
-        @Override
-        public String getConfigElementType() {
-            return configElementName;
-        }
     }
 
 }

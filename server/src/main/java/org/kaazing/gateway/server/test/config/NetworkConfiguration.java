@@ -25,15 +25,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class NetworkConfiguration implements Configuration<SuppressibleNetworkConfiguration> {
+public class NetworkConfiguration implements Configuration {
 
-    private final SuppressibleNetworkConfiguration _configuration;
-    private final Map<String, Suppressible<String[]>> mappings = new HashMap<>();
-    private final Map<String, String[]> unsuppressibleMappings = Suppressibles.unsuppressibleMap(mappings);
+    private final Map<String, String[]> mappings = new HashMap<>();
 
     public NetworkConfiguration() {
-        _configuration = new SuppressibleNetworkConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
     @Override
@@ -41,41 +37,14 @@ public class NetworkConfiguration implements Configuration<SuppressibleNetworkCo
         visitor.visit(this);
     }
 
-    @Override
-    public SuppressibleNetworkConfiguration getSuppressibleConfiguration() {
-        return _configuration;
-    }
+
 
     public Map<String, String[]> getMappings() {
-        return unsuppressibleMappings;
+        return mappings;
     }
 
     public void addMapping(String internalAddress, String[] externalAddresses) {
-        unsuppressibleMappings.put(internalAddress, externalAddresses);
+        mappings.put(internalAddress, externalAddresses);
     }
 
-    private class SuppressibleNetworkConfigurationImpl extends SuppressibleNetworkConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression>
-                                                   suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Map<String, Suppressible<String[]>> getMappings() {
-            return mappings;
-        }
-
-        @Override
-        public void addMapping(String internalAddress, Suppressible<String[]> externalAddresses) {
-            mappings.put(internalAddress, externalAddresses);
-        }
-    }
 }

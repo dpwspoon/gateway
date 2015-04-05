@@ -23,18 +23,14 @@ package org.kaazing.gateway.server.test.config.builder;
 
 import java.io.File;
 import java.security.KeyStore;
-import java.util.Set;
+
 import org.kaazing.gateway.server.test.config.RealmConfiguration;
 import org.kaazing.gateway.server.test.config.SecurityConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
-public abstract class AbstractSecurityConfigurationBuilder<R> extends
-        AbstractConfigurationBuilder<SecurityConfiguration, R> {
+public abstract class AbstractSecurityConfigurationBuilder<R> extends AbstractConfigurationBuilder<SecurityConfiguration, R> {
 
     public AbstractSecurityConfigurationBuilder<R> keyStore(KeyStore keyStore) {
-        configuration.getSuppressibleConfiguration().setKeyStore(
-                new Suppressible<>(keyStore, getCurrentSuppressions()));
+        configuration.setKeyStore(keyStore);
         return this;
     }
 
@@ -83,27 +79,25 @@ public abstract class AbstractSecurityConfigurationBuilder<R> extends
     }
 
     public AbstractSecurityConfigurationBuilder<R> trustStore(KeyStore trustStore) {
-        configuration.getSuppressibleConfiguration().setTrustStore(
-                new Suppressible<>(trustStore, getCurrentSuppressions()));
+        configuration.setTrustStore(trustStore);
         return this;
     }
 
     public abstract AbstractRealmConfigurationBuilder<? extends AbstractSecurityConfigurationBuilder<R>> realm();
 
-    public AbstractSecurityConfigurationBuilder(SecurityConfiguration configuration, R result,
-                                                Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    public AbstractSecurityConfigurationBuilder(SecurityConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public static class AddRealmBuilder<R extends AbstractSecurityConfigurationBuilder<?>> extends
             AbstractRealmConfigurationBuilder<R> {
-        public AddRealmBuilder(R result, Set<Suppression> suppressions) {
-            super(new RealmConfiguration(), result, suppressions);
+        public AddRealmBuilder(R result) {
+            super(new RealmConfiguration(), result);
         }
 
         @Override
         public AddLoginModuleBuilder<AddRealmBuilder<R>> loginModule() {
-            return new AddLoginModuleBuilder<>(this, getCurrentSuppressions());
+            return new AddLoginModuleBuilder<>(this);
         }
 
         @Override
@@ -112,11 +106,4 @@ public abstract class AbstractSecurityConfigurationBuilder<R> extends
             return super.done();
         }
     }
-
-    @Override
-    public AbstractSecurityConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
-    }
-
 }

@@ -21,39 +21,32 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.GatewayConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
-import org.kaazing.gateway.server.test.config.Suppressibles;
 
 public class GatewayConfigurationBuilder extends AbstractGatewayConfigurationBuilder<GatewayConfiguration> {
 
     public GatewayConfigurationBuilder() {
-        this(new GatewayConfiguration(), Suppressibles.getDefaultSuppressions());
-    }
-
-    public GatewayConfigurationBuilder(Set<Suppression> suppressions) {
-        this(new GatewayConfiguration(), suppressions);
+        this(new GatewayConfiguration());
     }
 
     @Override
     public SetSecurityBuilder<GatewayConfigurationBuilder> security() {
-        return new SetSecurityBuilder<>(this, getCurrentSuppressions());
+        return new SetSecurityBuilder<>(this);
     }
 
     @Override
     public AddServiceBuilder<GatewayConfigurationBuilder> service() {
-        return new AddServiceBuilder<>(this, getCurrentSuppressions());
+        return new AddServiceBuilder<>(this);
     }
 
     @Override
     public AbstractClusterConfigurationBuilder<GatewayConfigurationBuilder> cluster() {
-        return new SetClusterBuilder<>(this, getCurrentSuppressions());
+        return new SetClusterBuilder<>(this);
     }
 
     @Override
     public AbstractServiceDefaultsConfigurationBuilder<GatewayConfigurationBuilder> serviceDefaults() {
-        return new SetServiceDefaultsBuilder<>(this, getCurrentSuppressions());
+        return new SetServiceDefaultsBuilder<>(this);
     }
 
     /**
@@ -65,8 +58,8 @@ public class GatewayConfigurationBuilder extends AbstractGatewayConfigurationBui
         return new AddNetworkBuilder<>(this);
     }
 
-    private GatewayConfigurationBuilder(GatewayConfiguration configuration, Set<Suppression> suppressions) {
-        super(configuration, configuration, suppressions);
+    private GatewayConfigurationBuilder(GatewayConfiguration configuration) {
+        super(configuration, configuration);
     }
 
 }

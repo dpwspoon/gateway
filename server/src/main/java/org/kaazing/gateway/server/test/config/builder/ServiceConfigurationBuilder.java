@@ -21,33 +21,31 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.ServiceConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public class ServiceConfigurationBuilder extends AbstractServiceConfigurationBuilder<ServiceConfiguration> {
 
-    public ServiceConfigurationBuilder(Set<Suppression> suppressions) {
-        this(new ServiceConfiguration(), suppressions);
+    public ServiceConfigurationBuilder() {
+        this(new ServiceConfiguration());
     }
 
     @Override
     public AddCrossOriginConstraintBuilder<ServiceConfigurationBuilder> crossOrigin() {
-        return new AddCrossOriginConstraintBuilder<>(this, getCurrentSuppressions());
+        return new AddCrossOriginConstraintBuilder<>(this);
     }
 
     @Override
     public AddAuthorizationConstraintBuilder<ServiceConfigurationBuilder> authorization() {
-        return new AddAuthorizationConstraintBuilder<>(this, getCurrentSuppressions());
+        return new AddAuthorizationConstraintBuilder<>(this);
     }
 
-    private ServiceConfigurationBuilder(ServiceConfiguration configuration, Set<Suppression> suppressions) {
-        super(configuration, configuration, suppressions);
+    private ServiceConfigurationBuilder(ServiceConfiguration configuration) {
+        super(configuration, configuration);
     }
 
     @Override
     public AddNestedPropertyBuilder<ServiceConfigurationBuilder> nestedProperty(String propertyName) {
-        return new AddNestedPropertyBuilder<>(propertyName, this, getCurrentSuppressions());
+        return new AddNestedPropertyBuilder<>(propertyName, this);
     }
 
 }

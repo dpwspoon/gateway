@@ -21,40 +21,28 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.CrossOriginConstraintConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public abstract class AbstractCrossOriginConstraintConfigurationBuilder<R> extends
         AbstractConfigurationBuilder<CrossOriginConstraintConfiguration, R> {
 
     public AbstractCrossOriginConstraintConfigurationBuilder<R> allowOrigin(String allowOrigin) {
-        configuration.getSuppressibleConfiguration().setAllowOrigin(
-                new Suppressible<>(allowOrigin, getCurrentSuppressions()));
+        configuration.setAllowOrigin(allowOrigin);
         return this;
     }
 
     public AbstractCrossOriginConstraintConfigurationBuilder<R> allowMethods(String allowMethods) {
-        configuration.getSuppressibleConfiguration().setAllowMethods(
-                new Suppressible<>(allowMethods, getCurrentSuppressions()));
+        configuration.setAllowMethods(allowMethods);
         return this;
     }
 
     public AbstractCrossOriginConstraintConfigurationBuilder<R> allowHeaders(String allowHeaders) {
-        configuration.getSuppressibleConfiguration().setAllowHeaders(
-                new Suppressible<>(allowHeaders, getCurrentSuppressions()));
+        configuration.setAllowHeaders(allowHeaders);
         return this;
     }
 
-    protected AbstractCrossOriginConstraintConfigurationBuilder(CrossOriginConstraintConfiguration configuration,
-                                                                R result, Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    protected AbstractCrossOriginConstraintConfigurationBuilder(CrossOriginConstraintConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
-    @Override
-    public AbstractCrossOriginConstraintConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
-    }
 }

@@ -22,32 +22,29 @@
 package org.kaazing.gateway.server.test.config.builder;
 
 import java.net.URI;
-import java.util.Set;
+
 import org.kaazing.gateway.server.test.config.ClusterConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public abstract class AbstractClusterConfigurationBuilder<R> extends
         AbstractConfigurationBuilder<ClusterConfiguration, R> {
 
-    protected AbstractClusterConfigurationBuilder(ClusterConfiguration configuration, R result,
-                                                  Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    protected AbstractClusterConfigurationBuilder(ClusterConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public AbstractClusterConfigurationBuilder<R> name(String name) {
-        configuration.getSuppressibleConfiguration().setName(new Suppressible<>(name, getCurrentSuppressions()));
+        configuration.setName(name);
         return this;
     }
 
     public AbstractClusterConfigurationBuilder<R> accept(URI accept) {
-        configuration.getSuppressibleConfiguration().addAccept(new Suppressible<>(accept, getCurrentSuppressions()));
+        configuration.addAccept(accept);
         return this;
     }
 
     public AbstractClusterConfigurationBuilder<R> connect(URI connect) {
-        configuration.getSuppressibleConfiguration().addConnect(
-                new Suppressible<>(connect, getCurrentSuppressions()));
+        configuration.addConnect(
+                connect);
         return this;
     }
 
@@ -58,12 +55,6 @@ public abstract class AbstractClusterConfigurationBuilder<R> extends
 
     public AbstractClusterConfigurationBuilder<R> awsAccessKeyId(String awsAccessKeyId) {
         configuration.setAwsSecretKeyId(awsAccessKeyId);
-        return this;
-    }
-
-    @Override
-    public AbstractClusterConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
         return this;
     }
 

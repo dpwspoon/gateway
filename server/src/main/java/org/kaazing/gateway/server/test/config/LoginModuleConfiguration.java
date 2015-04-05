@@ -23,20 +23,14 @@ package org.kaazing.gateway.server.test.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-public class LoginModuleConfiguration implements Configuration<SuppressibleLoginModuleConfiguration> {
+public class LoginModuleConfiguration implements Configuration {
 
-    private final SuppressibleLoginModuleConfiguration _configuration;
-
-    private Suppressible<String> _type;
-    private Suppressible<String> _success;
-    private final Map<String, Suppressible<String>> options = new HashMap<>();
-    private final Map<String, String> unsuppressibleOptions = Suppressibles.unsuppressibleMap(options);
+    private String _type;
+    private String _success;
+    private final Map<String, String> options = new HashMap<>();
 
     public LoginModuleConfiguration() {
-        _configuration = new SuppressibleLoginModuleConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
     @Override
@@ -44,21 +38,16 @@ public class LoginModuleConfiguration implements Configuration<SuppressibleLogin
         visitor.visit(this);
     }
 
-    @Override
-    public SuppressibleLoginModuleConfiguration getSuppressibleConfiguration() {
-        return _configuration;
-    }
-
     // Type
     public String getType() {
         if (_type == null) {
             return null;
         }
-        return _type.value();
+        return _type;
     }
 
     public void setType(String type) {
-        this._type = new Suppressible<>(type);
+        this._type = type;
     }
 
     // Success
@@ -66,63 +55,20 @@ public class LoginModuleConfiguration implements Configuration<SuppressibleLogin
         if (_success == null) {
             return null;
         }
-        return _success.value();
+        return _success;
     }
 
     public void setSuccess(String success) {
-        this._success = new Suppressible<>(success);
+        this._success = success;
     }
 
     // Options
     public Map<String, String> getOptions() {
-        return unsuppressibleOptions;
+        return options;
     }
 
     public void addOption(String optionKey, String optionValue) {
-        unsuppressibleOptions.put(optionKey, optionValue);
+        options.put(optionKey, optionValue);
     }
 
-    private class SuppressibleLoginModuleConfigurationImpl extends SuppressibleLoginModuleConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<Suppression> suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Suppressible<String> getType() {
-            return _type;
-        }
-
-        @Override
-        public void setType(Suppressible<String> type) {
-            _type = type;
-        }
-
-        @Override
-        public Suppressible<String> getSuccess() {
-            return _success;
-        }
-
-        @Override
-        public void setSuccess(Suppressible<String> success) {
-            _success = success;
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getOptions() {
-            return options;
-        }
-
-        @Override
-        public void addOption(String key, Suppressible<String> value) {
-            options.put(key, value);
-        }
-    }
 }

@@ -22,98 +22,86 @@
 package org.kaazing.gateway.server.test.config.builder;
 
 import java.net.URI;
-import java.util.Set;
+
 import org.kaazing.gateway.server.test.config.AuthorizationConstraintConfiguration;
 import org.kaazing.gateway.server.test.config.CrossOriginConstraintConfiguration;
 import org.kaazing.gateway.server.test.config.NestedServicePropertiesConfiguration;
 import org.kaazing.gateway.server.test.config.ServiceConfiguration;
-import org.kaazing.gateway.server.test.config.Suppressible;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
-public abstract class AbstractServiceConfigurationBuilder<R> extends
-        AbstractConfigurationBuilder<ServiceConfiguration, R> {
+public abstract class AbstractServiceConfigurationBuilder<R> extends AbstractConfigurationBuilder<ServiceConfiguration, R> {
 
     public AbstractServiceConfigurationBuilder<R> balance(URI balance) {
-        configuration.getSuppressibleConfiguration().addBalance(
-                new Suppressible<>(balance, getCurrentSuppressions()));
+        configuration.addBalance(balance);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> accept(URI accept) {
-        configuration.getSuppressibleConfiguration().addAccept(new Suppressible<>(accept, getCurrentSuppressions()));
+        configuration.addAccept(accept);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> acceptOption(String optionName, String optionValue) {
-        configuration.getSuppressibleConfiguration().addAcceptOption(optionName,
-                new Suppressible<>(optionValue, getCurrentSuppressions()));
+        configuration.addAcceptOption(optionName, optionValue);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> connect(URI connect) {
-        configuration.getSuppressibleConfiguration().addConnect(
-                new Suppressible<>(connect, getCurrentSuppressions()));
+        configuration.addConnect(connect);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> connectOption(String optionName, String optionValue) {
-        configuration.getSuppressibleConfiguration().addConnectOption(optionName,
-                new Suppressible<>(optionValue, getCurrentSuppressions()));
+        configuration.addConnectOption(optionName, optionValue);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> realmName(String realmName) {
-        configuration.getSuppressibleConfiguration().setRealmName(
-                new Suppressible<>(realmName, getCurrentSuppressions()));
+        configuration.setRealmName(realmName);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> type(String type) {
-        configuration.getSuppressibleConfiguration().setType(new Suppressible<>(type, getCurrentSuppressions()));
+        configuration.setType(type);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> property(String propertyName, String propertyValue) {
-        configuration.getSuppressibleConfiguration().addProperty(propertyName,
-                new Suppressible<>(propertyValue, getCurrentSuppressions()));
+        configuration.addProperty(propertyName, propertyValue);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> mimeMapping(String extension, String type) {
-        configuration.getSuppressibleConfiguration().addMimeMapping(extension,
-                new Suppressible<>(type, getCurrentSuppressions()));
+        configuration.addMimeMapping(extension, type);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> description(String description) {
-        configuration.getSuppressibleConfiguration().setDescription(
-                new Suppressible<>(description, getCurrentSuppressions()));
+        configuration.setDescription(description);
         return this;
     }
 
     public AbstractServiceConfigurationBuilder<R> name(String name) {
-        configuration.getSuppressibleConfiguration().setName(new Suppressible<>(name, getCurrentSuppressions()));
+        configuration.setName(name);
         return this;
     }
 
-    public abstract AbstractNestedPropertyConfigurationBuilder<? extends AbstractServiceConfigurationBuilder<R>>
-        nestedProperty(String propertyName);
+    public abstract AbstractNestedPropertyConfigurationBuilder<? extends AbstractServiceConfigurationBuilder<R>> nestedProperty(
+        String propertyName);
 
     public abstract AbstractAuthorizationConstraintConfigurationBuilder<? extends AbstractServiceConfigurationBuilder<R>>
-    authorization();
+        authorization();
 
     public abstract AbstractCrossOriginConstraintConfigurationBuilder<? extends AbstractServiceConfigurationBuilder<R>>
-    crossOrigin();
+        crossOrigin();
 
-    protected AbstractServiceConfigurationBuilder(ServiceConfiguration configuration, R result,
-                                                  Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    protected AbstractServiceConfigurationBuilder(ServiceConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public static class AddCrossOriginConstraintBuilder<R extends AbstractServiceConfigurationBuilder<?>> extends
             AbstractCrossOriginConstraintConfigurationBuilder<R> {
-        protected AddCrossOriginConstraintBuilder(R result, Set<Suppression> suppressions) {
-            super(new CrossOriginConstraintConfiguration(), result, suppressions);
+        protected AddCrossOriginConstraintBuilder(R result) {
+            super(new CrossOriginConstraintConfiguration(), result);
         }
 
         @Override
@@ -125,8 +113,8 @@ public abstract class AbstractServiceConfigurationBuilder<R> extends
 
     public static class AddAuthorizationConstraintBuilder<R extends AbstractServiceConfigurationBuilder<?>> extends
             AbstractAuthorizationConstraintConfigurationBuilder<R> {
-        protected AddAuthorizationConstraintBuilder(R result, Set<Suppression> suppressions) {
-            super(new AuthorizationConstraintConfiguration(), result, suppressions);
+        protected AddAuthorizationConstraintBuilder(R result) {
+            super(new AuthorizationConstraintConfiguration(), result);
         }
 
         @Override
@@ -141,8 +129,8 @@ public abstract class AbstractServiceConfigurationBuilder<R> extends
 
         final String propertyName;
 
-        protected AddNestedPropertyBuilder(String propertyName, R result, Set<Suppression> suppressions) {
-            super(new NestedServicePropertiesConfiguration(propertyName), result, suppressions);
+        protected AddNestedPropertyBuilder(String propertyName, R result) {
+            super(new NestedServicePropertiesConfiguration(propertyName), result);
             this.propertyName = propertyName;
         }
 
@@ -151,12 +139,6 @@ public abstract class AbstractServiceConfigurationBuilder<R> extends
             result.configuration.addNestedProperties(configuration);
             return super.done();
         }
-    }
-
-    @Override
-    public AbstractServiceConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
     }
 
 }

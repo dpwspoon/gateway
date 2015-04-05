@@ -24,36 +24,26 @@ package org.kaazing.gateway.server.test.config;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-public class SecurityConfiguration implements Configuration<SuppressibleSecurityConfiguration> {
-
-    private final SuppressibleSecurityConfiguration _configuration;
+public class SecurityConfiguration implements Configuration {
 
     private final List<RealmConfiguration> realms = new ArrayList<>();
 
-    private Suppressible<KeyStore> _keyStore;
-    private Suppressible<char[]> _keyStorePassword;
-    private Suppressible<char[]> _trustStorePassword;
-    private Suppressible<KeyStore> _trustStore;
+    private KeyStore _keyStore;
+    private char[] _keyStorePassword;
+    private char[] _trustStorePassword;
+    private KeyStore _trustStore;
     private String keyStoreFile;
     private String trustStoreFile;
     private String trustStorePasswordFile;
     private String keyStorePasswordFile;
 
     public SecurityConfiguration() {
-        _configuration = new SuppressibleSecurityConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
     @Override
     public void accept(ConfigurationVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public SuppressibleSecurityConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     public List<RealmConfiguration> getRealms() {
@@ -70,11 +60,11 @@ public class SecurityConfiguration implements Configuration<SuppressibleSecurity
         if (_keyStore == null) {
             return null;
         }
-        return _keyStore.value();
+        return _keyStore;
     }
 
     public void setKeyStore(KeyStore keyStore) {
-        this._keyStore = new Suppressible<>(keyStore);
+        this._keyStore = keyStore;
     }
 
     // keyStore password
@@ -82,11 +72,11 @@ public class SecurityConfiguration implements Configuration<SuppressibleSecurity
         if (_keyStorePassword == null) {
             return null;
         }
-        return _keyStorePassword.value();
+        return _keyStorePassword;
     }
 
     public void setKeyStorePassword(char[] keyStorePassword) {
-        this._keyStorePassword = new Suppressible<>(keyStorePassword);
+        this._keyStorePassword = keyStorePassword;
     }
 
     // trust store
@@ -94,11 +84,11 @@ public class SecurityConfiguration implements Configuration<SuppressibleSecurity
         if (_trustStore == null) {
             return null;
         }
-        return _trustStore.value();
+        return _trustStore;
     }
 
     public void setTrustStore(KeyStore trustStore) {
-        this._trustStore = new Suppressible<>(trustStore);
+        this._trustStore = trustStore;
     }
 
     // keystore file
@@ -132,12 +122,11 @@ public class SecurityConfiguration implements Configuration<SuppressibleSecurity
         if (_trustStorePassword == null) {
             return null;
         }
-        return _trustStorePassword.value();
+        return _trustStorePassword;
     }
 
     public void setTrustStorePassword(char[] trustStorePassword) {
-
-        this._trustStorePassword = new Suppressible<>(trustStorePassword);
+        this._trustStorePassword = trustStorePassword;
     }
 
     // trust store password file
@@ -160,54 +149,6 @@ public class SecurityConfiguration implements Configuration<SuppressibleSecurity
     @Deprecated
     public void setKeyStorePasswordFile(String keyStorePasswordFile) {
         this.keyStorePasswordFile = keyStorePasswordFile;
-    }
-
-    protected class SuppressibleSecurityConfigurationImpl extends SuppressibleSecurityConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression>
-                                                   suppressions) {
-            _suppressions = suppressions;
-        }
-
-        // keystore
-        @Override
-        public Suppressible<KeyStore> getKeyStore() {
-            return _keyStore;
-        }
-
-        @Override
-        public void setKeyStore(Suppressible<KeyStore> keyStore) {
-            _keyStore = keyStore;
-        }
-
-        // keyStore password
-        @Override
-        public Suppressible<char[]> getKeyStorePassword() {
-            return _keyStorePassword;
-        }
-
-        @Override
-        public void setKeyStorePassword(Suppressible<char[]> keyStorePassword) {
-            _keyStorePassword = keyStorePassword;
-        }
-
-        // trust store
-        @Override
-        public Suppressible<KeyStore> getTrustStore() {
-            return _trustStore;
-        }
-
-        @Override
-        public void setTrustStore(Suppressible<KeyStore> trustStore) {
-            _trustStore = trustStore;
-        }
     }
 
 }

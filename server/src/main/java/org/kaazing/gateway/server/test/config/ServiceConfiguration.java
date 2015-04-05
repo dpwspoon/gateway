@@ -29,58 +29,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ServiceConfiguration implements Configuration<SuppressibleServiceConfiguration> {
+public class ServiceConfiguration implements Configuration {
 
-    private final SuppressibleServiceConfigurationImpl _configuration;
     private final List<AuthorizationConstraintConfiguration> authorizationConstraints;
     private final List<CrossOriginConstraintConfiguration> crossOriginConstraints;
 
-    private Suppressible<String> _name;
-    private Suppressible<String> _type;
-    private Suppressible<String> _realmName;
-    private Suppressible<String> _description;
+    private String _name;
+    private String _type;
+    private String _realmName;
+    private String _description;
 
-    private final Set<Suppressible<URI>> balances;
-    private final Set<Suppressible<URI>> accepts;
-    private final Map<String, Suppressible<String>> acceptOptions;
-    private final Set<Suppressible<URI>> connects;
-    private final Map<String, Suppressible<String>> connectOptions;
-    private final Map<String, Suppressible<String>> mimeMappings;
-    private final Set<URI> unsuppressibleAccepts;
-    private final Set<URI> unsuppressibleBalances;
-    private final Map<String, String> unsuppressibleAcceptOptions;
-    private final Set<URI> unsuppressibleConnects;
-    private final Map<String, String> unsuppressibleConnectOptions;
-    private final Map<String, String> unsuppressibleMimeMappings;
-    private final Map<String, Suppressible<String>> properties;
-    private final Map<String, String> unsuppressibleProperties;
+    private final Set<URI> balances;
+    private final Set<URI> accepts;
+    private final Map<String, String> acceptOptions;
+    private final Set<URI> connects;
+    private final Map<String, String> connectOptions;
+    private final Map<String, String> mimeMappings;
+    private final Map<String, String> properties;
     private final List<NestedServicePropertiesConfiguration> nestedProperties;
 
     public ServiceConfiguration() {
-        _configuration = new SuppressibleServiceConfigurationImpl();
-        _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
-
         balances = new HashSet<>();
-        unsuppressibleBalances = Suppressibles.unsuppressibleSet(balances);
-
         accepts = new HashSet<>();
-        unsuppressibleAccepts = Suppressibles.unsuppressibleSet(accepts);
-
         acceptOptions = new HashMap<>();
-        unsuppressibleAcceptOptions = Suppressibles.unsuppressibleMap(acceptOptions);
-
         connects = new HashSet<>();
-        unsuppressibleConnects = Suppressibles.unsuppressibleSet(connects);
-
         connectOptions = new HashMap<>();
-        unsuppressibleConnectOptions = Suppressibles.unsuppressibleMap(connectOptions);
-
         mimeMappings = new HashMap<>();
-        unsuppressibleMimeMappings = Suppressibles.unsuppressibleMap(mimeMappings);
-
         properties = new HashMap<>();
-        unsuppressibleProperties = Suppressibles.unsuppressibleMap(properties);
-
         authorizationConstraints = new LinkedList<>();
         crossOriginConstraints = new LinkedList<>();
         nestedProperties = new LinkedList<>();
@@ -89,11 +64,6 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
     @Override
     public void accept(ConfigurationVisitor visitor) {
         visitor.visit(this);
-    }
-
-    @Override
-    public SuppressibleServiceConfiguration getSuppressibleConfiguration() {
-        return _configuration;
     }
 
     public List<AuthorizationConstraintConfiguration> getAuthorizationConstraints() {
@@ -106,104 +76,104 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
 
     // accept
     public void addAccept(URI acceptURI) {
-        unsuppressibleBalances.add(acceptURI);
+        accepts.add(acceptURI);
     }
 
     public Set<URI> getAccepts() {
-        return unsuppressibleAccepts;
+        return accepts;
     }
 
     // balance
     public void addBalance(URI balanceURI) {
-        unsuppressibleBalances.add(balanceURI);
+        balances.add(balanceURI);
     }
 
     public Set<URI> getBalances() {
-        return unsuppressibleBalances;
+        return balances;
     }
 
     // connect
     public void addConnect(URI connectURI) {
-        unsuppressibleConnects.add(connectURI);
+        connects.add(connectURI);
     }
 
     public Set<URI> getConnects() {
-        return unsuppressibleConnects;
+        return connects;
     }
 
     // connect options
     public void addConnectOption(String key, String value) {
-        unsuppressibleMimeMappings.put(key, value);
+        connectOptions.put(key, value);
     }
 
     public Map<String, String> getConnectOptions() {
-        return unsuppressibleConnectOptions;
+        return connectOptions;
     }
 
     // mime mapping
     public void addMimeMapping(String key, String value) {
-        unsuppressibleMimeMappings.put(key, value);
+        mimeMappings.put(key, value);
     }
 
     public Map<String, String> getMimeMappings() {
-        return unsuppressibleMimeMappings;
+        return mimeMappings;
     }
 
     // accept options
     public void addAcceptOption(String key, String value) {
-        unsuppressibleAcceptOptions.put(key, value);
+        acceptOptions.put(key, value);
     }
 
     public Map<String, String> getAcceptOptions() {
-        return unsuppressibleAcceptOptions;
+        return acceptOptions;
     }
 
     // description
     public void setDescription(String description) {
-        this._description = new Suppressible<>(description);
+        this._description = description;
     }
 
     public String getDescription() {
         if (_description == null) {
             return null;
         }
-        return _description.value();
+        return _description;
     }
 
     // name
     public void setName(String name) {
-        this._name = new Suppressible<>(name);
+        this._name = name;
     }
 
     public String getName() {
         if (_name == null) {
             return null;
         }
-        return _name.value();
+        return _name;
     }
 
     // realm name
     public void setRealmName(String realmName) {
-        this._realmName = new Suppressible<>(realmName);
+        this._realmName = realmName;
     }
 
     public String getRealmName() {
         if (_realmName == null) {
             return null;
         }
-        return _realmName.value();
+        return _realmName;
     }
 
     // type
     public void setType(String type) {
-        this._type = new Suppressible<>(type);
+        this._type = type;
     }
 
     public String getType() {
         if (_type == null) {
             return null;
         }
-        return _type.value();
+        return _type;
     }
 
     // properties
@@ -217,135 +187,11 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
 
     // properties
     public Map<String, String> getProperties() {
-        return unsuppressibleProperties;
+        return properties;
     }
 
     public void addProperty(String key, String value) {
-        unsuppressibleProperties.put(key, value);
+        properties.put(key, value);
     }
 
-    protected class SuppressibleServiceConfigurationImpl extends SuppressibleServiceConfiguration {
-        private Set<Suppression> _suppressions;
-
-        @Override
-        public Set<Suppression> getSuppressions() {
-            return _suppressions;
-        }
-
-        @Override
-        public void setSuppression(Set<Suppression> suppressions) {
-            _suppressions = suppressions;
-        }
-
-        @Override
-        public Set<Suppressible<URI>> getAccepts() {
-            return accepts;
-        }
-
-        @Override
-        public void addAccept(Suppressible<URI> acceptURI) {
-            accepts.add(acceptURI);
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getProperties() {
-            return properties;
-        }
-
-        @Override
-        public void addProperty(String key, Suppressible<String> value) {
-            properties.put(key, value);
-        }
-
-        @Override
-        public Suppressible<String> getType() {
-            return _type;
-        }
-
-        @Override
-        public void setType(Suppressible<String> type) {
-            _type = type;
-        }
-
-        @Override
-        public Suppressible<String> getDescription() {
-            return _description;
-        }
-
-        @Override
-        public void setDescription(Suppressible<String> description) {
-            _description = description;
-        }
-
-        @Override
-        public Suppressible<String> getName() {
-            return _name;
-        }
-
-        @Override
-        public void setName(Suppressible<String> name) {
-            _name = name;
-        }
-
-        @Override
-        public Suppressible<String> getRealmName() {
-            return _realmName;
-        }
-
-        @Override
-        public void setRealmName(Suppressible<String> realmName) {
-            _realmName = realmName;
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getAcceptOptions() {
-            return acceptOptions;
-        }
-
-        @Override
-        public void addAcceptOption(String key, Suppressible<String> value) {
-            acceptOptions.put(key, value);
-        }
-
-        @Override
-        public Set<Suppressible<URI>> getBalances() {
-            return balances;
-        }
-
-        @Override
-        public void addBalance(Suppressible<URI> balanceURI) {
-            balances.add(balanceURI);
-        }
-
-        @Override
-        public Set<Suppressible<URI>> getConnects() {
-            return connects;
-        }
-
-        @Override
-        public void addConnect(Suppressible<URI> acceptURI) {
-            connects.add(acceptURI);
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getConnectOptions() {
-            return connectOptions;
-        }
-
-        @Override
-        public void addConnectOption(String key, Suppressible<String> value) {
-            connectOptions.put(key, value);
-        }
-
-        @Override
-        public Map<String, Suppressible<String>> getMimeMappings() {
-            return mimeMappings;
-        }
-
-        @Override
-        public void addMimeMapping(String key, Suppressible<String> value) {
-            mimeMappings.put(key, value);
-        }
-
-    }
 }

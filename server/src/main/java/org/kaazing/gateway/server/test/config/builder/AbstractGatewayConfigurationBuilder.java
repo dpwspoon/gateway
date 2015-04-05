@@ -22,21 +22,18 @@
 package org.kaazing.gateway.server.test.config.builder;
 
 import java.io.File;
-import java.util.Set;
+
 import org.kaazing.gateway.server.test.config.ClusterConfiguration;
 import org.kaazing.gateway.server.test.config.GatewayConfiguration;
 import org.kaazing.gateway.server.test.config.NetworkConfiguration;
 import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.kaazing.gateway.server.test.config.ServiceConfiguration;
 import org.kaazing.gateway.server.test.config.ServiceDefaultsConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
-public abstract class AbstractGatewayConfigurationBuilder<R> extends
-        AbstractConfigurationBuilder<GatewayConfiguration, R> {
+public abstract class AbstractGatewayConfigurationBuilder<R> extends AbstractConfigurationBuilder<GatewayConfiguration, R> {
 
-    public AbstractGatewayConfigurationBuilder(GatewayConfiguration configuration, R result,
-                                               Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    public AbstractGatewayConfigurationBuilder(GatewayConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public AbstractGatewayConfigurationBuilder<R> property(String name, String value) {
@@ -67,13 +64,13 @@ public abstract class AbstractGatewayConfigurationBuilder<R> extends
 
     public static class SetSecurityBuilder<R extends AbstractGatewayConfigurationBuilder<?>> extends
             AbstractSecurityConfigurationBuilder<R> {
-        public SetSecurityBuilder(R result, Set<Suppression> suppressions) {
-            super(new SecurityConfiguration(), result, suppressions);
+        public SetSecurityBuilder(R result) {
+            super(new SecurityConfiguration(), result);
         }
 
         @Override
         public AddRealmBuilder<SetSecurityBuilder<R>> realm() {
-            return new AddRealmBuilder<>(this, getCurrentSuppressions());
+            return new AddRealmBuilder<>(this);
         }
 
         @Override
@@ -85,23 +82,23 @@ public abstract class AbstractGatewayConfigurationBuilder<R> extends
 
     public static class AddServiceBuilder<R extends AbstractGatewayConfigurationBuilder<?>> extends
             AbstractServiceConfigurationBuilder<R> {
-        protected AddServiceBuilder(R result, Set<Suppression> suppressions) {
-            super(new ServiceConfiguration(), result, suppressions);
+        protected AddServiceBuilder(R result) {
+            super(new ServiceConfiguration(), result);
         }
 
         @Override
         public AddCrossOriginConstraintBuilder<AddServiceBuilder<R>> crossOrigin() {
-            return new AddCrossOriginConstraintBuilder<>(this, getCurrentSuppressions());
+            return new AddCrossOriginConstraintBuilder<>(this);
         }
 
         @Override
         public AddAuthorizationConstraintBuilder<AddServiceBuilder<R>> authorization() {
-            return new AddAuthorizationConstraintBuilder<>(this, getCurrentSuppressions());
+            return new AddAuthorizationConstraintBuilder<>(this);
         }
 
         @Override
         public AddNestedPropertyBuilder<AddServiceBuilder<R>> nestedProperty(String propertyName) {
-            return new AddNestedPropertyBuilder<>(propertyName, this, getCurrentSuppressions());
+            return new AddNestedPropertyBuilder<>(propertyName, this);
         }
 
         @Override
@@ -114,8 +111,8 @@ public abstract class AbstractGatewayConfigurationBuilder<R> extends
     public static class SetClusterBuilder<R extends AbstractGatewayConfigurationBuilder<?>> extends
             AbstractClusterConfigurationBuilder<R> {
 
-        protected SetClusterBuilder(R result, Set<Suppression> suppressions) {
-            super(new ClusterConfiguration(), result, suppressions);
+        protected SetClusterBuilder(R result) {
+            super(new ClusterConfiguration(), result);
         }
 
         @Override
@@ -128,8 +125,8 @@ public abstract class AbstractGatewayConfigurationBuilder<R> extends
     public static class SetServiceDefaultsBuilder<R extends AbstractGatewayConfigurationBuilder<?>> extends
             AbstractServiceDefaultsConfigurationBuilder<R> {
 
-        protected SetServiceDefaultsBuilder(R result, Set<Suppression> suppressions) {
-            super(new ServiceDefaultsConfiguration(), result, suppressions);
+        protected SetServiceDefaultsBuilder(R result) {
+            super(new ServiceDefaultsConfiguration(), result);
         }
 
         @Override
@@ -139,8 +136,7 @@ public abstract class AbstractGatewayConfigurationBuilder<R> extends
         }
     }
 
-    public static class AddNetworkBuilder<R extends AbstractGatewayConfigurationBuilder<?>> extends
-            AbstractNetworkBuilder<R> {
+    public static class AddNetworkBuilder<R extends AbstractGatewayConfigurationBuilder<?>> extends AbstractNetworkBuilder<R> {
 
         protected AddNetworkBuilder(R result) {
             super(new NetworkConfiguration(), result);
@@ -153,9 +149,4 @@ public abstract class AbstractGatewayConfigurationBuilder<R> extends
         }
     }
 
-    @Override
-    public AbstractGatewayConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
-    }
 }

@@ -21,16 +21,13 @@
 
 package org.kaazing.gateway.server.test.config.builder;
 
-import java.util.Set;
 import org.kaazing.gateway.server.test.config.NestedServicePropertiesConfiguration;
-import org.kaazing.gateway.server.test.config.SuppressibleConfiguration.Suppression;
 
 public abstract class AbstractNestedPropertyConfigurationBuilder<R> extends
         AbstractConfigurationBuilder<NestedServicePropertiesConfiguration, R> {
 
-    protected AbstractNestedPropertyConfigurationBuilder(NestedServicePropertiesConfiguration configuration, R result,
-                                                         Set<Suppression> suppressions) {
-        super(configuration, result, suppressions);
+    protected AbstractNestedPropertyConfigurationBuilder(NestedServicePropertiesConfiguration configuration, R result) {
+        super(configuration, result);
     }
 
     public AbstractNestedPropertyConfigurationBuilder<R> property(String propertyName, String propertyValue) {
@@ -38,11 +35,5 @@ public abstract class AbstractNestedPropertyConfigurationBuilder<R> extends
         return this;
     }
 
-    // We do not need more than one level of nesting at present
-    @Override
-    public AbstractNestedPropertyConfigurationBuilder<R> suppress(Suppression... suppressions) {
-        super.addCurrentSuppressions(suppressions);
-        return this;
-    }
 
 }

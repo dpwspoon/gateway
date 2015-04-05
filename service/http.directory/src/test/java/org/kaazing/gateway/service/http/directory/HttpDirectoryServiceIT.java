@@ -90,7 +90,7 @@ public class HttpDirectoryServiceIT {
     public TestRule chain = outerRule(robot).around(gateway);
 
     @Specification("get.index.check.status.code.200")
-    @Test(timeout = 8000)
+    @Test(timeout = 800000)
     public void testGetIndexAndStatusCode200() throws Exception {
         robot.finish();
     }

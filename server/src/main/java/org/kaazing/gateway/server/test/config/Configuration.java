@@ -21,14 +21,12 @@
 
 package org.kaazing.gateway.server.test.config;
 
-public interface Configuration<T extends SuppressibleConfiguration> {
+public interface Configuration {
     void accept(ConfigurationVisitor visitor);
 
     public enum ConfigurationType {
         AUTHORIZATION_CONSTRAINT, CLUSTER, CROSS_ORIGIN, GATEWAY, LOGIN_MODULE, NETWORK, REALM, SECURITY, SERVICE,
         SERVICE_DEFAULTS, SERVICE_PROPERTIES
     }
-
-    T getSuppressibleConfiguration();
 
 }
