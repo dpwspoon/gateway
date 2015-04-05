@@ -21,6 +21,10 @@
 
 package org.kaazing.gateway.management.jmx;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -42,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.annotation.Resource;
 import javax.management.MBeanServer;
 import javax.management.Notification;
@@ -59,20 +64,19 @@ import javax.rmi.ssl.SslRMIServerSocketFactory;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.Uptime;
 import org.kaazing.gateway.management.ManagementService;
 import org.kaazing.gateway.management.context.ManagementContext;
 import org.kaazing.gateway.security.RealmContext;
 import org.kaazing.gateway.server.Launcher;
-import org.kaazing.gateway.server.context.resolve.DefaultSecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.kaazing.gateway.service.ServiceContext;
 import org.kaazing.gateway.service.ServiceProperties;
 import org.kaazing.gateway.util.InternalSystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
 
 /**
  * Service for handling JMX management of the gateway (cluster?)
@@ -81,7 +85,7 @@ public class JmxManagementService implements ManagementService, NotificationList
 
     private static final Logger logger = LoggerFactory.getLogger(JmxManagementService.class);
 
-    private DefaultSecurityContext securityContext;
+    private SecurityConfiguration securityContext;
     private ManagementContext managementContext;
     private JMXConnectorServer connectorServer;
     private MBeanServer mbeanServer;
@@ -116,7 +120,7 @@ public class JmxManagementService implements ManagementService, NotificationList
     }
 
     @Resource(name = "securityContext")
-    public void setSecurityContext(DefaultSecurityContext securityContext) {
+    public void setSecurityContext(SecurityConfiguration securityContext) {
         this.securityContext = securityContext;
     }
 
@@ -191,7 +195,8 @@ public class JmxManagementService implements ManagementService, NotificationList
         KeyStore keyStore = securityContext.getKeyStore();
         if (keyStore != null) {
 
-            System.setProperty("javax.net.ssl.keyStore", securityContext.getKeyStoreFilePath());
+            // DPW TODO fix absolute path
+            System.setProperty("javax.net.ssl.keyStore", new File(securityContext.getKeyStoreFile()).getAbsolutePath());
             System.setProperty("javax.net.ssl.keyStoreType", keyStore.getType());
             char[] keyStorePassword = securityContext.getKeyStorePassword();
             if (keyStorePassword != null) {

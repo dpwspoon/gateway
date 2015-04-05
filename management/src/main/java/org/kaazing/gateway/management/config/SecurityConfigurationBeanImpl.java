@@ -32,11 +32,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+
 import javax.security.auth.x500.X500Principal;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.kaazing.gateway.management.gateway.GatewayManagementBean;
-import org.kaazing.gateway.security.SecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 
 public class SecurityConfigurationBeanImpl implements SecurityConfigurationBean {
 
@@ -49,7 +51,7 @@ public class SecurityConfigurationBeanImpl implements SecurityConfigurationBean 
     private final KeyStore trustStore;
     private final String trustStoreCertificateInfo; // JSON
 
-    public SecurityConfigurationBeanImpl(SecurityContext context, GatewayManagementBean gatewayBean) {
+    public SecurityConfigurationBeanImpl(SecurityConfiguration context, GatewayManagementBean gatewayBean) {
         this.gatewayBean = gatewayBean;
 
         // Add the keystore certs to one set of cert. info

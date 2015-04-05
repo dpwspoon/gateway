@@ -112,7 +112,8 @@ public class ServiceConfiguration implements Configuration {
 
     // mime mapping
     public void addMimeMapping(String key, String value) {
-        mimeMappings.put(key, value);
+        // Note: we lowercase the key for consistent searching
+        mimeMappings.put(key.toLowerCase(), value);
     }
 
     public Map<String, String> getMimeMappings() {

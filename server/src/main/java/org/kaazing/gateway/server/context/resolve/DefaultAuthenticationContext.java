@@ -21,6 +21,8 @@
 
 package org.kaazing.gateway.server.context.resolve;
 
+import java.util.List;
+
 import org.kaazing.gateway.security.AuthenticationContext;
 
 public class DefaultAuthenticationContext implements AuthenticationContext {
@@ -34,15 +36,15 @@ public class DefaultAuthenticationContext implements AuthenticationContext {
 
 
     public DefaultAuthenticationContext(String httpChallengeScheme,
-                                        String[] httpHeaders,
-                                        String[] httpQueryParameters,
-                                        String[] httpCookieNames,
+                                        List<String> httpHeaders,
+                                        List<String> httpQueryParameters,
+                                        List<String> httpCookieNames,
                                         String authorizationMode,
                                         String sessionTimeout) {
         this.httpChallengeScheme = httpChallengeScheme;
-        this.httpHeaders = httpHeaders;
-        this.httpQueryParameters = httpQueryParameters;
-        this.httpCookieNames = httpCookieNames;
+        this.httpHeaders = httpHeaders.toArray(new String[httpHeaders.size()]);
+        this.httpQueryParameters = httpQueryParameters.toArray(new String[httpQueryParameters.size()]);
+        this.httpCookieNames = httpCookieNames.toArray(new String[httpCookieNames.size()]);
         this.authorizationMode = authorizationMode;
         this.sessionTimeout = sessionTimeout;
         this.sessionTimeout = sessionTimeout;

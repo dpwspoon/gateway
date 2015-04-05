@@ -63,13 +63,12 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.kaazing.gateway.transport.IoHandlerAdapter;
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.resource.address.ResourceOptions;
 import org.kaazing.gateway.resource.address.ssl.SslResourceAddress;
-import org.kaazing.gateway.security.SecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.kaazing.gateway.transport.dispatch.ProtocolDispatcher;
 import org.kaazing.gateway.transport.AbstractBridgeAcceptor;
 import org.kaazing.gateway.transport.Bindings;
@@ -145,7 +144,7 @@ public class SslAcceptor extends AbstractBridgeAcceptor<SslSession, NextProtocol
     }
 
     @Resource(name = "securityContext")
-    public void setSecurityContext(SecurityContext securityContext) {
+    public void setSecurityContext(SecurityConfiguration securityContext) {
         vhostKeySelector = new VirtualHostKeySelector();
         try {
             vhostKeySelector.init(securityContext.getKeyStore(), securityContext.getKeyStorePassword());

@@ -42,7 +42,7 @@ public class GatewayConfiguration implements Configuration {
     private final List<ServiceConfiguration> services;
     private SecurityConfiguration security;
     private ClusterConfiguration cluster;
-    private ServiceDefaultsConfiguration serviceDefaultsConfiguration;
+    private ServiceDefaultsConfiguration serviceDefaultsConfiguration = new ServiceDefaultsConfiguration();
     private NetworkConfiguration networkConfiguration;
 
     public GatewayConfiguration() {

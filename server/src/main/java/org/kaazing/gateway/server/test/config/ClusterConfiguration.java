@@ -77,7 +77,7 @@ public class ClusterConfiguration implements Configuration {
     }
 
     // AwsSecretKey
-    public String getAwsSecretKeyId() {
+    public String getAwsSecretKey() {
         if (_awsSecretKeyId == null) {
             return null;
         }

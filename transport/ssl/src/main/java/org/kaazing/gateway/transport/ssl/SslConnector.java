@@ -52,11 +52,10 @@ import org.apache.mina.core.session.IoSessionInitializer;
 import org.apache.mina.filter.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.security.KeySelector;
-import org.kaazing.gateway.security.SecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.kaazing.gateway.transport.AbstractBridgeConnector;
 import org.kaazing.gateway.transport.AbstractBridgeSession;
 import org.kaazing.gateway.transport.BridgeConnector;
@@ -114,7 +113,7 @@ public class SslConnector extends AbstractBridgeConnector<SslSession> {
     }
 
     @Resource(name = "securityContext")
-    public void setSecurityContext(SecurityContext securityContext) {
+    public void setSecurityContext(SecurityConfiguration securityContext) {
         vhostKeySelector = new VirtualHostKeySelector();
         try {
             vhostKeySelector.init(securityContext.getKeyStore(), securityContext.getKeyStorePassword());

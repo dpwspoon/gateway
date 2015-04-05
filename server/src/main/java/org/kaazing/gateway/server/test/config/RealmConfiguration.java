@@ -33,12 +33,14 @@ public class RealmConfiguration implements Configuration {
     private String _name;
     private String _description;
     private String _httpChallengeScheme;
-    private String _authorizationMode;
+    private String _authorizationMode = "challenge";
     private String _sessionTimeout;
     private final List<String> httpHeaders = new ArrayList<>();
     private final List<String> httpQueryParameters = new ArrayList<>();
     private final List<String> httpCookies = new ArrayList<>();
     private final List<LoginModuleConfiguration> loginModules = new LinkedList<>();
+    private List<String> userPrincipalClasses = new ArrayList<String>();
+
     private static CharsetEncoder asciiEncoder = Charset.forName("US-ASCII").newEncoder();
 
     public RealmConfiguration() {
@@ -148,6 +150,10 @@ public class RealmConfiguration implements Configuration {
 
     public void addHttpCookie(String httpCookie) {
         httpCookies.add(httpCookie);
+    }
+
+    public List<String> getUserPrincipalClasses() {
+        return userPrincipalClasses;
     }
 
 }

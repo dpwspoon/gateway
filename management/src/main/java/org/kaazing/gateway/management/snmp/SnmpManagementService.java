@@ -25,12 +25,14 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.annotation.Resource;
+
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.Uptime;
 import org.kaazing.gateway.management.ManagementService;
 import org.kaazing.gateway.management.context.ManagementContext;
-import org.kaazing.gateway.server.context.resolve.DefaultSecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.kaazing.gateway.service.ServiceContext;
 import org.kaazing.gateway.service.cluster.ClusterContext;
 import org.kaazing.gateway.service.cluster.MemberId;
@@ -55,7 +57,7 @@ public class SnmpManagementService implements ManagementService {
     private ManagementContext managementContext;
     private SnmpManagementServiceHandler handler;
     private ServiceContext serviceContext;
-    private DefaultSecurityContext securityContext;
+    private SecurityConfiguration securityContext;
     private Properties configuration;
     private boolean systemStatsSupported = true;
 
@@ -80,7 +82,7 @@ public class SnmpManagementService implements ManagementService {
     }
 
     @Resource(name = "securityContext")
-    public void setSecurityContext(DefaultSecurityContext securityContext) {
+    public void setSecurityContext(SecurityConfiguration securityContext) {
         this.securityContext = securityContext;
     }
 

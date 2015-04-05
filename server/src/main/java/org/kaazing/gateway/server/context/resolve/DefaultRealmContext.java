@@ -23,7 +23,10 @@ package org.kaazing.gateway.server.context.resolve;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
+import java.util.List;
+
 import javax.security.auth.login.Configuration;
+
 import org.kaazing.gateway.security.AuthenticationContext;
 import org.kaazing.gateway.security.LoginContextFactory;
 import org.kaazing.gateway.security.RealmContext;
@@ -40,7 +43,7 @@ public class DefaultRealmContext implements RealmContext {
     private static CharsetEncoder asciiEncoder =
             Charset.forName("US-ASCII").newEncoder();
 
-    public DefaultRealmContext(String name, String description, String[] userPrincipalClasses, Configuration configuration,
+    public DefaultRealmContext(String name, String description, List<String> userPrincipalClasses, Configuration configuration,
                                AuthenticationContext authenticationContext) {
         this.name = name;
         if (description == null || asciiEncoder.canEncode(description)) {
@@ -49,7 +52,7 @@ public class DefaultRealmContext implements RealmContext {
             throw new RuntimeException(
                     "Invalid non US-ASCII character in Realm description. Realm description can only contain US-ASCII values");
         }
-        this.userPrincipalClasses = userPrincipalClasses;
+        this.userPrincipalClasses = userPrincipalClasses.toArray(new String[userPrincipalClasses.size()]);
         this.configuration = configuration;
         this.loginContextFactory = LoginContextFactories.create(name, configuration);
         this.authenticationContext = authenticationContext;

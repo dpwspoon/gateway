@@ -21,15 +21,15 @@
 
 package org.kaazing.gateway.transport.ssl;
 
-import org.kaazing.gateway.security.SecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-public class TestSecurityContext implements SecurityContext {
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TestSecurityContext extends SecurityConfiguration {
     private final KeyStore keyStore;
     private final String keyStoreFile;
     private final char[] keyStorePassword;

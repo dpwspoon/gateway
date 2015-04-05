@@ -34,6 +34,12 @@
         <!-- test dependencies -->
         <dependency>
             <groupId>org.kaazing</groupId>
+            <artifactId>gateway.server</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
             <artifactId>gateway.resource.address.httpxe</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

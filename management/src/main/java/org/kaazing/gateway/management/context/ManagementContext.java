@@ -22,6 +22,7 @@
 package org.kaazing.gateway.management.context;
 
 import java.util.List;
+
 import org.kaazing.gateway.management.ManagementServiceHandler;
 import org.kaazing.gateway.management.ManagementStrategyChangeListener;
 import org.kaazing.gateway.management.SummaryManagementInterval;
@@ -37,7 +38,7 @@ import org.kaazing.gateway.management.session.SessionManagementBean;
 import org.kaazing.gateway.management.session.SessionManagementListener;
 import org.kaazing.gateway.management.system.ManagementSystemStrategy;
 import org.kaazing.gateway.management.system.SystemDataProvider;
-import org.kaazing.gateway.security.SecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.kaazing.gateway.service.ServiceContext;
 import org.kaazing.gateway.service.cluster.ClusterContext;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
@@ -124,7 +125,7 @@ public interface ManagementContext {
 
     void removeSessionManagementBean(SessionManagementBean sessionBean);
 
-    void updateManagementContext(SecurityContext securityContext);
+    void updateManagementContext(SecurityConfiguration securityContext);
 
     ClusterContext getCluster();
 

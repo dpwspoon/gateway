@@ -26,13 +26,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.security.RealmContext;
 import org.kaazing.gateway.server.context.GatewayContext;
 import org.kaazing.gateway.server.context.SchemeContext;
-import org.kaazing.gateway.server.context.ServiceDefaultsContext;
 import org.kaazing.gateway.server.context.TransportContext;
 import org.kaazing.gateway.server.service.ServiceRegistry;
+import org.kaazing.gateway.server.test.config.ServiceDefaultsConfiguration;
 import org.kaazing.gateway.service.ServiceContext;
 import org.kaazing.gateway.service.cluster.ClusterContext;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
@@ -50,22 +51,16 @@ public class DefaultGatewayContext implements GatewayContext {
     private final File webDir;
     private final File tempDir;
     private final SchedulerProvider schedulerProvider;
-    private final ServiceDefaultsContext serviceDefaults;
+    private final ServiceDefaultsConfiguration serviceDefaults;
 
     // TODO: remove this from here when the launcher goes away and the GatewayContext, Launcher,
     // and Gateway become one class that can keep track of injectables itself
     private final Map<String, Object> injectables = new HashMap<>();
 
     public DefaultGatewayContext(Map<String, DefaultSchemeContext> schemes,
-                                 Map<String, DefaultTransportContext> schemeTransports /* by scheme name */,
-                                 RealmsContext realms,
-                                 ServiceDefaultsContext serviceDefaults,
-                                 Collection<ServiceContext> services,
-                                 ServiceRegistry servicesByURI,
-                                 File webDir,
-                                 File tempDir,
-                                 ClusterContext cluster,
-                                 SchedulerProvider schedulerProvider) {
+            Map<String, DefaultTransportContext> schemeTransports /* by scheme name */, RealmsContext realms,
+            ServiceDefaultsConfiguration serviceDefaults, Collection<ServiceContext> services, ServiceRegistry servicesByURI,
+            File webDir, File tempDir, ClusterContext cluster, SchedulerProvider schedulerProvider) {
 
         this.schemes = schemes;
         this.schemeTransports = schemeTransports;
@@ -144,7 +139,7 @@ public class DefaultGatewayContext implements GatewayContext {
     }
 
     @Override
-    public ServiceDefaultsContext getServiceDefaults() {
+    public ServiceDefaultsConfiguration getServiceDefaults() {
         return serviceDefaults;
     }
 

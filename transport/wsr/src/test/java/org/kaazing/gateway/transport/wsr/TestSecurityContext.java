@@ -25,11 +25,11 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-import org.kaazing.gateway.security.SecurityContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestSecurityContext implements SecurityContext {
+public class TestSecurityContext extends SecurityConfiguration {
     private final KeyStore keyStore;
     private final String keyStoreFile;
     private final char[] keyStorePassword;

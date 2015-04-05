@@ -24,13 +24,11 @@ package org.kaazing.gateway.server.test.config;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 public class NestedServicePropertiesConfiguration implements Configuration {
 
     private String configElementName;
-    private final Map<String, String> suppressibleSimpleProperties = new HashMap<>();
     private final Map<String, String> simpleProperties = new HashMap<String, String>();
     private final Stack<NestedServicePropertiesConfiguration> nestedServiceProperties = new Stack<>();
 

@@ -32,7 +32,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.annotation.Resource;
+
 import org.kaazing.gateway.management.ManagementService;
 import org.kaazing.gateway.management.ManagementServiceHandler;
 import org.kaazing.gateway.management.ManagementStrategy;
@@ -87,14 +89,16 @@ import org.kaazing.gateway.management.system.NullManagementSystemStrategy;
 import org.kaazing.gateway.management.system.SystemDataProvider;
 import org.kaazing.gateway.management.system.SystemDataProviderFactory;
 import org.kaazing.gateway.security.RealmContext;
-import org.kaazing.gateway.security.SecurityContext;
 import org.kaazing.gateway.server.context.DependencyContext;
 import org.kaazing.gateway.server.context.GatewayContext;
 import org.kaazing.gateway.server.context.ServiceDefaultsContext;
+import org.kaazing.gateway.server.test.config.SecurityConfiguration;
+import org.kaazing.gateway.server.test.config.ServiceDefaultsConfiguration;
 import org.kaazing.gateway.service.ServiceContext;
 import org.kaazing.gateway.service.cluster.ClusterContext;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.mina.core.session.IoSessionEx;
+
 import static org.kaazing.gateway.management.service.ServiceManagementBeanFactory.newServiceManagementBeanFactory;
 
 public class DefaultManagementContext implements ManagementContext, DependencyContext {
@@ -490,7 +494,7 @@ public class DefaultManagementContext implements ManagementContext, DependencyCo
         return clusterConfigBean;
     }
 
-    private SecurityConfigurationBean addSecurityConfigurationBean(SecurityContext securityContext, GatewayManagementBean
+    private SecurityConfigurationBean addSecurityConfigurationBean(SecurityConfiguration securityContext, GatewayManagementBean
             gatewayBean) {
         SecurityConfigurationBean securityBean = new SecurityConfigurationBeanImpl(securityContext, gatewayBean);
 
@@ -606,7 +610,7 @@ public class DefaultManagementContext implements ManagementContext, DependencyCo
         jvmManagementBean.managementStrategyChanged();
     }
 
-    private ServiceDefaultsConfigurationBean addServiceDefaultsConfigurationBean(ServiceDefaultsContext serviceDefaultsContext,
+    private ServiceDefaultsConfigurationBean addServiceDefaultsConfigurationBean(ServiceDefaultsConfiguration serviceDefaultsContext,
                                                                                  GatewayManagementBean gatewayBean) {
 
         ServiceDefaultsConfigurationBean serviceDefaultsConfigurationBean =
@@ -718,7 +722,7 @@ public class DefaultManagementContext implements ManagementContext, DependencyCo
     }
 
     @Override
-    public void updateManagementContext(SecurityContext securityContext) {
+    public void updateManagementContext(SecurityConfiguration securityContext) {
         if (managementConfigured.compareAndSet(false, true)) {
             GatewayManagementBean gatewayBean = getLocalGatewayManagementBean();
 
@@ -750,7 +754,7 @@ public class DefaultManagementContext implements ManagementContext, DependencyCo
                 }
             }
 
-            ServiceDefaultsContext serviceDefaults = gatewayContext.getServiceDefaults();
+             ServiceDefaultsConfiguration serviceDefaults = gatewayContext.getServiceDefaults();
             if (serviceDefaults != null) {
                 addServiceDefaultsConfigurationBean(serviceDefaults, gatewayBean);
             }

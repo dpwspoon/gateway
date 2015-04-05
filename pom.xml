@@ -167,11 +167,6 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.apache.xmlbeans</groupId>
-                <artifactId>xmlbeans</artifactId>
-                <version>2.4.0</version>
-            </dependency>
-            <dependency>
                 <groupId>com.hazelcast</groupId>
                 <artifactId>hazelcast</artifactId>
                 <version>${hazelcast.version}</version>
@@ -462,9 +457,6 @@
                     <aggregate>true</aggregate>
                     <instrumentation>
                         <excludes>
-                            <exclude>schemaorg_apache_xmlbeans/system/**/*.class</exclude>
-                            <exclude>org/kaazing/gateway/server/config/sep2014/**/*.class</exclude>
-                            <exclude>org/kaazing/xmlns/**/*.class</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>

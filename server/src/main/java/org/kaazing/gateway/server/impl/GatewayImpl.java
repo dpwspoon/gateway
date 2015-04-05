@@ -41,9 +41,9 @@ import org.kaazing.gateway.server.Gateway;
 import org.kaazing.gateway.server.Launcher;
 import org.kaazing.gateway.server.api.GatewayAlreadyRunningException;
 import org.kaazing.gateway.server.config.parse.GatewayConfigParser;
-import org.kaazing.gateway.server.config.sep2014.GatewayConfigDocument;
 import org.kaazing.gateway.server.context.GatewayContext;
 import org.kaazing.gateway.server.context.resolve.GatewayContextResolver;
+import org.kaazing.gateway.server.test.config.GatewayConfiguration;
 import org.slf4j.Logger;
 import org.w3c.dom.Element;
 
@@ -298,8 +298,9 @@ final class GatewayImpl implements Gateway {
         LOGGER.info("Configuration file: " + gatewayConfigFile.getCanonicalPath());
 
         GatewayConfigParser parser = new GatewayConfigParser(configuration);
-        GatewayConfigDocument config = parser.parse(gatewayConfigFile);
-        GatewayContextResolver resolver = new GatewayContextResolver(configDir, webRootDir, tempDir, jmxMBeanServer);
+
+        GatewayConfiguration config = parser.parse(gatewayConfigFile);
+        GatewayContextResolver resolver = new GatewayContextResolver(webRootDir, tempDir, jmxMBeanServer);
         GatewayContext context = resolver.resolve(config, configuration);
 
         gateway = new Launcher();

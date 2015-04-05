@@ -24,9 +24,11 @@ package org.kaazing.gateway.server.context;
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
+
 import org.kaazing.gateway.security.RealmContext;
 import org.kaazing.gateway.server.context.resolve.DefaultTransportContext;
 import org.kaazing.gateway.server.service.ServiceRegistry;
+import org.kaazing.gateway.server.test.config.ServiceDefaultsConfiguration;
 import org.kaazing.gateway.service.ServiceContext;
 import org.kaazing.gateway.service.cluster.ClusterContext;
 
@@ -50,7 +52,7 @@ public interface GatewayContext {
 
     ClusterContext getCluster();
 
-    ServiceDefaultsContext getServiceDefaults();
+    ServiceDefaultsConfiguration getServiceDefaults();
 
     Map<String, Object> getInjectables();
 

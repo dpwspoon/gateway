@@ -21,21 +21,58 @@
 
 package org.kaazing.gateway.server.context.resolve;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import org.kaazing.gateway.server.test.config.NestedServicePropertiesConfiguration;
 import org.kaazing.gateway.service.ServiceProperties;
 
 public class DefaultServiceProperties implements ServiceProperties {
     private static final Map<String, String> EMPTY_SIMPLE = Collections.<String, String>emptyMap();
-    private static final Map<String, List<ServiceProperties>> EMPTY_NESTED =
-            Collections.<String, List<ServiceProperties>>emptyMap();
+    private static final Map<String, List<ServiceProperties>> EMPTY_NESTED = Collections
+            .<String, List<ServiceProperties>>emptyMap();
     private static final List<ServiceProperties> EMPTY_LIST = Collections.<ServiceProperties>emptyList();
 
     private Map<String, String> simpleProperties = EMPTY_SIMPLE;
     private Map<String, List<ServiceProperties>> nestedProperties = EMPTY_NESTED;
+
+    public DefaultServiceProperties(){
+        this(new HashMap<String, String>(), new ArrayList<NestedServicePropertiesConfiguration>());
+    }
+    
+    public DefaultServiceProperties(Map<String, String> properties,
+            Collection<NestedServicePropertiesConfiguration> nestedProperties) {
+        this.simpleProperties = (properties == null) ? EMPTY_SIMPLE : properties;
+        this.nestedProperties = resolveNested(EMPTY_NESTED, nestedProperties);
+    }
+
+    private Map<String, List<ServiceProperties>> resolveNested(Map<String, List<ServiceProperties>> result,
+        Collection<NestedServicePropertiesConfiguration> nestedProperties) {
+        if (nestedProperties == null || nestedProperties.isEmpty()) {
+            return result;
+        }
+        // Not sure of this logic, to test DPW
+        for (NestedServicePropertiesConfiguration nestedProperty : nestedProperties) {
+            String key = nestedProperty.getConfigElementName();
+            ServiceProperties value =
+                    new DefaultServiceProperties(nestedProperty.getSimpleProperties(), nestedProperty.getNestedProperties());
+            if (result.containsKey(key)) {
+                result.get(key).add(value);
+            } else {
+                List<ServiceProperties> list = Collections.<ServiceProperties>emptyList();
+                list.add(value);
+                result.put(key, list);
+            }
+        }
+
+        return null;
+
+    }
 
     public boolean containsSimpleProperty(String name) {
         return simpleProperties.containsKey(name);

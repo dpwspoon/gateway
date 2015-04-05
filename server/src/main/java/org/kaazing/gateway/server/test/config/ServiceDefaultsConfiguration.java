@@ -23,7 +23,6 @@ package org.kaazing.gateway.server.test.config;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class ServiceDefaultsConfiguration implements Configuration {
 
@@ -31,6 +30,8 @@ public class ServiceDefaultsConfiguration implements Configuration {
     private final Map<String, String> mimeMappings = new HashMap<>();
 
     public ServiceDefaultsConfiguration() {
+        // default values
+        acceptOptions.put("ssl.verify-client", "none");
     }
 
     @Override
@@ -51,7 +52,8 @@ public class ServiceDefaultsConfiguration implements Configuration {
     }
 
     public void addMimeMapping(String key, String value) {
-        mimeMappings.put(key, value);
+        // Note: we do toLowerCase() for search consistency
+        mimeMappings.put(key.toLowerCase(), value);
     }
 
 }
