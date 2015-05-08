@@ -135,6 +135,7 @@ public class Launcher {
             }
         }
 
+        gatewayListener.stoppedGateway();
         context.dispose();
 
         long stoppedAt = System.currentTimeMillis();
