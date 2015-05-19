@@ -27,21 +27,15 @@ import static org.kaazing.gateway.transport.wseb.WsebEncodingStrategy.TEXT_AS_BI
 
 import java.net.URI;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.mina.core.filterchain.IoFilter;
 import org.apache.mina.core.filterchain.IoFilterChain;
-import org.apache.mina.core.future.CloseFuture;
-import org.apache.mina.core.future.IoFutureListener;
-import org.apache.mina.core.session.AttributeKey;
 import org.apache.mina.core.session.IdleStatus;
 import org.apache.mina.core.session.IoSession;
 import org.kaazing.gateway.resource.address.Protocol;
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.transport.BridgeServiceFactory;
-import org.kaazing.gateway.transport.BridgeSession;
-import org.kaazing.gateway.transport.CommitFuture;
 import org.kaazing.gateway.transport.IoHandlerAdapter;
 import org.kaazing.gateway.transport.http.HttpAcceptSession;
 import org.kaazing.gateway.transport.http.HttpHeaders;
@@ -53,7 +47,6 @@ import org.kaazing.gateway.transport.ws.extension.ActiveWsExtensions;
 import org.kaazing.gateway.transport.wseb.filter.EncodingFilter;
 import org.kaazing.gateway.transport.wseb.filter.WsebEncodingCodecFilter;
 import org.kaazing.gateway.transport.wseb.filter.WsebEncodingCodecFilter.EscapeTypes;
-import org.kaazing.gateway.transport.wseb.filter.WsebReconnectFilter;
 import org.kaazing.gateway.transport.wseb.filter.WsebTextAsBinaryEncodingCodecFilter;
 import org.kaazing.gateway.util.Encoding;
 import org.kaazing.mina.netty.IoSessionIdleTracker;
@@ -319,7 +312,7 @@ public class WsebDownstreamHandler extends IoHandlerAdapter<HttpAcceptSession> {
         if (clientPadding != null) {
             int paddingSize = Integer.parseInt(clientPadding);
             session.setAttribute(WsebAcceptor.CLIENT_PADDING_KEY, paddingSize);
-            session.setAttribute(WsebAcceptor.BYTES_WRITTEN_ON_LAST_FLUSH_KEY, new Long(0));
+            session.setAttribute(WsebAcceptor.BYTES_WRITTEN_ON_LAST_FLUSH_KEY, (long) 0);
 
             if (paddingSize == 0) {
                 session.setWriteHeader("X-Content-Type-Options", "nosniff");
@@ -330,7 +323,7 @@ public class WsebDownstreamHandler extends IoHandlerAdapter<HttpAcceptSession> {
         String clientBlockPadding = session.getParameter(".kbp");
         if (clientBlockPadding != null) {
             int paddingSize = Integer.parseInt(clientBlockPadding);
-            session.setAttribute(WsebAcceptor.CLIENT_BLOCK_PADDING_KEY, new Integer(paddingSize));
+            session.setAttribute(WsebAcceptor.CLIENT_BLOCK_PADDING_KEY, paddingSize);
             session.setWriteHeader("Content-Encoding", "gzip");
         }
 
@@ -341,105 +334,19 @@ public class WsebDownstreamHandler extends IoHandlerAdapter<HttpAcceptSession> {
             return;
         }
 
-        // attach now or attach after commit if header flush is required
-        if (!longPoll) {
-            // currently this is required for Silverlight as it seems to want some data to be
-            // received before it will start to deliver messages
-            // this is also needed to detect that streaming has initialized properly
-            // so we don't fall back to encrypted streaming or long polling
-            session.write(WsCommandMessage.NOOP);
-
-            String flushDelay = session.getParameter(".kf");
-            if (isClientIE11 && flushDelay == null) {
-            	flushDelay = "200";   //KG-10590 add .kf=200 for IE11 client
-            }
-            if (flushDelay != null) {
-            	final long flushDelayMillis = Integer.parseInt(flushDelay);
-                // commit session and write out headers and any messages already in the queue
-                CommitFuture commitFuture = session.commit();
-                commitFuture.addListener(new IoFutureListener<CommitFuture>() {
-                    @Override
-                    public void operationComplete(CommitFuture future) {
-                        // attach http session to wsf session
-                        // after delay to force Silverlight client to notice payload
-                        if (flushDelayMillis > 0L) {
-                            Runnable command = new AttachParentCommand(wsebSession, session, flushDelayMillis);
-                            scheduler.schedule(command, flushDelayMillis, TimeUnit.MILLISECONDS);
-                        }
-                        else {
-                            wsebSession.attachWriter(session);
-                        }
-                    }
-                });
-            }
-            else {
-                // attach http session to wse session
-                wsebSession.attachWriter(session);
-            }
-        }
-        else {
-            // attach http session to wse session
-            wsebSession.attachWriter(session);
-        }
+        wsebSession.attachWriter(session);
     }
 
     private URI locateSecureAcceptURI(HttpAcceptSession session) throws Exception {
         // TODO: same-origin requests must consider cross-origin access control
         //       internal redirect to secure resource should not trigger 403 Forbidden
-        ResourceAddress localAddress = (ResourceAddress)session.getLocalAddress();
+        ResourceAddress localAddress = session.getLocalAddress();
         URI resource = localAddress.getResource();
         Protocol resourceProtocol = bridgeServiceFactory.getTransportFactory().getProtocol(resource);
         if (WsebProtocol.WSEB_SSL == resourceProtocol || WsProtocol.WSS == resourceProtocol) {
             return resource;
         }
         return null;
-    }
-
-    private class AttachParentCommand implements Runnable {
-
-        private final WsebSession wsebSession;
-        private final BridgeSession parent;
-        private final long flushDelayMillis;
-
-        private AttachParentCommand(WsebSession wsebSession, BridgeSession parent, long flushDelayMillis) {
-            this.wsebSession = wsebSession;
-            this.parent = parent;
-            this.flushDelayMillis = flushDelayMillis;
-        }
-
-        @Override
-        public void run() {
-            wsebSession.attachWriter(parent);
-
-            // attaching the parent flushes buffered writes to HTTP response
-            // but if connection has high latency, then intermediate TCP node
-            // can cause server-delayed write to be combined into the same TCP packet
-            // defeating the purpose of the delay (needed by Silverlight)
-            // therefore, write a comment frame a little later as a backup to make
-            // sure that the connection does not get stalled
-
-            scheduler.schedule(new FlushCommand(wsebSession), flushDelayMillis * 2, TimeUnit.MILLISECONDS);
-            scheduler.schedule(new FlushCommand(wsebSession), flushDelayMillis * 4, TimeUnit.MILLISECONDS);
-            scheduler.schedule(new FlushCommand(wsebSession), flushDelayMillis * 8, TimeUnit.MILLISECONDS);
-        }
-    }
-
-    private class FlushCommand implements Runnable {
-
-        private final WsebSession session;
-
-        public FlushCommand(WsebSession session) {
-            this.session = session;
-        }
-
-        @Override
-        public void run() {
-            IoSession parent = session.getParent();
-            if (parent != null && !parent.isClosing()) {
-                parent.write(WsCommandMessage.NOOP);
-            }
-        }
-
     }
 
     protected final void removeFilter(IoFilterChain filterChain, String name) {

@@ -149,7 +149,7 @@ public class SimpleTokenLoginModule implements LoginModule {
 
         // Strip off the authentication scheme prefix due to KG-4635. Once KG-4635 is fixed this can be
         // removed.
-        if ( tokenData.indexOf(authToken.getScheme()) != -1 ) {
+        if (tokenData.contains(authToken.getScheme())) {
             tokenData = tokenData.substring(authToken.getScheme().length() + 1);
         }
 
@@ -308,11 +308,7 @@ public class SimpleTokenLoginModule implements LoginModule {
             return true;
         }
 
-        if("jane".equals(parts[1]) && "welcome".equals(parts[2])){
-            return true;
-        }
-        
-        return false;
+        return "jane".equals(parts[1]) && "welcome".equals(parts[2]);
 
     }
 

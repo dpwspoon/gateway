@@ -50,8 +50,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
@@ -111,7 +109,6 @@ import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.future.UnbindFuture;
 import org.kaazing.mina.core.service.IoProcessorEx;
-import org.kaazing.mina.core.session.IoSessionEx;
 import org.kaazing.mina.netty.IoSessionIdleTracker;
 import org.kaazing.mina.netty.util.threadlocal.VicariousThreadLocal;
 import org.slf4j.Logger;
@@ -510,6 +507,10 @@ public class WsebAcceptor extends AbstractBridgeAcceptor<WsebSession, Binding> {
         }
 
         private void createWsebSessionAndFinalizeResponse(final HttpAcceptSession session) throws Exception {
+            String sequenceStr = session.getReadHeader(HttpHeaders.HEADER_X_SEQUENCE_NO);
+            final boolean validateSequenceNo = (sequenceStr != null);
+            final long sequenceNo = validateSequenceNo ? Long.parseLong(sequenceStr) : -1;
+
             final boolean wasHixieHandshake = wasHixieHandshake(session);
 
 
@@ -641,7 +642,7 @@ public class WsebAcceptor extends AbstractBridgeAcceptor<WsebSession, Binding> {
                     wsSession.setAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY, session
                             .getAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY));
                     wsSession.setAttribute(HTTP_REQUEST_URI_KEY, session.getRequestURL());
-                    ((AbstractWsBridgeSession<?, ?>) wsSession).setSubject(((IoSessionEx) session).getSubject());
+                    ((AbstractWsBridgeSession<?, ?>) wsSession).setSubject(session.getSubject());
                     wsSession.setAttribute(BridgeSession.NEXT_PROTOCOL_KEY, wsProtocol0);
                     wsExtensions0.set(wsSession);
                     HttpLoginSecurityFilter.LOGIN_CONTEXT_KEY.set(wsSession,
@@ -653,7 +654,8 @@ public class WsebAcceptor extends AbstractBridgeAcceptor<WsebSession, Binding> {
                     ResultAwareLoginContext loginContext = (ResultAwareLoginContext) session.getAttribute(
                             HttpLoginSecurityFilter.LOGIN_CONTEXT_KEY);
                     WsebSession newWsebSession = new WsebSession(session.getIoLayer(), session.getIoThread(), session.getIoExecutor(), WsebAcceptor.this, getProcessor(),
-                            localAddress, remoteAddress, allocator, loginContext.getLoginResult(), wsExtensions0, clientIdleTimeout, inactivityTimeout);
+                            localAddress, remoteAddress, allocator, loginContext.getLoginResult(), wsExtensions0, clientIdleTimeout, inactivityTimeout,
+                            validateSequenceNo, sequenceNo);
                     IoHandler handler = getHandler(newWsebSession.getLocalAddress());
                     newWsebSession.setHandler(handler);
                     newWsebSession.setBridgeServiceFactory(bridgeServiceFactory);

@@ -25,13 +25,7 @@ import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.jboss.netty.util.CharsetUtil.UTF_8;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.GATEWAY_ORIGIN_SECURITY;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_AUTHORIZATION;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_CONTENT_LENGTH;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_MAX_AGE;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_WEBSOCKET_EXTENSIONS;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_WEBSOCKET_VERSION;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_X_ACCEPT_COMMANDS;
-import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_X_ORIGIN;
+import static org.kaazing.gateway.transport.http.HttpHeaders.*;
 import static org.kaazing.mina.core.buffer.IoBufferEx.FLAG_SHARED;
 
 import java.io.IOException;
@@ -191,6 +185,9 @@ public final class HttpClientAccessPolicyXml extends HttpDynamicResource {
                                 // X-Accept-Commands
                                 buf.putString(HEADER_X_ACCEPT_COMMANDS + ",", utf8Encoder);
 
+                                // X-Sequence-No
+                                buf.putString(HEADER_X_SEQUENCE_NO + ",", utf8Encoder);
+
                                 // original header:
                                 URI sourceOriginURI = ("*".equals(sourceOrigin)) ? NULL_ORIGIN : URI.create(URLEncoder
                                         .encode(sourceOrigin, "UTF-8"));
@@ -254,7 +251,7 @@ public final class HttpClientAccessPolicyXml extends HttpDynamicResource {
     }
 
     private interface CachedResult {
-        public void writeFile(HttpAcceptSession httpSession);
+        void writeFile(HttpAcceptSession httpSession);
 
     }
 
