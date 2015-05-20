@@ -35,7 +35,7 @@
                             <execution>
                                 <id>unpack-gateway</id>
                                 <goals>
-                                    <goal>unpack-dependencies</goal>
+                                    <goal>copy-dependencies</goal>
                                 </goals>
                                 <configuration>
                                     <includeArtifactIds>gateway.distribution</includeArtifactIds>
@@ -80,7 +80,7 @@
                             <execution>
                                 <id>unpack-gateway</id>
                                 <goals>
-                                    <goal>unpack-dependencies</goal>
+                                    <goal>copy-dependencies</goal>
                                 </goals>
                                 <configuration>
                                     <includeArtifactIds>gateway.distribution</includeArtifactIds>
