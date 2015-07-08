@@ -118,6 +118,12 @@
             <version>3.1</version>
             <scope>test</scope>
         </dependency>
+            <dependency>
+                <groupId>org.kaazing</groupId>
+                <artifactId>k3po.junit</artifactId>
+                <version>${k3po.version}</version>
+                <scope>test</scope>
+            </dependency>
     </dependencies>
 
     <build>

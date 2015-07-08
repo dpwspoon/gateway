@@ -8,6 +8,7 @@ import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandler;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
@@ -22,7 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.rules.RuleChain.outerRule;
 
-
+@Category(Specification.class)
 public class OpeningHandshakeIT {
 
     private final K3poRule k3po = new K3poRule().setScriptRoot("org/kaazing/specification/ws/opening");
