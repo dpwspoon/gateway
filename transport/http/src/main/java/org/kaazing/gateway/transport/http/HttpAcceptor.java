@@ -72,7 +72,9 @@ import org.kaazing.gateway.resource.address.Protocol;
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.resource.address.ResourceOptions;
+import org.kaazing.gateway.security.auth.DefaultLoginResult;
 import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.AbstractBridgeAcceptor;
 import org.kaazing.gateway.transport.Bindings;
 import org.kaazing.gateway.transport.BridgeAcceptor;
@@ -433,13 +435,13 @@ public class HttpAcceptor extends AbstractBridgeAcceptor<DefaultHttpSession, Htt
                 final Subject subject = httpRequest.getSubject();
 
                 // percolate login context
-                final ResultAwareLoginContext loginContext = httpRequest.getLoginContext();
+                final DefaultLoginResult loginResult = httpRequest.getLoginResult();
                 // create new http session and store it in this io session
                 httpSession = newSession(new IoSessionInitializer<IoFuture>() {
                     @Override
                     public void initializeSession(IoSession httpSession, IoFuture future) {
                         ((DefaultHttpSession)httpSession).setSubject(subject);
-                        ((DefaultHttpSession)httpSession).setLoginContext(loginContext);
+                        ((DefaultHttpSession)httpSession).setLoginResult(loginResult);
                     }
                 }, new Callable<DefaultHttpSession>() {
                     @Override

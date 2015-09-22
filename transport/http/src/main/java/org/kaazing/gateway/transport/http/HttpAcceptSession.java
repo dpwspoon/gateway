@@ -24,7 +24,8 @@ package org.kaazing.gateway.transport.http;
 import java.net.URI;
 
 import org.apache.mina.core.service.IoHandler;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.security.auth.DefaultLoginResult;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.CommitFuture;
 import org.kaazing.gateway.transport.UpgradeFuture;
 
@@ -36,7 +37,7 @@ public interface HttpAcceptSession extends HttpSession {
 
     void setMethod(HttpMethod method);
 
-    ResultAwareLoginContext getLoginContext();
+    LoginResult getLoginResult();
 
     URI getServicePath();
 

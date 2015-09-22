@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
 
 import org.apache.mina.core.session.AttributeKey;
 import org.apache.mina.core.session.IoSession;
@@ -44,7 +43,6 @@ import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.security.TypedCallbackHandlerMap;
 import org.kaazing.gateway.security.auth.DefaultLoginResult;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
 import org.kaazing.gateway.security.auth.token.DefaultAuthenticationToken;
 import org.kaazing.gateway.transport.http.DefaultHttpSession;
 import org.kaazing.gateway.transport.http.HttpCookie;
@@ -141,16 +139,16 @@ public class HttpSubjectSecurityFilter extends HttpLoginSecurityFilter {
         String realmName = httpAddress.getOption(HttpResourceAddress.REALM_NAME);
 
         if ( realmName == null ) {
-            ResultAwareLoginContext loginContext = null;
+            DefaultLoginResult loginResult = null;
             // Make sure we propagate the login context from the layer below in httpxe case
             if (session instanceof DefaultHttpSession) {
-                loginContext = ((DefaultHttpSession)session).getLoginContext();
+                loginResult = ((DefaultHttpSession)session).getLoginResult();
             }
-            if (loginContext != null) {
-                httpRequest.setLoginContext(loginContext);
+            if (loginResult != null) {
+                httpRequest.setLoginResult(loginResult);
             }
             else {
-                setUnprotectedLoginContext(httpRequest);
+                setUnprotectedLoginResult(httpRequest);
             }
 
             if (loggerIsEnabled) {
@@ -354,8 +352,8 @@ public class HttpSubjectSecurityFilter extends HttpLoginSecurityFilter {
         if ( alreadyLoggedIn(session, httpAddress)) {
             // KG-3232, KG-3267: we should never leave the login context unset
             // for unprotected services.
-            if (httpRequest.getLoginContext() == null) {
-                setUnprotectedLoginContext(httpRequest);
+            if (httpRequest.getLoginResult() == null) {
+                setUnprotectedLoginResult(httpRequest);
             }
             if (loggerIsEnabled) {
                 logger.trace("HttpSubjectSecurityFilter skipped because we are already allowed or logged in.");
@@ -366,7 +364,7 @@ public class HttpSubjectSecurityFilter extends HttpLoginSecurityFilter {
         }
 
         if ( realmName == null ) {
-            setUnprotectedLoginContext(httpRequest);
+            setUnprotectedLoginResult(httpRequest);
             if (loggerIsEnabled) {
                 logger.trace("HttpSecurityStandardFilter skipped because no realm is configured.");
             }

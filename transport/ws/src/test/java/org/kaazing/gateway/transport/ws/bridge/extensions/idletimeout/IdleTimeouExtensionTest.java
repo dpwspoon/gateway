@@ -29,7 +29,7 @@ import org.apache.mina.core.session.IoSession;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.ws.extension.ExtensionHeader;
 import org.kaazing.gateway.transport.ws.extension.ExtensionHeaderBuilder;
 import org.kaazing.gateway.transport.ws.extension.ExtensionHelper;
@@ -39,7 +39,7 @@ public class IdleTimeouExtensionTest {
     private static final ExtensionHelper extensionHelper = new ExtensionHelper() {
 
         @Override
-        public void setLoginContext(IoSession session, ResultAwareLoginContext loginContext) {
+        public void setLoginResult(IoSession session, LoginResult loginResult) {
             throw new RuntimeException("Not expected to be called");
         }
 

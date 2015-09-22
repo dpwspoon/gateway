@@ -24,8 +24,9 @@ package org.kaazing.gateway.security.auth;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
+import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.kaazing.gateway.server.spi.security.LoginResult;
@@ -36,9 +37,6 @@ import org.kaazing.gateway.server.spi.security.LoginResult;
  */
 public class DefaultLoginResult extends LoginResult {
 
-
-    /* Constant for 5 minutes as seconds */
-    private static final long FIVE_MINUTES = TimeUnit.MINUTES.toSeconds(5);
     static final long[] NO_PERIODS_AVAILABLE = new long[]{};
 
     Type loginResultType;
@@ -60,16 +58,13 @@ public class DefaultLoginResult extends LoginResult {
      */
     private Long sessionTimeout;
 
-    /**
-     * Once calculated, this is a cache for revalidate period[0] and timeout[1] values
-     */
-    private long[] calculatedPeriodTimeoutValues = NO_PERIODS_AVAILABLE;
+    private LoginContext loginContext;
 
     public DefaultLoginResult() {
         super();
         // Default to success to minimize the need to use the login result facility
         // if the customer does not want to use it.
-        loginResultType = Type.SUCCESS;
+        loginResultType = Type.FAILURE;
     }
 
     @Override
@@ -100,7 +95,6 @@ public class DefaultLoginResult extends LoginResult {
     public void success() {
         loginResultType = Type.SUCCESS;
     }
-
 
     public void clearTimeouts() {
         this.sessionTimeout = null;
@@ -149,5 +143,11 @@ public class DefaultLoginResult extends LoginResult {
         return loginAuthorizationAttachment;
     }
 
+    public void setLoginContext(LoginContext loginContext) {
+        this.loginContext = loginContext;
+    }
 
+    public LoginContext getLoginContext() {
+        return this.loginContext;
+    }
 }

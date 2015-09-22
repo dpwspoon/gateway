@@ -34,7 +34,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import javax.security.auth.Subject;
-import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.mina.core.filterchain.IoFilter.NextFilter;
@@ -123,7 +122,7 @@ public class HttpSubjectSecurityFilterTest {
         final URI serviceURI = URI.create("http://localhost:8000/echo");
         message.setRequestURI(serviceURI);
         message.addHeader("Host", "localhost:8000");
-        message.setLoginContext(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK);
+        message.setLoginResult(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK.getLoginResult());
         final ResourceAddress address = context.mock(ResourceAddress.class);
         message.setLocalAddress(address);
         context.checking(new Expectations() {
@@ -187,7 +186,7 @@ public class HttpSubjectSecurityFilterTest {
         });
         HttpSubjectSecurityFilter filter = new HttpSubjectSecurityFilter();
         filter.securityMessageReceived(nextFilter, session, message);
-        assertEquals(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK, message.getLoginContext());
+        assertEquals(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK.getLoginResult(), message.getLoginResult());
         context.assertIsSatisfied();
     }
 
@@ -255,7 +254,7 @@ public class HttpSubjectSecurityFilterTest {
         });
         HttpSubjectSecurityFilter filter = new HttpSubjectSecurityFilter(LoggerFactory.getLogger("security"));
         filter.securityMessageReceived(nextFilter, session, message);
-        assertEquals(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK, message.getLoginContext());
+        assertEquals(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK.getLoginResult(), message.getLoginResult());
         context.assertIsSatisfied();
     }
 
@@ -309,7 +308,7 @@ public class HttpSubjectSecurityFilterTest {
         filter.securityMessageReceived(nextFilter, session, message);
 
         // KG-3232, KG-3267: we should never leave the login context unset
-        assertEquals(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK, message.getLoginContext());
+        assertEquals(HttpLoginSecurityFilter.LOGIN_CONTEXT_OK.getLoginResult(), message.getLoginResult());
 
         context.assertIsSatisfied();
     }
@@ -400,6 +399,11 @@ public class HttpSubjectSecurityFilterTest {
                 oneOf(loginContext).getLoginResult();
                 will(returnValue(loginResult));
 
+                oneOf(loginResult).success();
+
+                oneOf(loginContext).getLoginResult();
+                will(returnValue(loginResult));
+
                 oneOf(loginResult).getType();
                 will(returnValue(LoginResult.Type.SUCCESS));
 
@@ -417,12 +421,15 @@ public class HttpSubjectSecurityFilterTest {
 
                 oneOf(session).resumeRead();
                 will(new LoginContextTaskDoneAction(latch, "login context task done"));
+
+                oneOf(loginContext).getLoginResult();
+                will(returnValue(loginResult));
             }
         });
         filter.messageReceived(nextFilter, session, message);
         latch.await(2000, TimeUnit.MILLISECONDS);
-        assertNotNull(message.getLoginContext());
         context.assertIsSatisfied();
+        assertNotNull(message.getLoginResult());
     }
 
     @Test
@@ -503,6 +510,11 @@ public class HttpSubjectSecurityFilterTest {
 
                 oneOf(loginContext).login();
                 will(VoidAction.INSTANCE);
+                
+                oneOf(loginContext).getLoginResult();
+                will(returnValue(loginResult));
+
+                oneOf(loginResult).success();
 
                 oneOf(loginContext).getLoginResult();
                 will(returnValue(loginResult));
@@ -524,12 +536,15 @@ public class HttpSubjectSecurityFilterTest {
 
                 oneOf(session).resumeRead();
                 will(new LoginContextTaskDoneAction(latch, "login context task done"));
+
+                oneOf(loginContext).getLoginResult();
+                will(returnValue(loginResult));
             }
         });
         filter.messageReceived(nextFilter, session, message);
         latch.await(200000, TimeUnit.MILLISECONDS);
-        assertNotNull(message.getLoginContext());
         context.assertIsSatisfied();
+        assertNotNull(message.getLoginResult());
     }
 
     @Test
@@ -687,6 +702,9 @@ public class HttpSubjectSecurityFilterTest {
                 will(returnValue(loginContext));
                 oneOf(session).suspendRead();
                 oneOf(loginContext).login();
+                oneOf(loginContext).getLoginResult();
+                will(returnValue(loginResult));
+                oneOf(loginResult).success();
                 oneOf(loginContext).getLoginResult();
                 will(returnValue(loginResult));
                 oneOf(loginResult).getType();

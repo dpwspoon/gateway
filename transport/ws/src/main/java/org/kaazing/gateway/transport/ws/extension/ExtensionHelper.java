@@ -22,7 +22,7 @@
 package org.kaazing.gateway.transport.ws.extension;
 
 import org.apache.mina.core.session.IoSession;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 
 /**
  * This interface provides methods which can be used within extension filters.
@@ -32,9 +32,9 @@ public interface ExtensionHelper {
     /**
      * Signal re-authentication on the WebSocket connection
      * @param session        transport session on whose filter chain the WebSocket frames flow
-     * @param loginContext   the new authenticated login context
+     * @param loginResult    the new authenticated login result
      */
-    void setLoginContext(IoSession session, ResultAwareLoginContext loginContext);
+    void setLoginResult(IoSession session, LoginResult loginResult);
 
     /**
      * Close the WebSocket connection associated with the given transport session.

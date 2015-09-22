@@ -45,7 +45,7 @@ import javax.security.auth.Subject;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoProcessor;
 import org.kaazing.gateway.resource.address.ResourceAddress;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.security.auth.DefaultLoginResult;
 import org.kaazing.gateway.transport.AbstractBridgeSession;
 import org.kaazing.gateway.transport.CommitFuture;
 import org.kaazing.gateway.transport.DefaultCommitFuture;
@@ -108,7 +108,7 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
     private final CommitFuture commitFuture;
     private final AtomicBoolean committing;
     private final AtomicBoolean connectionClose;
-    private ResultAwareLoginContext loginContext;
+    private DefaultLoginResult loginResult;
     private final AtomicBoolean shutdownWrite;
     private IoBufferEx readRequest;
 
@@ -580,12 +580,12 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
 	}
 
     @Override
-    public ResultAwareLoginContext getLoginContext() {
-        return loginContext;
+    public DefaultLoginResult getLoginResult() {
+        return loginResult;
     }
 
-	public void setLoginContext(ResultAwareLoginContext loginContext) {
-	    this.loginContext = loginContext;
+	public void setLoginResult(DefaultLoginResult loginResult) {
+	    this.loginResult = loginResult;
 	}
 
     public boolean isChunkingNecessary() {

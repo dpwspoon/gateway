@@ -78,7 +78,9 @@ import org.kaazing.gateway.resource.address.ResourceOptions;
 import org.kaazing.gateway.resource.address.URLUtils;
 import org.kaazing.gateway.resource.address.ws.WsResourceAddress;
 import org.kaazing.gateway.resource.address.wsn.WsnResourceAddressFactorySpi;
+import org.kaazing.gateway.security.auth.DefaultLoginResult;
 import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.AbstractBridgeAcceptor;
 import org.kaazing.gateway.transport.AbstractBridgeSession;
 import org.kaazing.gateway.transport.Bindings;
@@ -141,10 +143,11 @@ import org.slf4j.LoggerFactory;
 
 public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.WsnBinding> {
 
-    private static final TypedAttributeKey<ResultAwareLoginContext> LOGIN_CONTEXT_TRANSFER_KEY
+    private static final TypedAttributeKey<DefaultLoginResult> LOGIN_CONTEXT_TRANSFER_KEY
                             = new TypedAttributeKey<>(WsnAcceptor.class, "login_transfer");
     private static final TypedAttributeKey<Subject> SUBJECT_TRANSFER_KEY
                             = new TypedAttributeKey<>(WsnAcceptor.class, "subject_transfer");
+    private static final DefaultLoginResult DEFAULT_LOGIN_RESULT_OK = new DefaultLoginResult();
 
     static final String CHECK_ALIVE_FILTER = WsnProtocol.NAME + "#checkalive";
 	        static final String CODEC_FILTER = WsnProtocol.NAME + "#codec";
@@ -206,10 +209,10 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
     private static final ExtensionHelper extensionHelper = new ExtensionHelper() {
 
         @Override
-        public void setLoginContext(IoSession session, ResultAwareLoginContext loginContext) {
+        public void setLoginResult(IoSession session, LoginResult loginResult) {
             WsnSession wsnSession = SESSION_KEY.get(session);
             assert wsnSession !=  null;
-            wsnSession.setLoginContext(loginContext);
+            wsnSession.setLoginResult((DefaultLoginResult)loginResult);
         }
 
         @Override
@@ -570,12 +573,12 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                 @Override
                 public WsnSession call() {
                     URI httpRequestURI = httpUri;
-                    ResultAwareLoginContext loginContext = LOGIN_CONTEXT_TRANSFER_KEY.remove(session);
+                    DefaultLoginResult loginResult = LOGIN_CONTEXT_TRANSFER_KEY.remove(session);
                     IoBufferAllocatorEx<?> parentAllocator = session.getBufferAllocator();
                     IoBufferAllocatorEx<WsBuffer> allocator = wasHixieHandshake ? new WsDraftHixieBufferAllocator(parentAllocator)
                                                                                 : new WsBufferAllocator(parentAllocator, false /* masking */);
                     WsnSession newWsnSession = new WsnSession(WsnAcceptor.this, getProcessor(), localAddress, remoteAddress,
-                            session, allocator, httpRequestURI, loginContext,
+                            session, allocator, httpRequestURI, loginResult == null ? DEFAULT_LOGIN_RESULT_OK : loginResult,
                             wsVersion, null);
 
                     IoHandler handler = getHandler(localAddress);
@@ -1146,7 +1149,7 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                             parent.setAttribute(LOCAL_ADDRESS_KEY, session.getLocalAddress());
                             parent.setAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY, session.getAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY));
                             parent.setAttribute(SUBJECT_TRANSFER_KEY, session.getSubject());
-                            parent.setAttribute(LOGIN_CONTEXT_TRANSFER_KEY, session.getLoginContext());
+                            parent.setAttribute(LOGIN_CONTEXT_TRANSFER_KEY, session.getLoginResult());
                             parent.setAttribute(HTTP_REQUEST_URI_KEY, session.getRequestURL());
                         }
                     });
@@ -1383,7 +1386,7 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                                         .getAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY));
                                 parent.setAttribute(SUBJECT_TRANSFER_KEY, session.getSubject());
                                 parent.setAttribute(HTTP_REQUEST_URI_KEY, session.getRequestURL());
-                                parent.setAttribute(LOGIN_CONTEXT_TRANSFER_KEY, session.getLoginContext());
+                                parent.setAttribute(LOGIN_CONTEXT_TRANSFER_KEY, session.getLoginResult());
                             }
                         });
                         session.close(false);
@@ -1542,7 +1545,7 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                                    .getAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY));
                            parent.setAttribute(SUBJECT_TRANSFER_KEY, session.getSubject());
                            parent.setAttribute(HTTP_REQUEST_URI_KEY, session.getRequestURL());
-                           parent.setAttribute(LOGIN_CONTEXT_TRANSFER_KEY, session.getLoginContext());
+                           parent.setAttribute(LOGIN_CONTEXT_TRANSFER_KEY, session.getLoginResult());
                        }
                    });
                    session.close(false);

@@ -70,7 +70,8 @@ import org.kaazing.gateway.resource.address.ResourceOption;
 import org.kaazing.gateway.resource.address.ResourceOptions;
 import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.resource.address.ws.WsResourceAddress;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.security.auth.DefaultLoginResult;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.AbstractBridgeAcceptor;
 import org.kaazing.gateway.transport.Bindings;
 import org.kaazing.gateway.transport.Bindings.Binding;
@@ -409,8 +410,8 @@ public class WsebAcceptor extends AbstractBridgeAcceptor<WsebSession, Binding> {
     private static final ExtensionHelper extensionHelper = new ExtensionHelper() {
 
         @Override
-        public void setLoginContext(IoSession session, ResultAwareLoginContext loginContext) {
-            ((WsebSession.TransportSession)session).getWsebSession().setLoginContext(loginContext);
+        public void setLoginResult(IoSession session, LoginResult loginResult) {
+            ((WsebSession.TransportSession)session).getWsebSession().setLoginResult((DefaultLoginResult)loginResult);
         }
 
         @Override
@@ -646,7 +647,7 @@ public class WsebAcceptor extends AbstractBridgeAcceptor<WsebSession, Binding> {
                     wsSession.setAttribute(HTTP_REQUEST_URI_KEY, session.getRequestURL());
                     WsebSession wsebSession = (WsebSession)wsSession;
                     wsSession.setAttribute(BridgeSession.NEXT_PROTOCOL_KEY, wsProtocol0);
-                    wsebSession.setLoginContext(session.getLoginContext());
+                    wsebSession.setLoginResult((DefaultLoginResult) session.getLoginResult());
                     IoSessionEx extensionsSession = wsebSession.getTransportSession();
                     IoFilterChain extensionsFilterChain = extensionsSession.getFilterChain();
                     WsUtils.addExtensionFilters(negotiated, extensionHelper, extensionsFilterChain, false);
@@ -656,10 +657,10 @@ public class WsebAcceptor extends AbstractBridgeAcceptor<WsebSession, Binding> {
             }, new Callable<WsebSession>() {
                 @Override
                 public WsebSession call() {
-                    ResultAwareLoginContext loginContext = session.getLoginContext();
-                    WsebSession newWsebSession = new WsebSession(session.getIoLayer(), session.getIoThread(), session.getIoExecutor(), WsebAcceptor.this, getProcessor(),
-                            localAddress, remoteAddress, allocator, loginContext, clientIdleTimeout, inactivityTimeout,
-                            validateSequenceNo, sequenceNo, negotiated);
+                    DefaultLoginResult loginResult = ((DefaultLoginResult) session.getLoginResult());
+                    WsebSession newWsebSession = new WsebSession(session.getIoLayer(), session.getIoThread(),
+                            session.getIoExecutor(), WsebAcceptor.this, getProcessor(), localAddress, remoteAddress, allocator,
+                            loginResult, clientIdleTimeout, inactivityTimeout, validateSequenceNo, sequenceNo, negotiated);
                     IoHandler handler = getHandler(newWsebSession.getLocalAddress());
                     newWsebSession.setHandler(handler);
                     newWsebSession.setBridgeServiceFactory(bridgeServiceFactory);

@@ -183,6 +183,7 @@ public abstract class HttpLoginSecurityFilter extends HttpBaseSecurityFilter {
             }
 
             loginContext.login();
+            loginContext.getLoginResult().success();
         } catch (LoginException le) {
             // Depending on the login modules configured, this could be
             // a very normal condition.
@@ -337,6 +338,7 @@ public abstract class HttpLoginSecurityFilter extends HttpBaseSecurityFilter {
                 }
 
                 loginContext.login();
+                loginContext.getLoginResult().success();
                 loginResult = loginContext.getLoginResult();
                 final LoginResult.Type resultType = loginResult.getType();
                 if (resultType == LoginResult.Type.FAILURE) {
@@ -411,7 +413,7 @@ public abstract class HttpLoginSecurityFilter extends HttpBaseSecurityFilter {
             try {
 
                 // remember login context
-                httpRequest.setLoginContext(loginContext);
+                httpRequest.setLoginResult(loginContext.getLoginResult());
 
                 // remember subject
                 httpRequest.setSubject((loginContext == null || loginContext == LOGIN_CONTEXT_OK) ? subject : loginContext.getSubject());
@@ -445,8 +447,8 @@ public abstract class HttpLoginSecurityFilter extends HttpBaseSecurityFilter {
      * This allows the rest of the pipeline to issue the login context is always set.
      * @param session
      */
-    protected void setUnprotectedLoginContext(final HttpRequestMessage request) {
-        request.setLoginContext(LOGIN_CONTEXT_OK);
+    protected void setUnprotectedLoginResult(final HttpRequestMessage request) {
+        request.setLoginResult(LOGIN_CONTEXT_OK.getLoginResult());
     }
 
     private void registerCallbacks(

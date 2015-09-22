@@ -40,7 +40,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.kaazing.gateway.resource.address.ws.WsResourceAddress;
-import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
+import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.ws.extension.WebSocketExtensionFactoryTest.MockWebSocketExtensionFactorySpi.MockNegotiate;
 
 public class WebSocketExtensionFactoryTest {
@@ -53,7 +53,7 @@ public class WebSocketExtensionFactoryTest {
     private static final ExtensionHelper extensionHelper = new ExtensionHelper() {
 
         @Override
-        public void setLoginContext(IoSession session, ResultAwareLoginContext loginContext) {
+        public void setLoginResult(IoSession session, LoginResult loginResult) {
             throw new RuntimeException("Not expected to be called");
         }
 

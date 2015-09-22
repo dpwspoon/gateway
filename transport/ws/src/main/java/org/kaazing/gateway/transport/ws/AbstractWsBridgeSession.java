@@ -29,8 +29,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
+import org.apache.mina.core.session.IoSession;
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.security.auth.DefaultLoginResult;
@@ -39,7 +41,9 @@ import org.kaazing.gateway.server.spi.security.LoginResult;
 import org.kaazing.gateway.transport.AbstractBridgeSession;
 import org.kaazing.gateway.transport.BridgeServiceFactory;
 import org.kaazing.gateway.transport.Direction;
+import org.kaazing.gateway.transport.http.bridge.filter.HttpLoginSecurityFilter;
 import org.kaazing.gateway.transport.ws.extension.WebSocketExtension;
+import org.kaazing.gateway.transport.ws.util.BridgeSessionIterator;
 import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.service.IoProcessorEx;
@@ -66,23 +70,23 @@ public abstract class AbstractWsBridgeSession<S extends IoSessionEx, B extends I
     protected final WsSessionTimeoutCommand sessionTimeout;
 
     protected ScheduledExecutorService scheduler;
-    protected ResultAwareLoginContext loginContext;
+    protected DefaultLoginResult loginResult;
     private List<WebSocketExtension> extensions;
 
     public AbstractWsBridgeSession(int ioLayer, Thread ioThread, Executor ioExecutor, IoServiceEx service, IoProcessorEx<S> sIoProcessor, ResourceAddress localAddress,
                                    ResourceAddress remoteAddress, IoBufferAllocatorEx<B> allocator,
-                                   Direction direction, ResultAwareLoginContext loginContext, List<WebSocketExtension> extensions) {
+                                   Direction direction, DefaultLoginResult loginResult, List<WebSocketExtension> extensions) {
         super(ioLayer, ioThread, ioExecutor, service, sIoProcessor, localAddress, remoteAddress, allocator, direction);
-        this.loginContext = loginContext;
+        this.loginResult = loginResult;
         this.sessionTimeout = new WsSessionTimeoutCommand(this);
         this.extensions = extensions;
     }
 
     public AbstractWsBridgeSession(IoServiceEx service, IoProcessorEx<S> sIoProcessor, ResourceAddress localAddress,
                                    ResourceAddress remoteAddress, IoSessionEx parent, IoBufferAllocatorEx<B> allocator,
-                                   Direction direction, ResultAwareLoginContext loginContext, List<WebSocketExtension> extensions) {
+                                   Direction direction, DefaultLoginResult loginResult, List<WebSocketExtension> extensions) {
         super(service, sIoProcessor, localAddress, remoteAddress, parent, allocator, direction);
-        this.loginContext = loginContext;
+        this.loginResult = loginResult;
         this.sessionTimeout = new WsSessionTimeoutCommand(this);
     }
 
@@ -101,9 +105,11 @@ public abstract class AbstractWsBridgeSession<S extends IoSessionEx, B extends I
         this.scheduler = scheduler;
     }
 
-    public void setLoginContext(ResultAwareLoginContext loginContext) {
-        this.loginContext = loginContext;
-        super.setSubject(loginContext.getSubject());
+    public void setLoginResult(DefaultLoginResult loginResult) {
+        this.loginResult = loginResult;
+        final LoginContext loginContext = loginResult.getLoginContext();
+        final Subject subject = (loginResult != null) ? loginContext.getSubject() : null;
+        super.setSubject(subject);
     }
 
     @Override
@@ -169,9 +175,7 @@ public abstract class AbstractWsBridgeSession<S extends IoSessionEx, B extends I
      */
     public Long getSessionTimeout() {
         //  look in the login result...if it is success
-        DefaultLoginResult loginResult;
-        if ( loginContext != null && (loginResult = loginContext.getLoginResult()) != null
-                && loginResult.getType() == LoginResult.Type.SUCCESS) {
+        if ( loginResult != null && loginResult.getType() == LoginResult.Type.SUCCESS) {
             Long sessionTimeout = loginResult.getSessionTimeout();
             if ( sessionTimeout != null && sessionTimeout > 0 ) {
                 return sessionTimeout;
@@ -186,6 +190,7 @@ public abstract class AbstractWsBridgeSession<S extends IoSessionEx, B extends I
      * Used to clean up any login context state that should be cleaned up.
      */
     public void logout() {
+        LoginContext loginContext = loginResult.getLoginContext();
         if (loginContext != null) {
             try {
                 loginContext.logout();

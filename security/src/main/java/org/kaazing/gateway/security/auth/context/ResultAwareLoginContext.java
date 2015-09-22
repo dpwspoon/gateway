@@ -46,5 +46,8 @@ public class ResultAwareLoginContext extends LoginContext {
                                    Configuration config, DefaultLoginResult result) throws LoginException {
         super(name, subject, callbackHandler, config);
         this.loginResult = result;
+        if (result != null) {
+            result.setLoginContext(this);
+        }
     }
 }
