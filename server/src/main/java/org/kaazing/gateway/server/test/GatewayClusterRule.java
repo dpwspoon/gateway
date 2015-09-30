@@ -24,6 +24,7 @@ package org.kaazing.gateway.server.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,10 @@ public class GatewayClusterRule implements TestRule {
     @Override
     public Statement apply(Statement base, Description description) {
         return new GatewayStatement(base);
+    }
+
+    public void init(GatewayConfiguration... configurations) {
+        this.configurations = Arrays.asList(configurations);
     }
 
     public void init(List<GatewayConfiguration> configurations) {

@@ -596,6 +596,7 @@ public class DefaultServiceContext implements ServiceContext {
                             if (newBalanceUris.equals(balanceUris)) {
                                 break;
                             }
+                            // This is infinite loop, don't know why.
                         } while (!sharedBalanceUriMap.replace(balanceURI, balanceUris, newBalanceUris));
 
                         GL.info(CLUSTER_LOGGER_NAME, "Cluster member {}: service {} bound", localMember, serviceType);
