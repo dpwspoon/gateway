@@ -12,6 +12,12 @@
     <artifactId>gateway.bom</artifactId>
     <packaging>pom</packaging>
 
+    <url>https://github.com/kaazing/gateway.git</url>
+    <scm>
+        <url>https://github.com/kaazing/gateway.git</url>
+        <connection>scm:git:https://github.com/kaazing/gateway.git</connection>
+    </scm>
+
     <name>Kaazing Gateway BOM</name>
     <description>Bill Of Materials (BOM) for gateway</description>
     <dependencyManagement>
@@ -264,6 +270,16 @@
             <dependency>
                 <groupId>org.kaazing</groupId>
                 <artifactId>gateway.resource.address.wse</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.kaazing</groupId>
+                <artifactId>gateway.demo.utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.kaazing</groupId>
+                <artifactId>gateway.demo.udp.client.driver</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

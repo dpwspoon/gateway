@@ -76,6 +76,9 @@
         <include>org.kaazing:gateway.security</include>
         <include>org.kaazing:gateway.util</include>
 
+        <!-- demo jars -->
+        <include>org.kaazing:gateway.demo.utils</include>
+
         <include>org.kaazing:gateway.bridge</include>
         <include>org.kaazing:gateway.management</include>
         <include>org.kaazing:gateway.service.update.check.management</include>

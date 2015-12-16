@@ -213,6 +213,14 @@
             <groupId>org.kaazing</groupId>
             <artifactId>gateway.resource.address.wse</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
+            <artifactId>gateway.demo.utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
+            <artifactId>gateway.demo.udp.client.driver</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

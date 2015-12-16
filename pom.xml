@@ -40,6 +40,8 @@
         <module>bridge</module>
         <module>bom</module>
         <!--<module>docker</module> -->
+        <module>demo/utils</module>
+        <module>demo/udp.client.driver</module>
         <module>distribution</module>
         <module>management</module>
         <module>resource.address/spi</module>
