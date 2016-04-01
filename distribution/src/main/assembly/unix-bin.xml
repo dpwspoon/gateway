@@ -31,7 +31,7 @@
       <includes>
           <include>README.txt</include>
           <include>web/README.txt</include>
-          <include>web/base/index.html</include>
+          <include>web/**/index.html</include>
       </includes>
       <filtered>true</filtered>
       <lineEnding>unix</lineEnding>
