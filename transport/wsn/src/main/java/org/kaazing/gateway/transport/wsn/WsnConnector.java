@@ -353,7 +353,6 @@ public class WsnConnector extends AbstractBridgeConnector<WsnSession> {
                 if (!protocols.isEmpty()) {
                     httpSession.setWriteHeader("Sec-WebSocket-Protocol", Utils.asCommaSeparatedString(protocols));
                 }
-                System.out.println("DPW -- HTTP SESSION IS " + httpSession);
                 WSN_SESSION_INITIALIZER_KEY.set(httpSession, wsnSessionInitializer);
                 WSN_CONNECT_FUTURE_KEY.set(httpSession, wsnConnectFuture);
                 WSN_CONNECT_ADDRESS_KEY.set(httpSession, wsnConnectAddress);

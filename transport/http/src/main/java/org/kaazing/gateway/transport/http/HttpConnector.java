@@ -458,7 +458,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                                                     "Basic " + new String(Base64.getEncoder().encode(auth.getBytes())));
                                             for(Object attributeKey: httpSession.getParent().getAttributeKeys()){
                                                 Object attributeValue = httpSession.getParent().getAttribute(attributeKey);
-                                                System.out.println("DPW === " + attributeKey + " " + attributeValue);
                                             }
                                             final HttpSessionFactory httpSessionFactory =
                                                     getReconnectSessionFactory(httpSession);
