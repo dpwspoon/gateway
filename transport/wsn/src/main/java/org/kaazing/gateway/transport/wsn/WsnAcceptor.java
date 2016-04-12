@@ -1077,9 +1077,9 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                     }
 
 //                     If configured with "Application xxx" challenge scheme, reject and close the connection
-//                    if (!verifyApplicationChallengeSchemeSecurity(session)) {
-//                        return;
-//                    }
+                    if (!verifyApplicationChallengeSchemeSecurity(session)) {
+                        return;
+                    }
 
                     // find (based on this http session) the local address for the WS session
                     // we are about to upgrade to.
