@@ -17,7 +17,6 @@ package org.kaazing.gateway.transport.wsn;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertTrue;
-import static org.kaazing.test.util.ITUtil.timeoutRule;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,6 +31,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.junit.rules.Timeout;
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.transport.BridgeServiceFactory;
@@ -48,7 +48,8 @@ import org.kaazing.mina.core.future.UnbindFuture;
 public class WsnAcceptorTest {
 
     @Rule
-    public final TestRule timeoutRule = timeoutRule(10, SECONDS);
+    public final TestRule timeoutRule = Timeout.builder().withTimeout(10, SECONDS)
+            .withLookingForStuckThread(true).build();
 
     private SchedulerProvider schedulerProvider;
     
