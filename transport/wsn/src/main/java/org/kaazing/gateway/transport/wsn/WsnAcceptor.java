@@ -1012,7 +1012,7 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                 case GET:
                     // suspend reads until after protocol switch complete
                     session.suspendRead();
-                
+
                     // get key values from session
                     List<String> clientRequestedWsProtocols = session.getReadHeaders(HEADER_SEC_WEBSOCKET_PROTOCOL);
                     List<String> clientRequestedExtensions = session.getReadHeaders(HEADER_SEC_WEBSOCKET_EXTENSION);

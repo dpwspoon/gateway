@@ -22,7 +22,6 @@ import static org.kaazing.gateway.resource.address.ResourceAddress.TRANSPORT;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getScheme;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.uriToString;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

@@ -127,7 +127,6 @@ public class HttpResourceAddressFactorySpiTest {
         assertNull(address.getOption(QUALIFIER));
         assertNull(address.getOption(TRANSPORT));
         assertTrue(address.getOption(KEEP_ALIVE));
-      //  assertTrue(address.getOption(HTTP_REDIRECT));
         assertEquals(address.getOption(KEEP_ALIVE_TIMEOUT).intValue(), 30);
         assertEquals(address.getOption(KEEP_ALIVE_CONNECTIONS).intValue(), DEFAULT_HTTP_KEEPALIVE_CONNECTIONS);
         assertNull(address.getOption(REALM_NAME));
