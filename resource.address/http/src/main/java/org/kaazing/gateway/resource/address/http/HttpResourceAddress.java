@@ -15,8 +15,6 @@
  */
 package org.kaazing.gateway.resource.address.http;
 
-import static org.kaazing.gateway.resource.address.http.HttpRedirectBehavior.FORWARD;
-
 import java.io.File;
 import java.net.URI;
 import java.security.Principal;
@@ -42,7 +40,7 @@ public final class HttpResourceAddress extends ResourceAddress {
 	static final String TRANSPORT_NAME = "http";
 
     public static final ResourceOption<Boolean> KEEP_ALIVE = new HttpKeepAliveOption();
-    public static final ResourceOption<HttpRedirectBehavior> HTTP_REDIRECT_BEHAVIOR = new HttpRedirectOption();
+    public static final ResourceOption<Integer> MAXIMUM_REDIRECTS = new HttpMaxRedirectOption();
     public static final ResourceOption<Integer> KEEP_ALIVE_TIMEOUT = new HttpKeepAliveTimeoutOption();
     public static final ResourceOption<Integer> KEEP_ALIVE_CONNECTIONS = new HttpKeepAliveConnectionsOption();
 
@@ -70,7 +68,7 @@ public final class HttpResourceAddress extends ResourceAddress {
 
     private Boolean serverHeaderEnabled = SERVER_HEADER_ENABLED.defaultValue();
     private Boolean keepAlive = KEEP_ALIVE.defaultValue();
-    private HttpRedirectBehavior httpRedirectBehavior = HTTP_REDIRECT_BEHAVIOR.defaultValue();
+    private Integer httpMaxRedirects = MAXIMUM_REDIRECTS.defaultValue();
     private Integer keepAliveTimeout = KEEP_ALIVE_TIMEOUT.defaultValue();
     private Integer keepAliveMaxConnections = KEEP_ALIVE_CONNECTIONS.defaultValue();
     private String[] requiredRoles = REQUIRED_ROLES.defaultValue();
@@ -107,8 +105,8 @@ public final class HttpResourceAddress extends ResourceAddress {
             switch (httpOption.kind) {
                 case KEEP_ALIVE:
                     return (V) keepAlive;
-                case HTTP_REDIRECT:
-                    return (V) httpRedirectBehavior;
+                case MAX_REDIRECTS:
+                    return (V) httpMaxRedirects;
                 case KEEP_ALIVE_TIMEOUT:
                     return (V) keepAliveTimeout;
                 case KEEP_ALIVE_CONNECTIONS:
@@ -168,8 +166,8 @@ public final class HttpResourceAddress extends ResourceAddress {
                 case KEEP_ALIVE:
                     keepAlive = (Boolean) value;
                     return;
-                case HTTP_REDIRECT:
-                    httpRedirectBehavior = value instanceof String ? HttpRedirectBehavior.valueOf((String) value) : (HttpRedirectBehavior) value;
+                case MAX_REDIRECTS:
+                    httpMaxRedirects = value instanceof String ? Integer.parseInt((String) value) : (Integer) value;
                     return;
                 case KEEP_ALIVE_TIMEOUT:
                     keepAliveTimeout = (Integer) value;
@@ -261,7 +259,7 @@ public final class HttpResourceAddress extends ResourceAddress {
             LOGIN_CONTEXT_FACTORY, INJECTABLE_HEADERS,
             ORIGIN_SECURITY, TEMP_DIRECTORY, GATEWAY_ORIGIN_SECURITY, BALANCE_ORIGINS,
             AUTHENTICATION_CONNECT, AUTHENTICATION_IDENTIFIER, ENCRYPTION_KEY_ALIAS, SERVICE_DOMAIN, SERVER_HEADER, 
-            REALM_USER_PRINCIPAL_CLASSES,HTTP_REDIRECT
+            REALM_USER_PRINCIPAL_CLASSES,MAX_REDIRECTS
         }
 
         private static final Map<String, ResourceOption<?>> OPTION_NAMES = new HashMap<>();
@@ -289,9 +287,9 @@ public final class HttpResourceAddress extends ResourceAddress {
             super(Kind.KEEP_ALIVE_CONNECTIONS, "keepalive.connections", DEFAULT_HTTP_KEEPALIVE_CONNECTIONS);
         }
     }
-    private static final class HttpRedirectOption extends HttpResourceOption<HttpRedirectBehavior> {
-        private HttpRedirectOption() {
-            super(Kind.HTTP_REDIRECT, "redirect.behavior", FORWARD);
+    private static final class HttpMaxRedirectOption extends HttpResourceOption<Integer> {
+        private HttpMaxRedirectOption() {
+            super(Kind.MAX_REDIRECTS, "maximum.redirects", 0);
         }
     }
 

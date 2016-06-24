@@ -22,11 +22,12 @@ import static java.util.EnumSet.complementOf;
 import static java.util.EnumSet.of;
 import static org.kaazing.gateway.resource.address.ResourceAddress.NEXT_PROTOCOL;
 import static org.kaazing.gateway.resource.address.ResourceAddress.QUALIFIER;
-import static org.kaazing.gateway.resource.address.http.HttpRedirectBehavior.FOLLOW;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;
 import static org.kaazing.gateway.transport.BridgeSession.LOCAL_ADDRESS;
 import static org.kaazing.gateway.transport.http.HttpConnectFilter.CONTENT_LENGTH_ADJUSTMENT;
 import static org.kaazing.gateway.transport.http.HttpConnectFilter.PROTOCOL_HTTPXE;
 import static org.kaazing.gateway.transport.http.HttpHeaders.HEADER_LOCATION;
+import static org.kaazing.gateway.transport.http.HttpStatus.REDIRECT_FOUND;
 import static org.kaazing.gateway.transport.http.HttpUtils.hasCloseHeader;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpNextProtocolHeaderFilter.PROTOCOL_HTTPXE_1_1;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpProtocolFilter.PROTOCOL_HTTP_1_1;
@@ -58,7 +59,6 @@ import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.resource.address.ResourceOption;
 import org.kaazing.gateway.resource.address.ResourceOptions;
-import org.kaazing.gateway.resource.address.http.HttpRedirectBehavior;
 import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.transport.AbstractBridgeConnector;
 import org.kaazing.gateway.transport.BridgeConnector;
@@ -408,9 +408,9 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                 HttpResponseMessage httpResponse = (HttpResponseMessage)httpMessage;
                 HttpStatus httpStatus = httpResponse.getStatus();
 
-                HttpRedirectBehavior redirctBehavior = httpSession.getRemoteAddress().getOption(HttpResourceAddress.HTTP_REDIRECT_BEHAVIOR);
+                Integer redirctBehavior = httpSession.getRemoteAddress().getOption(MAXIMUM_REDIRECTS);
                 // Handle temporary redirect (status 302), for example from http load balancer service
-                if (redirctBehavior != null && redirctBehavior == FOLLOW && httpStatus == HttpStatus.REDIRECT_FOUND /*&& httpSession.getAndDecrementRedirectsAllowed() > 0*/) {
+                if (redirctBehavior != null && redirctBehavior > 0 && httpStatus == REDIRECT_FOUND) {
                     followRedirect(httpSession, httpResponse);
                     return;
                 }
@@ -488,6 +488,9 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                         public <T> T getOption(ResourceOption<T> key) {
                             if(ResourceAddress.TRANSPORT_URI.equals(key) || ResourceAddress.TRANSPORT.equals(key) || ResourceAddress.TRANSPORTED_URI.equals(key)){
                                 return null;
+                            }
+                            if (HttpResourceAddress.MAXIMUM_REDIRECTS.equals(key)) {
+                                return (T) new Integer(((Integer) httpSession.getRemoteAddress().getOption(key)) - 1);
                             }
                             return httpSession.getRemoteAddress().getOption(key);
                         }

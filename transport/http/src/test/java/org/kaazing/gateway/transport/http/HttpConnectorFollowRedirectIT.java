@@ -16,7 +16,6 @@
 package org.kaazing.gateway.transport.http;
 
 import static org.junit.Assert.assertTrue;
-import static org.kaazing.gateway.resource.address.http.HttpRedirectBehavior.FOLLOW;
 import static org.kaazing.test.util.ITUtil.createRuleChain;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -28,7 +27,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.kaazing.gateway.resource.address.http.HttpRedirectBehavior;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
 public class HttpConnectorFollowRedirectIT {
@@ -48,7 +46,7 @@ public class HttpConnectorFollowRedirectIT {
     @Specification("should.receive.redirect.response")
     public void responseMustBeARedirect() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        connector.getConnectOptions().put("http.redirect.behavior", FOLLOW);
+        connector.getConnectOptions().put("http.maximum.redirects", 1);
         ConnectFuture connectFuture = connector.connect("http://localhost:8080/jms", handler,
                 new ConnectSessionInitializer());
         connectFuture.awaitUninterruptibly();
