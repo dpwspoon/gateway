@@ -398,22 +398,22 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                 // Handle temporary redirect (status 302), for example from http load balancer service
                 if (httpStatus == HttpStatus.REDIRECT_FOUND && httpSession.getAndDecrementRedirectsAllowed() > 0) {
                     String location = httpResponse.getHeader(HEADER_LOCATION);
-                    ResourceAddress newConnectAddress =
-                            addressFactory.newResourceAddress(URI.create(location), httpSession.getRemoteAddress());
-                    Executor executor = org.kaazing.mina.core.session.AbstractIoSessionEx.CURRENT_WORKER.get();
-                    if (session.getIoExecutor() != executor) {
-                        throw new RuntimeException("Thread alignment violation when handling redirect");
-                    }
-                    connectInternal0(new DefaultConnectFuture(), newConnectAddress, httpSession.getHandler(),
-                            new HttpSessionFactory() {
-
-                                @Override
-                                public DefaultHttpSession get(IoSession parent) throws Exception {
-                                    return httpSession;
-                                }
-
-                            });
-                    return;
+//                    ResourceAddress newConnectAddress =
+//                            addressFactory.newResourceAddress(URI.create(location), httpSession.getRemoteAddress());
+//                    Executor executor = org.kaazing.mina.core.session.AbstractIoSessionEx.CURRENT_WORKER.get();
+//                    if (session.getIoExecutor() != executor) {
+//                        throw new RuntimeException("Thread alignment violation when handling redirect");
+//                    }
+//                    connectInternal0(new DefaultConnectFuture(), newConnectAddress, httpSession.getHandler(),
+//                            new HttpSessionFactory() {
+//
+//                                @Override
+//                                public DefaultHttpSession get(IoSession parent) throws Exception {
+//                                    return httpSession;
+//                                }
+//
+//                            });
+//                    return;
                 }
 
                 httpSession.setStatus(httpStatus);
