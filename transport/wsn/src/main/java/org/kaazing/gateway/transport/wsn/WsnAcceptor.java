@@ -1114,7 +1114,7 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
 
                     final String wsProtocol0 = chosenProtocol;
 
-                    // Send out 302 HTTP Balance
+                    // Send out 302 HTTP Balance for WSN and WSX 
                     Object balancerKeys = session.getParent().getAttribute(BALANCEES_KEY);
                     if (!"x-kaazing-handshake".equals(wsProtocol0) && wsVersion == HYBI_13 && balancerKeys != null) {
                         SocketAddress parentLocalAddress = session.getParent().getLocalAddress();

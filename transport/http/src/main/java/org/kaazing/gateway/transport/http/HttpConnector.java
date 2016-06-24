@@ -22,6 +22,7 @@ import static java.util.EnumSet.complementOf;
 import static java.util.EnumSet.of;
 import static org.kaazing.gateway.resource.address.ResourceAddress.NEXT_PROTOCOL;
 import static org.kaazing.gateway.resource.address.ResourceAddress.QUALIFIER;
+import static org.kaazing.gateway.resource.address.http.HttpRedirectBehavior.FOLLOW;
 import static org.kaazing.gateway.transport.BridgeSession.LOCAL_ADDRESS;
 import static org.kaazing.gateway.transport.http.HttpConnectFilter.CONTENT_LENGTH_ADJUSTMENT;
 import static org.kaazing.gateway.transport.http.HttpConnectFilter.PROTOCOL_HTTPXE;
@@ -39,6 +40,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.annotation.Resource;
 
@@ -54,6 +56,9 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.session.IoSessionInitializer;
 import org.kaazing.gateway.resource.address.ResourceAddress;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
+import org.kaazing.gateway.resource.address.ResourceOption;
+import org.kaazing.gateway.resource.address.ResourceOptions;
+import org.kaazing.gateway.resource.address.http.HttpRedirectBehavior;
 import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.transport.AbstractBridgeConnector;
 import org.kaazing.gateway.transport.BridgeConnector;
@@ -68,6 +73,7 @@ import org.kaazing.gateway.transport.http.bridge.HttpMessage;
 import org.kaazing.gateway.transport.http.bridge.HttpResponseMessage;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBuffer;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBufferAllocator;
+import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.service.IoProcessorEx;
@@ -85,6 +91,7 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
     private ResourceAddressFactory addressFactory;
     private final PersistentConnectionPool persistentConnectionsStore;
     private Properties configuration;
+    private ScheduledExecutorService schedulerProvider;
 
     public HttpConnector() {
         super(new DefaultIoSessionConfigEx());
@@ -111,6 +118,11 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
     @Resource(name = "configuration")
     public void setConfiguration(Properties configuration) {
         this.configuration = configuration;
+    }
+
+    @Resource(name = "schedulerProvider")
+    public void setSchedulerProvider(SchedulerProvider provider) {
+        this.schedulerProvider = provider.getScheduler("HttpConnector", true);
     }
 
     @Override
@@ -390,30 +402,17 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
 
             DefaultHttpSession httpSession = HTTP_SESSION_KEY.get(session);
             HttpMessage httpMessage = (HttpMessage) message;
+
             switch (httpMessage.getKind()) {
             case RESPONSE:
                 HttpResponseMessage httpResponse = (HttpResponseMessage)httpMessage;
                 HttpStatus httpStatus = httpResponse.getStatus();
 
+                HttpRedirectBehavior redirctBehavior = httpSession.getRemoteAddress().getOption(HttpResourceAddress.HTTP_REDIRECT_BEHAVIOR);
                 // Handle temporary redirect (status 302), for example from http load balancer service
-                if (httpStatus == HttpStatus.REDIRECT_FOUND && httpSession.getAndDecrementRedirectsAllowed() > 0) {
-                    String location = httpResponse.getHeader(HEADER_LOCATION);
-//                    ResourceAddress newConnectAddress =
-//                            addressFactory.newResourceAddress(URI.create(location), httpSession.getRemoteAddress());
-//                    Executor executor = org.kaazing.mina.core.session.AbstractIoSessionEx.CURRENT_WORKER.get();
-//                    if (session.getIoExecutor() != executor) {
-//                        throw new RuntimeException("Thread alignment violation when handling redirect");
-//                    }
-//                    connectInternal0(new DefaultConnectFuture(), newConnectAddress, httpSession.getHandler(),
-//                            new HttpSessionFactory() {
-//
-//                                @Override
-//                                public DefaultHttpSession get(IoSession parent) throws Exception {
-//                                    return httpSession;
-//                                }
-//
-//                            });
-//                    return;
+                if (redirctBehavior != null && redirctBehavior == FOLLOW && httpStatus == HttpStatus.REDIRECT_FOUND /*&& httpSession.getAndDecrementRedirectsAllowed() > 0*/) {
+                    followRedirect(httpSession, httpResponse);
+                    return;
                 }
 
                 httpSession.setStatus(httpStatus);
@@ -466,6 +465,41 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
             }
         }
 
+        private void followRedirect(DefaultHttpSession httpSession, HttpResponseMessage httpResponse) {
+            String location = httpResponse.getHeader(HEADER_LOCATION);
+//            
+            ResourceAddress newConnectAddress =
+                    addressFactory.newResourceAddress(URI.create(location).toString(), new ResourceOptions() {
+
+                        @Override
+                        public <T> T setOption(ResourceOption<T> key, T value) {
+                            return httpSession.getRemoteAddress().setOption(key, value);
+                        }
+
+                        @Override
+                        public <T> boolean hasOption(ResourceOption<T> key) {
+                            if(ResourceAddress.TRANSPORT_URI.equals(key) || ResourceAddress.TRANSPORT.equals(key) || ResourceAddress.TRANSPORTED_URI.equals(key)){
+                                return false;
+                            }
+                            return httpSession.getRemoteAddress().hasOption(key);
+                        }
+
+                        @Override
+                        public <T> T getOption(ResourceOption<T> key) {
+                            if(ResourceAddress.TRANSPORT_URI.equals(key) || ResourceAddress.TRANSPORT.equals(key) || ResourceAddress.TRANSPORTED_URI.equals(key)){
+                                return null;
+                            }
+                            return httpSession.getRemoteAddress().getOption(key);
+                        }
+                    });
+
+            httpSession.setRemoteAddress(newConnectAddress);
+            schedulerProvider.submit(() -> {
+                final HttpSessionFactory httpSessionFactory = getReconnectSessionFactory(httpSession);
+                connectInternal0(new DefaultConnectFuture(), newConnectAddress, httpSession.getHandler(), httpSessionFactory);
+            });
+        }
+
         private void fireContentReceived(HttpSession session, HttpContentMessage content) {
             IoBufferEx buffer = content.asBuffer();
             if (buffer != null && buffer.hasRemaining()) {
@@ -484,6 +518,23 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
 
         DefaultHttpSession get(IoSession parent) throws Exception;
 
+    }
+
+    private HttpSessionFactory getReconnectSessionFactory(final DefaultHttpSession httpSession) {
+        return parent -> {
+            ResourceAddress rmA = httpSession.getRemoteAddress();
+            String prot = rmA.getOption(ResourceAddress.NEXT_PROTOCOL);
+            if(prot == null){
+                // if next prot == null and HTTP is end of the line then
+                // we need to reset the parent as the close future
+                // of the session is tied to the old session
+                // and will close everything
+                httpSession.resetParent((IoSessionEx) parent);
+            }
+            HttpConnectProcessor processor = (HttpConnectProcessor) httpSession.getProcessor();
+            processor.finishConnect(httpSession);
+            return httpSession;
+        };
     }
 
 }

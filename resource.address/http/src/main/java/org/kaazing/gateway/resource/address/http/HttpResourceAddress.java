@@ -15,6 +15,8 @@
  */
 package org.kaazing.gateway.resource.address.http;
 
+import static org.kaazing.gateway.resource.address.http.HttpRedirectBehavior.FORWARD;
+
 import java.io.File;
 import java.net.URI;
 import java.security.Principal;
@@ -40,7 +42,7 @@ public final class HttpResourceAddress extends ResourceAddress {
 	static final String TRANSPORT_NAME = "http";
 
     public static final ResourceOption<Boolean> KEEP_ALIVE = new HttpKeepAliveOption();
-    public static final ResourceOption<Boolean> HTTP_REDIRECT = new HttpRedirectOption();
+    public static final ResourceOption<HttpRedirectBehavior> HTTP_REDIRECT_BEHAVIOR = new HttpRedirectOption();
     public static final ResourceOption<Integer> KEEP_ALIVE_TIMEOUT = new HttpKeepAliveTimeoutOption();
     public static final ResourceOption<Integer> KEEP_ALIVE_CONNECTIONS = new HttpKeepAliveConnectionsOption();
 
@@ -68,7 +70,7 @@ public final class HttpResourceAddress extends ResourceAddress {
 
     private Boolean serverHeaderEnabled = SERVER_HEADER_ENABLED.defaultValue();
     private Boolean keepAlive = KEEP_ALIVE.defaultValue();
-    private Boolean httpRedirect = HTTP_REDIRECT.defaultValue();
+    private HttpRedirectBehavior httpRedirectBehavior = HTTP_REDIRECT_BEHAVIOR.defaultValue();
     private Integer keepAliveTimeout = KEEP_ALIVE_TIMEOUT.defaultValue();
     private Integer keepAliveMaxConnections = KEEP_ALIVE_CONNECTIONS.defaultValue();
     private String[] requiredRoles = REQUIRED_ROLES.defaultValue();
@@ -106,7 +108,7 @@ public final class HttpResourceAddress extends ResourceAddress {
                 case KEEP_ALIVE:
                     return (V) keepAlive;
                 case HTTP_REDIRECT:
-                    return (V) httpRedirect;
+                    return (V) httpRedirectBehavior;
                 case KEEP_ALIVE_TIMEOUT:
                     return (V) keepAliveTimeout;
                 case KEEP_ALIVE_CONNECTIONS:
@@ -167,7 +169,7 @@ public final class HttpResourceAddress extends ResourceAddress {
                     keepAlive = (Boolean) value;
                     return;
                 case HTTP_REDIRECT:
-                    httpRedirect = (Boolean) value;
+                    httpRedirectBehavior = value instanceof String ? HttpRedirectBehavior.valueOf((String) value) : (HttpRedirectBehavior) value;
                     return;
                 case KEEP_ALIVE_TIMEOUT:
                     keepAliveTimeout = (Integer) value;
@@ -287,11 +289,12 @@ public final class HttpResourceAddress extends ResourceAddress {
             super(Kind.KEEP_ALIVE_CONNECTIONS, "keepalive.connections", DEFAULT_HTTP_KEEPALIVE_CONNECTIONS);
         }
     }
-    private static final class HttpRedirectOption extends HttpResourceOption<Boolean> {
+    private static final class HttpRedirectOption extends HttpResourceOption<HttpRedirectBehavior> {
         private HttpRedirectOption() {
-            super(Kind.HTTP_REDIRECT, "httpRedirect", Boolean.FALSE);
+            super(Kind.HTTP_REDIRECT, "redirect.behavior", FORWARD);
         }
     }
+
     private static final class HttpKeepAliveOption extends HttpResourceOption<Boolean> {
         private HttpKeepAliveOption() {
             super(Kind.KEEP_ALIVE, "keepAlive", Boolean.TRUE);

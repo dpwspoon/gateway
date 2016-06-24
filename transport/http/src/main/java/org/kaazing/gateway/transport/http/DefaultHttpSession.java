@@ -118,6 +118,7 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
     private boolean httpxeSpecCompliant;
 
 	private int redirectsAllowed;
+    private ResourceAddress localRemoteAddress = null;
 
     @SuppressWarnings("deprecation")
     private DefaultHttpSession(IoServiceEx service,
@@ -566,7 +567,7 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
 
     @Override
     public ResourceAddress getRemoteAddress() {
-        return super.getRemoteAddress();
+        return (localRemoteAddress == null) ? super.getRemoteAddress() : localRemoteAddress;
     }
 
     public Queue<IoBufferEx> getDeferredReads() {
@@ -624,13 +625,22 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
     public boolean isHttpxeSpecCompliant() {
         return httpxeSpecCompliant;
     }
-    
+
+        void resetParent(IoSessionEx newParent){
+        setParent(newParent);
+    }
+
     int getAndDecrementRedirectsAllowed() {
         int result = redirectsAllowed;
         if (result > 0) {
             redirectsAllowed--;
         }
         return result;
+    }
+
+    public void setRemoteAddress(ResourceAddress newConnectAddress) {
+        // used by redirects
+        this.localRemoteAddress = newConnectAddress;
     }
 
 
