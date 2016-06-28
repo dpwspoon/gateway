@@ -27,5 +27,5 @@ write header "Sec-WebSocket-Version" "13"
 
 read status "302" /.+/
 read version "HTTP/1.1"
-read header "location" "ws://localhost:8001/echo1"
+read header "location" "http://localhost:8001/echo1"
 
