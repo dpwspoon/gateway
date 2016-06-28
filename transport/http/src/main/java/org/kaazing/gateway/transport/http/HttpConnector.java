@@ -34,6 +34,7 @@ import static org.kaazing.gateway.transport.http.bridge.filter.HttpProtocolFilte
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -517,6 +518,5 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
             return httpSession;
         };
     }
-
 
 }

@@ -127,6 +127,7 @@ import org.kaazing.gateway.transport.ws.extension.WebSocketExtensionFactory;
 import org.kaazing.gateway.transport.ws.util.WsHandshakeNegotiationException;
 import org.kaazing.gateway.transport.ws.util.WsUtils;
 import org.kaazing.gateway.util.Encoding;
+import org.kaazing.gateway.util.feature.EarlyAccessFeatures;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.gateway.util.ws.WebSocketWireProtocol;
 import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
@@ -1132,7 +1133,6 @@ public class WsnAcceptor extends AbstractBridgeAcceptor<WsnSession, WsnBindings.
                     session.addWriteHeader(HEADER_UPGRADE, webSocketUpgradeResponseValue);
                     session.addWriteHeader(HEADER_CONNECTION, HEADER_UPGRADE);
                     session.addWriteHeader(HEADER_WEBSOCKET_ACCEPT, WsUtils.acceptHash(key));
-
                     // do upgrade
                     UpgradeFuture upgradeFuture = session.upgrade(ioBridgeHandler);
                     upgradeFuture.addListener(new IoFutureListener<UpgradeFuture>() {
