@@ -18,6 +18,10 @@
     </scm>
 
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.testSource>1.8</maven.compiler.testSource>
+        <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
         <symbolicName>${exportedPackage}</symbolicName>
         <mina.version>2.1.0.0-SNAPSHOT</mina.version>
         <mina.groupId>org.kaazing</mina.groupId>

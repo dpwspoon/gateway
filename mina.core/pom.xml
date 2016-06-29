@@ -33,6 +33,13 @@
         </license>
     </licenses>
 
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.testSource>1.8</maven.compiler.testSource>
+		<maven.compiler.testTarget>1.8</maven.compiler.testTarget>
+	</properties>
+
     <modules>
         <module>legal</module>
         <module>parent</module>
