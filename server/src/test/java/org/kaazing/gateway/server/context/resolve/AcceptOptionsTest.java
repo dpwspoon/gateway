@@ -72,14 +72,12 @@ public class AcceptOptionsTest {
     }
 
     @Test
-    @Ignore("XSD no longer validates accept-options types")
     public void testSslCiphersOption() throws Exception {
         expectSuccess("ssl.ciphers", "  FOO,BAR ", "ssl.ciphers", new String[]{"FOO", "BAR"});
         expectParseFailure("ssl.ciphers", "FOO, BAR");
     }
 
     @Test
-    @Ignore("XSD no longer validates accept-options types")
     public void testHttpKeepAliveTimeoutOption() throws Exception {
         // expect default if 0 is specified
         expectSuccess("http.keepalive.timeout", "0 minutes", "http[http/1.1].keepAliveTimeout", 30);
@@ -87,11 +85,30 @@ public class AcceptOptionsTest {
         expectSuccess("http.keepalive.timeout", "10 seconds", "http[http/1.1].keepAliveTimeout", 10);
         expectSuccess("http.keepalive.timeout", "10 minutes", "http[http/1.1].keepAliveTimeout", 600);
         expectSuccess("http.keepalive.timeout", "0.5 minutes", "http[http/1.1].keepAliveTimeout", 30);
-        expectSuccess("http.keepalive.timeout", "", "http[http/1.1].keepAliveTimeout", 30);
+        //expectSuccess("http.keepalive.timeout", "", "http[http/1.1].keepAliveTimeout", 30);
 
         expectParseFailure("http.keepalive.timeout", "-1 seconds");
         expectParseFailure("http.keepalive.timeout", "abc");
         expectParseFailure("http.keepalive.timeout", null);
+    }
+
+    @Test
+    public void testHandshakeTimeoutOption() throws Exception {
+        testHandshakeTimeoutOption("tcp.handshake.timeout");
+        testHandshakeTimeoutOption("ssl.handshake.timeout");
+        testHandshakeTimeoutOption("http.handshake.timeout");
+        testHandshakeTimeoutOption("ws.handshake.timeout");
+    }
+
+    private void testHandshakeTimeoutOption(String optionName) throws Exception {
+        expectSuccess(optionName, "0 minutes", optionName, 0L);
+        expectSuccess(optionName, "10 seconds", optionName, 10000L);
+        expectSuccess(optionName, "10 minutes", optionName, 600000L);
+        expectSuccess(optionName, "0.5 minutes", optionName, 30000L);
+
+        expectParseFailure(optionName, "-1 seconds");
+        expectParseFailure(optionName, "abc");
+        expectParseFailure(optionName, null);
     }
 
     @Test
@@ -132,6 +149,15 @@ public class AcceptOptionsTest {
         expectParseFailure("tcp.maximum.outbound.rate", "");
         expectParseFailure("tcp.maximum.outbound.rate", null);
     }
+
+    @Test
+    public void testWsInactivityTimeout() throws Exception {
+        expectSuccess("ws.inactivity.timeout", "60", "ws.inactivityTimeout", 60000L, "http[http/1.1].keepAliveTimeout", 60);
+        expectSuccess("ws.inactivity.timeout", "60s", "ws.inactivityTimeout", 60000L, "http[http/1.1].keepAliveTimeout", 60);
+        //https://github.com/kaazing/gateway/issues/595
+        //expectSuccess("ws.inactivity.timeout", "60000ms", "ws.inactivityTimeout", 60000L, "http[http/1.1].keepAliveTimeout", 60);
+    }
+
 
     @Test
     public void testTcpBindOption() throws Exception {
@@ -253,17 +279,17 @@ public class AcceptOptionsTest {
 
     void expectParseFailure(String optionName,
                             String optionValue) throws Exception {
-        runTestCase(optionName, optionValue, TestResult.PARSE_FAILURE, null, null, null);
+        runTestCase(optionName, optionValue, TestResult.PARSE_FAILURE, null, null);
     }
 
     void expectValidateFailure(String optionName,
                                String optionValue) throws Exception {
-        runTestCase(optionName, optionValue, TestResult.VALIDATE_FAILURE, null, null, null);
+        runTestCase(optionName, optionValue, TestResult.VALIDATE_FAILURE, null, null);
     }
 
     void expectRuntimeFailure(String optionName,
                               String optionValue) throws Exception {
-        runTestCase(optionName, optionValue, TestResult.RUNTIME_EXCEPTION, null, null, null);
+        runTestCase(optionName, optionValue, TestResult.RUNTIME_EXCEPTION, null, null);
     }
 
     void runTestCase(String optionName,
@@ -273,13 +299,13 @@ public class AcceptOptionsTest {
                      Object expectedValue,
                      Object... extras) throws Exception {
 
-        File configFile = null;
+        File configFile;
         configFile =
                 createTempFileFromResource("org/kaazing/gateway/server/config/parse/data/gateway-config-accept-options-template" +
                                 ".xml",
                         optionName, optionValue);
 
-        GatewayConfigDocument doc = null;
+        GatewayConfigDocument doc;
         try {
             doc = parser.parse(configFile);
 
@@ -293,7 +319,7 @@ public class AcceptOptionsTest {
         }
         Assert.assertNotNull(doc);
         ServiceAcceptOptionsType serviceAcceptOptionsType = doc.getGatewayConfig().getServiceArray(0).getAcceptOptions();
-        AcceptOptionsContext acceptOptionsContext = null;
+        AcceptOptionsContext acceptOptionsContext;
         try {
             acceptOptionsContext = new DefaultAcceptOptionsContext(serviceAcceptOptionsType, null);
 
@@ -334,7 +360,7 @@ public class AcceptOptionsTest {
 
     }
 
-    private File createTempFileFromResource(String resourceName, String... values) throws IOException {
+    private File createTempFileFromResource(String resourceName, Object... values) throws IOException {
         File file = File.createTempFile("gateway-config", "xml");
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream is = classLoader.getResource(resourceName).openStream();

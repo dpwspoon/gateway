@@ -43,12 +43,14 @@ import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.SERV
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.SERVICE_DOMAIN;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.TEMP_DIRECTORY;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.TRANSPORT_NAME;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.HANDSHAKE_TIMEOUT;
 
 import java.io.File;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,13 +79,13 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
 
     static {
         // go backwards so we can set alternate addresses correctly
-        List<ResourceFactory> insecureAlternateResourceFactories = Arrays.asList(
+        List<ResourceFactory> insecureAlternateResourceFactories = Collections.singletonList(
                 changeSchemeOnly("httpxe")
         );
 
-        List<ResourceFactory> secureAlternateResourceFactories = Arrays.asList(
+        List<ResourceFactory> secureAlternateResourceFactories = Collections.singletonList(
                 changeSchemeOnly("httpxe+ssl")
-                                                                              );
+        );
 
         RESOURCE_FACTORIES_BY_KEY.put("wse/1.0",
                                       insecureAlternateResourceFactories);
@@ -246,8 +248,14 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
                 options.setOption(IDENTITY_RESOLVER, httpIdentityResolver);
             }
         }
+
+        Long handshakeTimeout = (Long) optionsByName.remove(HANDSHAKE_TIMEOUT.name());
+        if (handshakeTimeout != null) {
+            options.setOption(HANDSHAKE_TIMEOUT, handshakeTimeout);
+        }
     }
 
+    @Override
     protected void setAlternateOption(final String location,
                                       ResourceOptions options,
                                       Map<String, Object> optionsByName) {
@@ -338,6 +346,7 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
                  address.setIdentityResolver(IDENTITY_RESOLVER, httpIdentityResolver);
              }
         }
+        address.setOption0(HANDSHAKE_TIMEOUT, options.getOption(HANDSHAKE_TIMEOUT));
     }
 
 }

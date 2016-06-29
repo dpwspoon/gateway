@@ -27,6 +27,7 @@ import static org.kaazing.gateway.resource.address.ws.WsResourceAddress.MAX_MESS
 import static org.kaazing.gateway.resource.address.ws.WsResourceAddress.REQUIRED_PROTOCOLS;
 import static org.kaazing.gateway.resource.address.ws.WsResourceAddress.SUPPORTED_PROTOCOLS;
 import static org.kaazing.gateway.resource.address.ws.WsResourceAddress.TRANSPORT_NAME;
+import static org.kaazing.gateway.resource.address.ws.WsResourceAddress.HANDSHAKE_TIMEOUT;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -121,6 +122,11 @@ public class WsResourceAddressFactorySpi extends ResourceAddressFactorySpi<WsRes
         if (requiredProtocols != null) {
             options.setOption(REQUIRED_PROTOCOLS, requiredProtocols);
         }
+
+        Long handshakeTimeout = (Long) optionsByName.remove(HANDSHAKE_TIMEOUT.name());
+        if (handshakeTimeout != null) {
+            options.setOption(HANDSHAKE_TIMEOUT, handshakeTimeout);
+        }
     }
 
     @Override
@@ -150,6 +156,7 @@ public class WsResourceAddressFactorySpi extends ResourceAddressFactorySpi<WsRes
         return this.alternateResourceFactories;
     }
 
+    @Override
     protected void setAlternateOption(String location,
                                       ResourceOptions options,
                                       Map<String, Object> optionsByName) {
@@ -218,5 +225,6 @@ public class WsResourceAddressFactorySpi extends ResourceAddressFactorySpi<WsRes
         address.setOption0(INACTIVITY_TIMEOUT, options.getOption(INACTIVITY_TIMEOUT));
         address.setOption0(SUPPORTED_PROTOCOLS, options.getOption(SUPPORTED_PROTOCOLS));
         address.setOption0(REQUIRED_PROTOCOLS, options.getOption(REQUIRED_PROTOCOLS));
+        address.setOption0(HANDSHAKE_TIMEOUT, options.getOption(HANDSHAKE_TIMEOUT));
     }
 }
