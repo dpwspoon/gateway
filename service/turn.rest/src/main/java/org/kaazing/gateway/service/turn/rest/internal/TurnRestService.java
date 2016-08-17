@@ -165,8 +165,7 @@ public class TurnRestService implements Service {
         return configuration;
     }
 
-    @Resource(
-            name = "configuration")
+    @Resource(name = "configuration")
     public void setConfiguration(Properties configuration) {
         this.configuration = configuration;
     }
