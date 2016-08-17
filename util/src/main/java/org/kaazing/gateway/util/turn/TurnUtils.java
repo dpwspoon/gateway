@@ -38,16 +38,6 @@ public class TurnUtils {
         // utility class should hide constructor
     }
 
-    public static Key getSharedSecret(KeyStore ks, String alias, File pwFile) {
-        char[] password;
-        try {
-            password = loadKeyStorePassword(pwFile);
-        } catch (IOException e) {
-            throw new TurnException("Unable to load password from file: " + pwFile, e);
-        }
-        return getSharedSecret(ks, alias, password);
-    }
-
     public static Key getSharedSecret(KeyStore ks, String alias, char[] password) {
         try {
             return ks.getKey(alias, password);
@@ -56,6 +46,13 @@ public class TurnUtils {
         }
     }
 
+    /**
+     * Generates short term password as defined here: https://tools.ietf.org/html/draft-uberti-rtcweb-turn-rest-00#section-2.2
+     * @param username
+     * @param sharedSecret
+     * @param algorithm
+     * @return
+     */
     public static char[] getPassword(String username, Key sharedSecret, String algorithm) {
         byte[] key = sharedSecret.getEncoded();
         Mac hmac;

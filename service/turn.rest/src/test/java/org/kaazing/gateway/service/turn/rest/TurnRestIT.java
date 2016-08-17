@@ -18,10 +18,8 @@ package org.kaazing.gateway.service.turn.rest;
 import static java.nio.charset.Charset.forName;
 import static org.kaazing.test.util.ITUtil.createRuleChain;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.security.KeyStore;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -44,7 +42,6 @@ public class TurnRestIT {
     private final GatewayRule gateway = new GatewayRule() {
         {
             KeyStore keyStore = null;
-            File turnPasswordFile = null;
             char[] password = "ab987c".toCharArray();
             try {
                 FileInputStream fileInStr =
@@ -53,11 +50,7 @@ public class TurnRestIT {
                 keyStore.load(fileInStr, "ab987c".toCharArray());
                 keyStore.setKeyEntry("turn.shared.secret",
                         new SecretKeySpec("turnAuthenticationSharedSecret".getBytes(forName("UTF-8")), "PBEWithMD5AndDES"),
-                        "1234567".toCharArray(), null);
-                turnPasswordFile = new File(System.getProperty("user.dir") + "/target/truststore/turnstore.db");
-                try (BufferedWriter bw = new BufferedWriter(new FileWriter(turnPasswordFile))) {
-                    bw.write("1234567");
-                }
+                        "ab987c".toCharArray(), null);
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -76,7 +69,6 @@ public class TurnRestIT {
 
                             .property("generate.credentials", "class:" + DefaultCredentialsGenerator.class.getName())
                             .property("key.alias", "turn.shared.secret")
-                            .property("key.password-file", turnPasswordFile.getPath())
                             .property("key.algorithm", "HmacSHA1")
                             .nestedProperty("uris")
                                 .property("uri", "uri1")
