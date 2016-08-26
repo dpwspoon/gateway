@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Assert;
 
@@ -233,5 +234,27 @@ public class MemoryCollectionsFactoryTest {
         Set<Map.Entry<String, TestObject>> entries = map.entrySet(query);
         Assert.assertTrue("Expected entries, got null", entries != null);
         Assert.assertTrue(String.format("Expected entries %s, got %s", expected, entries), entries.equals(expected));
+    }
+
+    @Test
+    public void expiringMap() throws InterruptedException {
+        IMap<String, String> map = factory.getMap(MAP_NAME);
+        map.putIfAbsent("one", "1", 1, TimeUnit.MILLISECONDS);
+        map.putIfAbsent("two", "2", 10000, TimeUnit.MILLISECONDS);
+        map.putIfAbsent("three", "3", 2, TimeUnit.MILLISECONDS);
+        long setupComplete = System.currentTimeMillis();
+        while (System.currentTimeMillis() < setupComplete + 5) {
+            Thread.sleep(1);
+        }
+        Assert.assertNull(map.putIfAbsent("one", "10", 1, TimeUnit.MILLISECONDS));
+        Assert.assertEquals("2", map.putIfAbsent("two", "20", 1000, TimeUnit.MILLISECONDS));
+        Assert.assertNull(map.putIfAbsent("three", "30", 10000, TimeUnit.MILLISECONDS));
+        setupComplete = System.currentTimeMillis();
+        while (System.currentTimeMillis() < setupComplete + 5) {
+            Thread.sleep(1);
+        }
+        Assert.assertNull(map.get("one"));
+        Assert.assertEquals("2", map.get("two"));
+        Assert.assertEquals("30", map.get("three"));
     }
 }

@@ -15,6 +15,9 @@
  */
 package org.kaazing.gateway.service.messaging.collections;
 
+import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -277,6 +280,7 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
     private class IMapImpl<K, V> implements IMap<K, V> {
 
         private final ConcurrentHashMap<K, V> map;
+        private final ConcurrentHashMap<K, Long> mapToExpiration;
         private final EntryListenerSupport<K,V> listenerSupport;
         private final ConcurrentMap<Object, Lock> locks;
         private final String name;
@@ -286,6 +290,7 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
             this.map = new ConcurrentHashMap<>();
             this.listenerSupport = new EntryListenerSupport<>();
             this.locks = new ConcurrentHashMap<>();
+            this.mapToExpiration = new ConcurrentHashMap<>();
         }
 
         @Override
@@ -425,6 +430,7 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
 
         @Override
         public V get(Object key) {
+            removeExpiredEntries();
             return map.get(key);
         }
 
@@ -569,7 +575,14 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
 
         @Override
         public V putIfAbsent(K key, V value, long ttl, TimeUnit timeunit) {
-            throw new UnsupportedOperationException("putIfAbsent");
+            removeExpiredEntries();
+            V result = this.map.putIfAbsent(key, value);
+            System.out.println(result);
+            if(result == null){
+                this.mapToExpiration.put(key, currentTimeMillis() + MILLISECONDS.convert(ttl, timeunit));
+                System.out.println(mapToExpiration);
+            }
+            return result;
         }
 
         @Override
@@ -601,11 +614,24 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
             V value = map.remove(key);
             boolean removed = (value !=  null);
             if (removed) {
+                this.mapToExpiration.remove(key);
+                removeExpiredEntries();
                 EntryEvent<K, V> event = new EntryEvent<>(name, null, EntryEvent.TYPE_REMOVED, (K)key, value);
                 listenerSupport.entryRemoved(event);
             }
             return value;
-		}
+        }
+
+        private void removeExpiredEntries() {
+            long ct = System.currentTimeMillis();
+            this.mapToExpiration.entrySet().removeIf(e -> {
+                boolean found = e.getValue() < ct;
+                if (found) {
+                    map.remove(e.getKey());
+                }
+                return found;
+            });
+        }
 
         @Override
         public Future<V> getAsync(K key) {
