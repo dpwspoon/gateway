@@ -30,6 +30,7 @@ import static org.kaazing.gateway.transport.http.HttpConnectFilter.PROTOCOL_HTTP
 import static org.kaazing.gateway.transport.http.HttpUtils.hasCloseHeader;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpNextProtocolHeaderFilter.PROTOCOL_HTTPXE_1_1;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpProtocolFilter.PROTOCOL_HTTP_1_1;
+import static org.kaazing.gateway.transport.http.security.auth.WWWAuthenticateHeaderUtils.getChallenges;
 
 import java.io.IOException;
 import java.net.Authenticator;
@@ -37,16 +38,17 @@ import java.net.Authenticator.RequestorType;
 import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.SocketAddress;
-import java.util.Base64;
-import java.util.Collection;
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 
@@ -78,6 +80,8 @@ import org.kaazing.gateway.transport.http.bridge.HttpMessage;
 import org.kaazing.gateway.transport.http.bridge.HttpResponseMessage;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBuffer;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBufferAllocator;
+import org.kaazing.gateway.transport.http.security.auth.WWWAuthChallenge;
+import org.kaazing.gateway.transport.http.security.auth.WWWAuthenticateHeaderUtils;
 import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.service.IoProcessorEx;
@@ -95,7 +99,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
     ResourceAddressFactory addressFactory;
     private final PersistentConnectionPool persistentConnectionsStore;
     private Properties configuration;
-    private final Pattern CHALLENGE_PATTERN = Pattern.compile("(?<scheme>[a-zA-Z_]*) ([a-zA-Z_]*)\\s?(.*)");
 
     public HttpConnector() {
         super(new DefaultIoSessionConfigEx());
@@ -109,20 +112,17 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
         this.persistentConnectionsStore = new PersistentConnectionPool(logger);
     }
 
-    @Resource(
-            name = "bridgeServiceFactory")
+    @Resource(name = "bridgeServiceFactory")
     public void setBridgeServiceFactory(BridgeServiceFactory bridgeServiceFactory) {
         this.bridgeServiceFactory = bridgeServiceFactory;
     }
 
-    @Resource(
-            name = "resourceAddressFactory")
+    @Resource(name = "resourceAddressFactory")
     public void setResourceAddressFactory(ResourceAddressFactory resourceAddressFactory) {
         this.addressFactory = resourceAddressFactory;
     }
 
-    @Resource(
-            name = "configuration")
+    @Resource(name = "configuration")
     public void setConfiguration(Properties configuration) {
         this.configuration = configuration;
     }
@@ -271,47 +271,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
         };
     }
 
-    // initializer for bridge session to specify bridge handler,
-    // and call user-defined bridge session initializer if present
-//<<<<<<< HEAD
-//    private <T extends ConnectFuture> IoSessionInitializer<T> createHttpSessionInitializer(final IoHandler handler,
-//        final IoSessionInitializer<T> initializer) {
-//        return new IoSessionInitializer<T>() {
-//            @Override
-//            public void initializeSession(IoSession session, T future) {
-//                DefaultHttpSession httpSession = (DefaultHttpSession) session;
-//                httpSession.setHandler(handler);
-//
-//                if (initializer != null) {
-//                    initializer.initializeSession(session, future);
-//                }
-//            }
-//        };
-//    }
-//
-//    // factory to create a new bridge session
-//    private <T extends ConnectFuture> HttpSessionFactory createHttpSession(final ResourceAddress connectAddress,
-//                final IoSessionInitializer<T> httpSessionInitializer, final ConnectFuture connectFuture) {
-//        return new HttpSessionFactory() {
-//            @Override
-//            public DefaultHttpSession get(IoSession parent) throws Exception {
-//                ResourceAddress transportAddress = LOCAL_ADDRESS.get(parent);
-//                final ResourceAddress localAddress = addressFactory.newResourceAddress(connectAddress, transportAddress);
-//
-//                Callable<DefaultHttpSession> httpSessionFactory = new Callable<DefaultHttpSession>() {
-//                    @Override
-//                    public DefaultHttpSession call() throws Exception {
-//                        IoSessionEx parentEx = (IoSessionEx) parent;
-//                        IoBufferAllocatorEx<?> parentAllocator = parentEx.getBufferAllocator();
-//                        DefaultHttpSession httpSession = new DefaultHttpSession(HttpConnector.this, getProcessor(), localAddress,
-//                                connectAddress, parentEx, new HttpBufferAllocator(parentAllocator), configuration);
-//                        parent.setAttribute(HTTP_SESSION_KEY, httpSession);
-//                        return httpSession;
-//                    }
-//                };
-//
-//                return newSession(httpSessionInitializer, connectFuture, httpSessionFactory);
-//=======
     private <T extends ConnectFuture> IoSessionInitializer<T> createHttpSessionInitializer(final IoHandler handler, final IoSessionInitializer<T> initializer) {
         return (session, future) -> {
             DefaultHttpSession httpSession = (DefaultHttpSession) session;
@@ -345,18 +304,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
         @Override
         protected void doSessionClosed(IoSessionEx session) throws Exception {
             DefaultHttpSession httpSession = HTTP_SESSION_KEY.remove(session);
-//<<<<<<< HEAD
-//            boolean connectionClose = hasCloseHeader(httpSession.getReadHeaders(HttpHeaders.HEADER_CONNECTION));
-//            if (httpSession != null && !httpSession.isClosing() && !connectionClose) {
-//                httpSession.setStatus(HttpStatus.SERVER_GATEWAY_TIMEOUT);
-//                httpSession.reset(new IOException("Early termination of IO session").fillInStackTrace());
-//                return;
-//            }
-//            if (connectionClose && !httpSession.isClosing()) {
-//                httpSession.getProcessor().remove(httpSession);
-//            }
-//            ;
-//=======
             if (httpSession != null) {
                 boolean connectionClose = hasCloseHeader(httpSession.getReadHeaders(HttpHeaders.HEADER_CONNECTION));
                 if (!httpSession.isClosing() && !connectionClose) {
@@ -413,56 +360,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                 HttpResponseMessage httpResponse = (HttpResponseMessage) httpMessage;
                 HttpStatus httpStatus = httpResponse.getStatus();
 
-
-                if (httpStatus == HttpStatus.CLIENT_UNAUTHORIZED) {
-                    ResourceAddress remoteAddress = httpSession.getRemoteAddress();
-                    Class<? extends Authenticator> authenticator =
-                            remoteAddress.getOption(AUTHENTICATOR);
-                    // TODO, this will need to be thread aligned in edge case where it does not reuse the same tcp
-                    // connection i.e connection: close
-                    if (authenticator != null) {
-                        String location = remoteAddress.getExternalURI();
-                        String wwwAuthHeader = ((HttpResponseMessage) httpMessage).getHeader("WWW-Authenticate");
-                                PasswordAuthentication creds = Authenticator.requestPasswordAuthentication(remoteAddress.getResource().getHost(),
-                                        InetAddress.getByName(remoteAddress.getResource().getHost()),
-                                        remoteAddress.getResource().getPort(), "HTTP", wwwAuthHeader,
-                                        challengeMatcher.group("scheme"), remoteAddress.getResource().toURL(),
-                                        RequestorType.SERVER);
-                                if(creds != null){
-                                    schedulerProvider.submit(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            String auth = creds.getUserName() + ":" + new String(creds.getPassword());
-                                            httpSession.setWriteHeader(HttpHeaders.HEADER_AUTHORIZATION,
-                                                    "Basic " + new String(Base64.getEncoder().encode(auth.getBytes())));
-                                            for(Object attributeKey: httpSession.getParent().getAttributeKeys()){
-                                                Object attributeValue = httpSession.getParent().getAttribute(attributeKey);
-                                            }
-                                            final HttpSessionFactory httpSessionFactory =
-                                                    getReconnectSessionFactory(httpSession);
-                                            connectInternal0(new DefaultConnectFuture(), remoteAddress, httpSession.getHandler(),
-                                                    httpSessionFactory);
-                                        }
-                                    });
-                                    return;
-                                }
-                        } else {
-                            ChallengeRequest challengeRequest = new ChallengeRequest(location, wwwAuthHeader);
-
-                            ChallengeHandler nextChallengeHandler = httpSession.getNextChallengeHandler();
-                            if (nextChallengeHandler != null && nextChallengeHandler.canHandle(challengeRequest)) {
-                                retryConnectWithAuth(httpSession, remoteAddress, challengeRequest, nextChallengeHandler);
-                            }
-
-                            for (Class<? extends ChallengeHandler> handlerClass : challengeHandlers) {
-                                ChallengeHandler handler = handlerClass.newInstance();
-                                if (handler.canHandle(challengeRequest)) {
-                                    retryConnectWithAuth(httpSession, remoteAddress, challengeRequest, handler);
-                                }
-                            }
-                        }
-                    }
-                }
                 httpSession.setStatus(httpStatus);
                 httpSession.setReason(httpResponse.getReason());
                 httpSession.setVersion(httpResponse.getVersion());
@@ -503,9 +400,17 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                     httpSession.close(false);
                     break;
                 case CLIENT_UNAUTHORIZED:
+                    Map<WWWAuthChallenge, PasswordAuthentication> challengeToCredentials = getAuthentication(httpSession, (HttpResponseMessage) httpMessage, RequestorType.SERVER);
+                    if(!challengeToCredentials.isEmpty()) {
+                        authenticate(httpSession, session, challengeToCredentials);
+                    }
+                    break;
                 case CLIENT_PROXY_AUTHENTICATION_REQUIRED:
-                    // to do get attribute from remote address
-                    ChallengeHandler challengeHandler = null;
+                    challengeToCredentials = getAuthentication(httpSession, (HttpResponseMessage) httpMessage, RequestorType.PROXY);
+                    if(!challengeToCredentials.isEmpty()) {
+                        authenticate(httpSession, session, challengeToCredentials);
+                    }
+                    break;
                 default:
                     HttpContentMessage httpContent = httpResponse.getContent();
                     if (httpContent == null) {
@@ -535,40 +440,87 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
             }
         }
 
-//        private void retryConnectWithAuth(DefaultHttpSession httpSession, ResourceAddress remoteAddress,
-//            ChallengeRequest challengeRequest, ChallengeHandler handler) {
-//            ChallengeResponse response = handler.handle(challengeRequest);
-//            ChallengeHandler nextChallengeHandler = response.getNextChallengeHandler();
-//            httpSession.nextChallengeHandlers(nextChallengeHandler);
-//            if (response != null) {
-//                schedulerProvider.submit(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        httpSession.addWriteHeader(HttpHeaders.HEADER_AUTHORIZATION,
-//                                new String(response.getCredentials()));
-//                        final HttpSessionFactory httpSessionFactory =
-//                                getReconnectSessionFactory(httpSession);
-//                        connectInternal0(new DefaultConnectFuture(), remoteAddress, httpSession.getHandler(),
-//                                httpSessionFactory);
-//                    }
-//                });
-//                return;
-//            }
-        
         private boolean shouldFollowRedirects(DefaultHttpSession httpSession) {
             Integer redirctBehavior = httpSession.getRemoteAddress().getOption(MAXIMUM_REDIRECTS);
             return redirctBehavior != null && redirctBehavior > 0;
         }
 
+        /**
+         * Gets the password authentication to authenticate a WWW_AUTHETNICATE header, or returns null
+         * @param httpSession
+         * @param httpMessage
+         * @return
+         */
+        Map<WWWAuthChallenge, PasswordAuthentication> getAuthentication(DefaultHttpSession httpSession,
+            HttpResponseMessage httpMessage, RequestorType requestorType) {
+            Map<WWWAuthChallenge, PasswordAuthentication> result = new HashMap<>();
+            try {
+                ResourceAddress remoteAddress = httpSession.getRemoteAddress();
+                final URI remoteURI = remoteAddress.getResource();
+                Class<? extends Authenticator> authenticator = remoteAddress.getOption(AUTHENTICATOR);
+                if (authenticator != null) {
+                    List<WWWAuthChallenge> challenges = getChallenges(httpMessage.getHeader(HttpHeaders.HEADER_WWW_AUTHENTICATE));
+                    for (WWWAuthChallenge challenge : challenges) {
+                        // @formatter: off
+                        PasswordAuthentication credentials = Authenticator.requestPasswordAuthentication(
+                                remoteURI.getHost(),
+                                InetAddress.getByName(remoteURI.getHost()), // DPW TODO use transport
+                                remoteURI.getPort(),
+                                "HTTP",
+                                challenge.getType(),
+                                challenge.getChallenge(),
+                                remoteURI.toURL(),
+                                requestorType);
+                        result.put(challenge, credentials);
+                        // @formatter: on
+                    }
+                }
+            } catch (Exception e) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Failed to get a valid response from http.authenticator due to exception", e);
+                }
+            }
+            return result;
+        }
+
+        private DefaultConnectFuture authenticate(DefaultHttpSession httpSession, IoSessionEx session, Map<WWWAuthChallenge, PasswordAuthentication> challengeToCredentials) {
+            String location = httpSession.getRemoteAddress().getExternalURI();
+            Integer maxRedirects = new Integer((httpSession.getRemoteAddress().getOption(MAXIMUM_REDIRECTS)) - 1);
+            ResourceAddress newConnectAddress = addressFactory.newResourceAddress(location.replaceFirst("ws", "http"),
+                    new WrappedResourceOptionsForConnectionRetry(httpSession,
+                            maxRedirects/* , maxAuthentications DPW TODO */));
+            httpSession.setWriteHeader(HttpHeaders.HEADER_AUTHORIZATION, "DPW TODO");
+            return retryConnect(httpSession, session, newConnectAddress);
+        }
+
+        /**
+         * Follows a redirect
+         * @param httpSession
+         * @param session
+         * @return
+         */
         private DefaultConnectFuture followRedirect(DefaultHttpSession httpSession, IoSessionEx session) {
             String location = httpSession.getReadHeader("location");
+            Integer maxRedirects = new Integer((httpSession.getRemoteAddress().getOption(MAXIMUM_REDIRECTS)) - 1);
             ResourceAddress newConnectAddress =
-                    addressFactory.newResourceAddress(location.replaceFirst("ws","http"), new HttpRedirectResourceOptions(httpSession));
+                    addressFactory.newResourceAddress(location.replaceFirst("ws","http"), new WrappedResourceOptionsForConnectionRetry(httpSession, maxRedirects));
+            return retryConnect(httpSession, session, newConnectAddress);
+        }
+
+        /**
+         * Retries a connect based on new ConnectAddress
+         * @param httpSession
+         * @param session
+         * @param newConnectAddress
+         * @return
+         */
+        private DefaultConnectFuture retryConnect(DefaultHttpSession httpSession, IoSessionEx session,
+            ResourceAddress newConnectAddress) {
             DefaultConnectFuture connectFuture = new DefaultConnectFuture();
             HTTP_SESSION_KEY.remove(session);
             connectFuture.addListener(future -> session.close(false));
             httpSession.setRemoteAddress(newConnectAddress);
-            final HttpConnectSessionFactory httpSessionFactory = new HttpRedirectSessionFactory(httpSession);
+            final HttpConnectSessionFactory httpSessionFactory = new HttpRetryConnectSessionFactory(httpSession);
             connectInternal0(connectFuture, newConnectAddress, httpSessionFactory);
             return connectFuture;
         }
@@ -587,11 +539,13 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
         }
     };
 
-    private final class HttpRedirectResourceOptions implements ResourceOptions {
+    private final class WrappedResourceOptionsForConnectionRetry implements ResourceOptions {
         private final DefaultHttpSession httpSession;
+        private final Integer maxRedirects;
 
-        public HttpRedirectResourceOptions(DefaultHttpSession httpSession) {
+        public WrappedResourceOptionsForConnectionRetry(DefaultHttpSession httpSession, Integer maxRedirects) {
             this.httpSession = httpSession;
+            this.maxRedirects = maxRedirects;
         }
 
         @Override
@@ -616,7 +570,7 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                 return null;
             }
             if (HttpResourceAddress.MAXIMUM_REDIRECTS.equals(key)) {
-                return (T) new Integer(((Integer) httpSession.getRemoteAddress().getOption(key)) - 1);
+                return (T) maxRedirects;
             }
             return httpSession.getRemoteAddress().getOption(key);
         }

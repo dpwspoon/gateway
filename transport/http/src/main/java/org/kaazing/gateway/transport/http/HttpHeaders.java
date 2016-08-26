@@ -45,5 +45,6 @@ public interface HttpHeaders {
     String HEADER_X_SEQUENCE_NO = "X-Sequence-No";
     String HEADER_SET_COOKIE = "Set-Cookie";
     String HEADER_LOCATION = "Location";
+    String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
 
 }
