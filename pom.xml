@@ -6,13 +6,12 @@
     <parent>
         <groupId>org.kaazing</groupId>
         <artifactId>community</artifactId>
-        <version>2.20</version>
+        <version>2.21</version>
     </parent>
 
-    <groupId>org.kaazing</groupId>
     <artifactId>gateway</artifactId>
     <name>Kaazing Gateway</name>
-    <version>ekwic-SNAPSHOT</version>
+    <version>develop-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <url>https://github.com/kaazing/gateway</url>
@@ -29,12 +28,15 @@
         <maven.compiler.testSource>1.8</maven.compiler.testSource>
         <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
         <hazelcast.version>1.9.4.8</hazelcast.version>
-        <k3po.version>3.0.0-alpha-28</k3po.version>
+        <k3po.version>3.0.0-alpha-41</k3po.version>
         <jdom.version>1.1</jdom.version>
         <jmock.version>2.6.0</jmock.version>
-        <slf4j.log4j.version>1.7.5</slf4j.log4j.version>
-        <agrona.version>0.4.2</agrona.version>
+        <slf4j.log4j.version>1.7.21</slf4j.log4j.version>
+        <agrona.version>0.4.12</agrona.version>
         <enforcer.skip>true</enforcer.skip>
+        <!-- Try to avoid huge heap size on Travis builds -->
+        <failsafeArgLine>-Xmx1024m</failsafeArgLine>
+        <opencsv.version>2.3</opencsv.version>
     </properties>
 
     <modules>
@@ -72,6 +74,8 @@
         <module>service/http.directory</module>
         <module>service/http.proxy</module>
         <module>service/proxy</module>
+        <module>service/turn.rest</module>
+        <module>service/turn.proxy</module>
         <module>service/update.check</module>
         <module>service/update.check.management</module>
         <module>transport/spi</module>
@@ -196,12 +200,24 @@
             <dependency>
                 <groupId>org.kaazing</groupId>
                 <artifactId>gateway.truststore</artifactId>
-                <version>1.0.0.81</version>
+                <version>[1.0.0.0,1.1.0.0)</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>org.kaazing</groupId>
                 <artifactId>specification.http</artifactId>
+                <version>${k3po.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.kaazing</groupId>
+                <artifactId>specification.tcp</artifactId>
+                <version>${k3po.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.kaazing</groupId>
+                <artifactId>specification.udp</artifactId>
                 <version>${k3po.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -217,22 +233,13 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!-- Try to avoid huge heap size on Travis builds -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <configuration>
-                        <argLine>-Xmx1024m ${failsafeArgLine}</argLine>
-                        <skipTests>${skipITs}</skipTests>
+                        <argLine>@{failsafeArgLine}</argLine>
+                        <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                     </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -411,12 +418,22 @@
                     </dependency>
                     <dependency>
                         <groupId>org.kaazing</groupId>
+                        <artifactId>specification.udp</artifactId>
+                        <version>${k3po.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.kaazing</groupId>
                         <artifactId>specification.wse</artifactId>
                         <version>${k3po.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.kaazing</groupId>
                         <artifactId>specification.x-kaazing-ping-pong</artifactId>
+                        <version>${k3po.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.kaazing</groupId>
+                        <artifactId>specification.turn</artifactId>
                         <version>${k3po.version}</version>
                     </dependency>
                 </dependencies>
@@ -479,48 +496,11 @@
                     <instrumentation>
                         <excludes>
                             <exclude>schemaorg_apache_xmlbeans/system/**/*.class</exclude>
-                            <exclude>org/kaazing/gateway/server/config/sep2014/**/*.class</exclude>
+                            <exclude>org/kaazing/gateway/server/config/**/*.class</exclude>
                             <exclude>org/kaazing/xmlns/**/*.class</exclude>
                         </excludes>
                     </instrumentation>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.5.201505241946</version>
-                <executions>
-                    <execution>
-                        <id>pre-unit-test</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <propertyName>surefireArgLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>post-unit-test</id>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>pre-integration-test</id>
-                        <goals>
-                            <goal>prepare-agent-integration</goal>
-                        </goals>
-                        <configuration>
-                            <propertyName>failsafeArgLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>post-integration-test</id>
-                        <goals>
-                            <goal>report-integration</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <!-- Here only to turn off linting in Java Doc as for Java 8, 
                 this should be removed when https://github.com/kaazing/gateway/issues/157 
@@ -536,6 +516,53 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>sonar</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.7.5.201505241946</version>
+                        <executions>
+                            <execution>
+                                <id>pre-unit-test</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <propertyName>surefireArgLine</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>post-unit-test</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>pre-integration-test</id>
+                                <goals>
+                                    <goal>prepare-agent-integration</goal>
+                                </goals>
+                                <configuration>
+                                    <propertyName>failsafeArgLine</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>post-integration-test</id>
+                                <goals>
+                                    <goal>report-integration</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
 

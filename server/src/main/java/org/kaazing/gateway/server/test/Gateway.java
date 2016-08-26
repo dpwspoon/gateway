@@ -33,29 +33,29 @@ import javax.management.MBeanServer;
 
 import org.kaazing.gateway.server.GatewayObserver;
 import org.kaazing.gateway.server.Launcher;
-import org.kaazing.gateway.server.config.nov2015.AuthenticationType;
-import org.kaazing.gateway.server.config.nov2015.AuthenticationType.AuthorizationMode;
-import org.kaazing.gateway.server.config.nov2015.AuthenticationType.HttpChallengeScheme;
-import org.kaazing.gateway.server.config.nov2015.AuthorizationConstraintType;
-import org.kaazing.gateway.server.config.nov2015.ClusterConnectOptionsType;
-import org.kaazing.gateway.server.config.nov2015.ClusterType;
-import org.kaazing.gateway.server.config.nov2015.CrossSiteConstraintType;
-import org.kaazing.gateway.server.config.nov2015.GatewayConfigDocument;
-import org.kaazing.gateway.server.config.nov2015.GatewayConfigDocument.GatewayConfig;
-import org.kaazing.gateway.server.config.nov2015.LoginModuleOptionsType;
-import org.kaazing.gateway.server.config.nov2015.LoginModuleType;
-import org.kaazing.gateway.server.config.nov2015.LoginModulesType;
-import org.kaazing.gateway.server.config.nov2015.MimeMappingType;
-import org.kaazing.gateway.server.config.nov2015.RealmType;
-import org.kaazing.gateway.server.config.nov2015.SecurityStoreType;
-import org.kaazing.gateway.server.config.nov2015.SecurityStoreType.Type;
-import org.kaazing.gateway.server.config.nov2015.SecurityType;
-import org.kaazing.gateway.server.config.nov2015.ServiceAcceptOptionsType;
-import org.kaazing.gateway.server.config.nov2015.ServiceConnectOptionsType;
-import org.kaazing.gateway.server.config.nov2015.ServiceDefaultsType;
-import org.kaazing.gateway.server.config.nov2015.ServicePropertiesType;
-import org.kaazing.gateway.server.config.nov2015.ServiceType;
-import org.kaazing.gateway.server.config.nov2015.SuccessType;
+import org.kaazing.gateway.server.config.june2016.AuthenticationType;
+import org.kaazing.gateway.server.config.june2016.AuthenticationType.AuthorizationMode;
+import org.kaazing.gateway.server.config.june2016.AuthenticationType.HttpChallengeScheme;
+import org.kaazing.gateway.server.config.june2016.AuthorizationConstraintType;
+import org.kaazing.gateway.server.config.june2016.ClusterConnectOptionsType;
+import org.kaazing.gateway.server.config.june2016.ClusterType;
+import org.kaazing.gateway.server.config.june2016.CrossSiteConstraintType;
+import org.kaazing.gateway.server.config.june2016.GatewayConfigDocument;
+import org.kaazing.gateway.server.config.june2016.GatewayConfigDocument.GatewayConfig;
+import org.kaazing.gateway.server.config.june2016.LoginModuleOptionsType;
+import org.kaazing.gateway.server.config.june2016.LoginModuleType;
+import org.kaazing.gateway.server.config.june2016.LoginModulesType;
+import org.kaazing.gateway.server.config.june2016.MimeMappingType;
+import org.kaazing.gateway.server.config.june2016.RealmType;
+import org.kaazing.gateway.server.config.june2016.SecurityStoreType;
+import org.kaazing.gateway.server.config.june2016.SecurityStoreType.Type;
+import org.kaazing.gateway.server.config.june2016.SecurityType;
+import org.kaazing.gateway.server.config.june2016.ServiceAcceptOptionsType;
+import org.kaazing.gateway.server.config.june2016.ServiceConnectOptionsType;
+import org.kaazing.gateway.server.config.june2016.ServiceDefaultsType;
+import org.kaazing.gateway.server.config.june2016.ServicePropertiesType;
+import org.kaazing.gateway.server.config.june2016.ServiceType;
+import org.kaazing.gateway.server.config.june2016.SuccessType;
 import org.kaazing.gateway.server.context.GatewayContext;
 import org.kaazing.gateway.server.context.resolve.ContextResolver;
 import org.kaazing.gateway.server.context.resolve.DefaultSecurityContext;
@@ -226,9 +226,9 @@ public class Gateway {
                 if (loginModuleConfig.getSuccess() != null) {
                     loginModule.setSuccess(SuccessType.Enum.forString(loginModuleConfig.getSuccess()));
                 }
-                Node domNode = null;
-                Document ownerDocument = null;
-                LoginModuleOptionsType newOptions = null;
+                Node domNode;
+                Document ownerDocument;
+                LoginModuleOptionsType newOptions;
                 Map<String, String> options = loginModuleConfig.getOptions();
 
                 if (!options.isEmpty()) {
@@ -476,12 +476,14 @@ public class Gateway {
         }
     }
 
-    private void appendSimpleProperties(Map<String, String> properties, Node domNode, Document ownerDocument) {
-        for (Entry<String, String> property : properties.entrySet()) {
-            Element newElement = ownerDocument.createElementNS(domNode.getNamespaceURI(), property.getKey());
-            Text newTextNode = ownerDocument.createTextNode(property.getValue());
-            newElement.appendChild(newTextNode);
-            domNode.appendChild(newElement);
+    private void appendSimpleProperties(Map<String, List<String>> properties, Node domNode, Document ownerDocument) {
+        for (Entry<String, List<String>> property : properties.entrySet()) {
+            for (String p : property.getValue()) {    
+                Element newElement = ownerDocument.createElementNS(domNode.getNamespaceURI(), property.getKey());
+                Text newTextNode = ownerDocument.createTextNode(p);
+                newElement.appendChild(newTextNode);
+                domNode.appendChild(newElement);
+            }
         }
     }
 
@@ -492,6 +494,7 @@ public class Gateway {
         for (NestedServicePropertiesConfiguration nestedProperty : nestedPropertyConfig.getNestedProperties()) {
             Element newElement = ownerDocument.createElementNS(domNode.getNamespaceURI(),
                     nestedProperty.getConfigElementName());
+            domNode.appendChild(newElement);
             appendNestedProperties(nestedProperty, newElement, ownerDocument);
         }
     }

@@ -38,7 +38,7 @@ import org.kaazing.gateway.server.GatewayObserver;
 import org.kaazing.gateway.server.Launcher;
 import org.kaazing.gateway.server.api.GatewayAlreadyRunningException;
 import org.kaazing.gateway.server.config.parse.GatewayConfigParser;
-import org.kaazing.gateway.server.config.nov2015.GatewayConfigDocument;
+import org.kaazing.gateway.server.config.june2016.GatewayConfigDocument;
 import org.kaazing.gateway.server.context.GatewayContext;
 import org.kaazing.gateway.server.context.resolve.GatewayContextResolver;
 import org.kaazing.gateway.server.util.version.DuplicateJarFinder;
@@ -234,7 +234,7 @@ final class GatewayImpl implements Gateway {
         //    (of course, the user may have modified that file and just be using the same name.)
         //  * If that doesn't exist, we'll look for the default "minimal" gateway config.
         //  * If none of those exists (and is a readable file), that's an error.
-        File gatewayConfigFile = null;
+        File gatewayConfigFile;
         String gatewayConfigProperty = configuration.getProperty(GATEWAY_CONFIG_PROPERTY);
 
         // If config property is a url then we download it and reset the property

@@ -32,6 +32,7 @@ import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.HTTP_REDIRECT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE_TIMEOUT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.LOGIN_CONTEXT_FACTORY;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_COOKIE_NAMES;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_HEADER_NAMES;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_PARAMETER_NAMES;
@@ -151,7 +152,7 @@ public class HttpResourceAddressFactorySpiTest {
         assertEquals(5000L, address.getOption(KEEP_ALIVE_TIMEOUT).longValue());
         assertEquals(10, address.getOption(KEEP_ALIVE_CONNECTIONS).intValue());
         assertFalse(address.getOption(KEEP_ALIVE));
-        assertFalse(address.getOption(HTTP_REDIRECT));
+        assertEquals(address.getOption(MAXIMUM_REDIRECTS), new Integer(0));
         assertEquals("demo", address.getOption(REALM_NAME));
         assertArrayEquals(new String[] { "admin" }, address.getOption(REQUIRED_ROLES));
 

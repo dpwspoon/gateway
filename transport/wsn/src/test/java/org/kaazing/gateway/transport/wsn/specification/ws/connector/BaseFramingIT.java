@@ -23,12 +23,10 @@ import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandler;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
@@ -37,7 +35,6 @@ import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
 import org.kaazing.gateway.transport.test.Expectations;
 import org.kaazing.gateway.transport.ws.bridge.filter.WsBuffer;
-import org.kaazing.gateway.transport.wsn.WsnProtocol;
 import org.kaazing.gateway.transport.wsn.WsnSession;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
@@ -69,7 +66,6 @@ public class BaseFramingIT {
             .around(contextRule);
 
     @Test
-    @Ignore("Issue# 306: IllegalArgumentException: message is empty. Forgot to call flip")
     @Specification({
         "echo.binary.payload.length.0/handshake.response.and.frame"
         })
@@ -318,7 +314,6 @@ public class BaseFramingIT {
     }
 
     @Test
-    @Ignore("Issue# 306: IllegalArgumentException: message is empty. Forgot to call flip")
     @Specification({
         "echo.text.payload.length.0/handshake.response.and.frame"
         })

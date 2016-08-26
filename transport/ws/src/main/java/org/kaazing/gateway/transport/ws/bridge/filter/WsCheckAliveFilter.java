@@ -13,26 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
-O * Copyright (c) 2007-2014 Kaazing Corporation. All rights reserved.
- *
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 
 package org.kaazing.gateway.transport.ws.bridge.filter;
 
@@ -66,7 +46,7 @@ public class WsCheckAliveFilter extends IoFilterAdapter<IoSessionEx> {
     // feature is disabled by default. If in future we want to enable by default, a suitable default would be "30sec".
     public static final long DEFAULT_WS_INACTIVITY_TIMEOUT_MILLIS = DISABLE_INACTIVITY_TIMEOUT;
 
-    private static String OBSOLETE_INACTIVITY_TIMEOUT_PROPERTY = "org.kaazing.gateway.transport.ws.INACTIVITY_TIMEOUT";
+    private static final String OBSOLETE_INACTIVITY_TIMEOUT_PROPERTY = "org.kaazing.gateway.transport.ws.INACTIVITY_TIMEOUT";
 
     private final Logger logger;
 
@@ -194,7 +174,7 @@ public class WsCheckAliveFilter extends IoFilterAdapter<IoSessionEx> {
         if (status == IdleStatus.READER_IDLE) {
             switch (nextAction) {
             case PONG:
-                logger.info("Client connection {} has been aborted because network connectivity has been lost", session);
+                logger.info("Session {} didn't receive PONG, will close corresponding connection", session);
 
                 // Disable idle timeout so it doesn't fire while we're closing
                 session.getConfig().setReaderIdleTime(0);
@@ -214,6 +194,7 @@ public class WsCheckAliveFilter extends IoFilterAdapter<IoSessionEx> {
                     filterChain.remove(WsAcceptor.CLOSE_FILTER);
                 }
                 IoSession sessionToClose = wsSession != null ? wsSession : session;
+                logger.info("Closing session {} as it didn't receive PONG", sessionToClose);
                 sessionToClose.close(true);
                 break;
             case PING:

@@ -28,7 +28,7 @@ import java.util.Set;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
-import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -126,10 +126,6 @@ public class JmxSessionPrincipalIT {
         "wsn.session.with.user.principal.ann" })
     @Test
     public void shouldKillSessionsByUserPrincipal() throws Exception {
-        Assume.assumeFalse(
-                "Test will be ignored for Travis as it needs the test ca in java; please see https://github.com/kaazing/QA-Roadmap/issues/115 for details",
-                "true".equalsIgnoreCase(System.getenv("TRAVIS")));
-
         ObjectName echoServiceMbeanName = null;
 
         k3po.start();
@@ -162,22 +158,18 @@ public class JmxSessionPrincipalIT {
 
         assertEquals("Ann Wsn session should still be alive", (Long) 1L, numberOfCurrentSessions);
 
-        k3po.notifyBarrier("CLOSE_SESSIONS_INVOKED");
-
         k3po.finish();
     }
 
     // Test should kill all sessions that have "TEST" as a role Principal
+    // please see "Jmx should KillSessions By Role Principal can fail if invoked early in session initialization #448"
     @Specification({
         "wsn.session.with.user.principal.joe",
         "wse.session.with.user.principal.joe",
         "wsn.session.with.user.principal.ann" })
     @Test
+    @Ignore("https://github.com/kaazing/tickets/issues/448")
     public void shouldKillSessionsByRolePrincipal() throws Exception {
-        Assume.assumeFalse(
-                "Test will be ignored for Travis as it needs the test ca in java; please see https://github.com/kaazing/QA-Roadmap/issues/115 for details",
-                "true".equalsIgnoreCase(System.getenv("TRAVIS")));
-
         ObjectName echoServiceMbeanName = null;
 
         k3po.start();
@@ -209,8 +201,6 @@ public class JmxSessionPrincipalIT {
         }
 
         assertEquals("Not all sessions have been closed", (Long) 0L, numberOfCurrentSessions);
-
-        k3po.notifyBarrier("CLOSE_SESSIONS_INVOKED");
 
         k3po.finish();
     }

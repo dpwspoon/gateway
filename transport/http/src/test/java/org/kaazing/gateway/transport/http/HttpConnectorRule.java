@@ -45,6 +45,7 @@ public class HttpConnectorRule implements TestRule {
     private ResourceAddressFactory addressFactory;
     private HttpConnector httpConnector;
     private SchedulerProvider provider;
+    private Map<String, Object> connectOptions = new HashMap<>();
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -53,7 +54,7 @@ public class HttpConnectorRule implements TestRule {
 
     public ConnectFuture connect(String connect, IoHandler connectHandler, IoSessionInitializer<? extends ConnectFuture> initializer, Map<String, Object> connectOptions) {
         ResourceAddress connectAddress =
-                addressFactory.newResourceAddress(connect, connectOptions);
+                addressFactory.newResourceAddress(connect, getConnectOptions());
 
         return httpConnector.connect(connectAddress, connectHandler, initializer);
     }
@@ -82,7 +83,7 @@ public class HttpConnectorRule implements TestRule {
                 schedulerProvider = new SchedulerProvider();
 
                 addressFactory = ResourceAddressFactory.newResourceAddressFactory();
-                TransportFactory transportFactory = TransportFactory.newTransportFactory(Collections.<String, Object> emptyMap());
+                TransportFactory transportFactory = TransportFactory.newTransportFactory(Collections.emptyMap());
                 BridgeServiceFactory serviceFactory = new BridgeServiceFactory(transportFactory);
 
                 tcpAcceptor = (NioSocketAcceptor)transportFactory.getTransport("tcp").getAcceptor();

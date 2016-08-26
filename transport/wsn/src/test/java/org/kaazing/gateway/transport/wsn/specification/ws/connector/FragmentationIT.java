@@ -24,21 +24,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandler;
 import org.jmock.api.Invocation;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.action.CustomAction;
 import org.jmock.lib.concurrent.Synchroniser;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.TestRule;
 import org.kaazing.gateway.transport.test.Expectations;
 import org.kaazing.gateway.transport.ws.bridge.filter.WsBuffer;
-import org.kaazing.gateway.transport.wsn.WsnProtocol;
 import org.kaazing.gateway.transport.wsn.WsnSession;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
@@ -67,12 +64,11 @@ public class FragmentationIT {
             .around(contextRule);
 
     @Test
-    @Ignore("Issue# 306: IllegalArgumentException: message is empty. Forgot to call flip")
     @Specification({
         "server.echo.binary.payload.length.0.fragmented.with.injected.ping.pong/handshake.response.and.frames" })
     public void shouldEchoServerSendBinaryFrameWithEmptyPayloadFragmentedAndInjectedPingPong() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -118,7 +114,7 @@ public class FragmentationIT {
         "server.echo.binary.payload.length.125.fragmented/handshake.response.and.frames" })
     public void shouldEchoServerSendBinaryFrameWithPayloadFragmented() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -164,7 +160,7 @@ public class FragmentationIT {
         "server.echo.binary.payload.length.125.fragmented.with.injected.ping.pong/handshake.response.and.frames" })
     public void shouldEchoServerSendBinaryFrameWithPayloadFragmentedAndInjectedPingPong() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -210,7 +206,7 @@ public class FragmentationIT {
         "server.echo.binary.payload.length.125.fragmented.with.some.empty.fragments/handshake.response.and.frames" })
     public void shouldEchoServerSendBinaryFrameWithPayloadFragmentedWithSomeEmptyFragments() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -256,7 +252,7 @@ public class FragmentationIT {
         "server.echo.binary.payload.length.125.not.fragmented/handshake.response.and.frame" })
     public void shouldEchoServerSendBinaryFrameWithPayloadNotFragmented() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -298,13 +294,12 @@ public class FragmentationIT {
     }
 
     @Test
-    @Ignore("Issue# 306: IllegalArgumentException: message is empty. Forgot to call flip")
     @Specification({
         "server.echo.text.payload.length.0.fragmented/handshake.response.and.frames"
         })
     public void shouldEchoServerSendTextFrameWithEmptyPayloadFragmented() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -346,13 +341,12 @@ public class FragmentationIT {
     }
 
     @Test
-    @Ignore("Issue# 306: IllegalArgumentException: message is empty. Forgot to call flip")
     @Specification({
         "server.echo.text.payload.length.0.fragmented.with.injected.ping.pong/handshake.response.and.frames"
         })
     public void shouldEchoServerSendTextFrameWithEmptyPayloadFragmentedAndInjectedPingPong() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -398,7 +392,7 @@ public class FragmentationIT {
         "server.echo.text.payload.length.125.fragmented/handshake.response.and.frames" })
     public void shouldEchoServerSendTextFrameWithPayloadFragmented() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -444,7 +438,7 @@ public class FragmentationIT {
         "server.echo.text.payload.length.125.fragmented.but.not.utf8.aligned/handshake.response.and.frames" })
     public void shouldEchoServerSendTextFrameWithPayloadFragmentedEvenWhenNotUTF8Aligned() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -490,7 +484,7 @@ public class FragmentationIT {
         "server.echo.text.payload.length.125.fragmented.with.injected.ping.pong/handshake.response.and.frames" })
     public void shouldEchoServerSendTextFrameWithPayloadFragmentedAndInjectedPingPong() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -536,7 +530,7 @@ public class FragmentationIT {
         "server.echo.text.payload.length.125.fragmented.with.some.empty.fragments/handshake.response.and.frames" })
     public void shouldEchoServerSendTextFrameWithPayloadFragmentedWithSomeEmptyFragments() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {
@@ -582,7 +576,7 @@ public class FragmentationIT {
         "server.echo.text.payload.length.125.not.fragmented/handshake.response.and.frame" })
     public void shouldEchoServerSendTextFrameWithPayloadNotFragmented() throws Exception {
         final IoHandler handler = context.mock(IoHandler.class);
-        final List<ByteBuffer> bufferList = new ArrayList<ByteBuffer>();
+        final List<ByteBuffer> bufferList = new ArrayList<>();
 
         context.checking(new Expectations() {
             {

@@ -112,6 +112,7 @@ public class HttpAcceptor extends AbstractBridgeAcceptor<DefaultHttpSession, Htt
 
     public static final TypedAttributeKey<Boolean> HTTPXE_SPEC_KEY = new TypedAttributeKey<>(HttpAcceptor.class, "httpxeSpec");
     static final TypedAttributeKey<DefaultHttpSession> SESSION_KEY = new TypedAttributeKey<>(HttpAcceptor.class, "session");
+	public static final AttributeKey BALANCEES_KEY = new AttributeKey(HttpAcceptor.class, "balancees");
 
     private final Map<String, Set<HttpAcceptFilter>> acceptFiltersByProtocol;
     private final Set<HttpAcceptFilter> allAcceptFilters;
@@ -400,7 +401,7 @@ public class HttpAcceptor extends AbstractBridgeAcceptor<DefaultHttpSession, Htt
             // TODO: if content is complete then suspendRead on iosession
             // TODO: in processor when complete resume iosession read (parent)
 
-            DefaultHttpSession httpSession = null;
+            DefaultHttpSession httpSession;
 
             HttpMessage httpMessage = (HttpMessage) message;
             switch (httpMessage.getKind()) {
@@ -532,13 +533,16 @@ public class HttpAcceptor extends AbstractBridgeAcceptor<DefaultHttpSession, Htt
         IoSession transport = chain.getSession();
 
         SocketAddress localAddress = transport.getLocalAddress();
-        String nextProtocol = PROTOCOL_HTTP_1_1;
 
+        String nextProtocol = null;
         if (localAddress instanceof ResourceAddress) {
             ResourceAddress address = (ResourceAddress) localAddress;
             if (!address.hasOption(QUALIFIER)) {
                 nextProtocol = address.getOption(NEXT_PROTOCOL);
             }
+        }
+        if (nextProtocol == null) {
+            nextProtocol = PROTOCOL_HTTP_1_1;
         }
 
         if (logger.isTraceEnabled()) {

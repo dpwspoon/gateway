@@ -25,9 +25,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URI;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -49,6 +46,7 @@ import org.jboss.netty.logging.InternalLogLevel;
 import org.jboss.netty.logging.Slf4JLoggerFactory;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Assume;
 import org.kaazing.mina.netty.socket.nio.DefaultNioSocketChannelIoSessionConfig;
 import org.kaazing.mina.netty.socket.nio.NioSocketChannelIoAcceptor;
 import org.slf4j.Logger;
@@ -63,7 +61,7 @@ public class ABasicTcpUnbindIT {
     }
 
     private boolean checkIfUnbound(String host, int port) {
-        Socket socket = null;
+        Socket socket;
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(format("Testing to see if the %s:%s is unbound", host, port));
         }
@@ -87,6 +85,7 @@ public class ABasicTcpUnbindIT {
 
     @Test
     public void shouldBindToIPv6AddressUsingNetty() throws Exception {
+
         ServerBootstrap bootstrap = null;
         try {
             URI bindURI = URI.create("tcp://[0:0:0:0:0:0:0:1]:8000");
@@ -117,6 +116,13 @@ public class ABasicTcpUnbindIT {
             bootstrap.releaseExternalResources();
             assertTrue("socket is bound", checkIfUnbound(bindURI));
         } catch (Exception e) {
+            // Some build environments do not support IPv6 at all, including TravisCI
+            // This essentually disables these tests for that build environment
+            Assume.assumeFalse(e.getMessage().contains("Protocol family unavailable"));
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                Assume.assumeFalse(cause.getMessage().contains("Protocol family unavailable"));
+            }
             e.printStackTrace();
             throw e;
         } finally {

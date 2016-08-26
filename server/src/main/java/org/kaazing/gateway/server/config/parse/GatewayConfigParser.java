@@ -56,19 +56,20 @@ import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlOptions;
 import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.kaazing.gateway.server.Launcher;
 import org.kaazing.gateway.server.config.parse.translate.GatewayConfigTranslator;
 import org.kaazing.gateway.server.config.parse.translate.GatewayConfigTranslatorFactory;
-import org.kaazing.gateway.server.config.nov2015.ClusterType;
-import org.kaazing.gateway.server.config.nov2015.GatewayConfigDocument;
-import org.kaazing.gateway.server.config.nov2015.PropertiesType;
-import org.kaazing.gateway.server.config.nov2015.PropertyType;
-import org.kaazing.gateway.server.config.nov2015.SecurityType;
-import org.kaazing.gateway.server.config.nov2015.ServiceDefaultsType;
-import org.kaazing.gateway.server.config.nov2015.ServiceType;
+import org.kaazing.gateway.server.config.june2016.ClusterType;
+import org.kaazing.gateway.server.config.june2016.GatewayConfigDocument;
+import org.kaazing.gateway.server.config.june2016.PropertiesType;
+import org.kaazing.gateway.server.config.june2016.PropertyType;
+import org.kaazing.gateway.server.config.june2016.SecurityType;
+import org.kaazing.gateway.server.config.june2016.ServiceDefaultsType;
+import org.kaazing.gateway.server.config.june2016.ServiceType;
 import org.kaazing.gateway.util.parse.ConfigParameter;
 import org.slf4j.Logger;
 import org.xml.sax.Attributes;
@@ -158,15 +159,29 @@ public class GatewayConfigParser {
         Document dom = xmlReader.build(configFile);
         Element root = dom.getRootElement();
         GatewayConfigNamespace namespace =  GatewayConfigNamespace.fromURI(root.getNamespace().getURI());
-
+        checkForNoLongerSupported(root); 
         boolean writeTranslatedFile = !namespace.equals(GatewayConfigNamespace.CURRENT_NS);
         File translatedConfigFile = writeTranslatedFile ?
                 new File(configFile.getParent(), configFile.getName()
                 + TRANSLATED_CONFIG_FILE_EXT) : configFile;
 
         translate(namespace, dom, translatedConfigFile, writeTranslatedFile);
-
         return translatedConfigFile;
+    }
+    
+    private void checkForNoLongerSupported(Element root) throws Exception {
+        Namespace namespace = root.getNamespace();
+        List<Element> children = root.getChildren("service", namespace);
+        for (Element child : children) {
+            Element typeChild = child.getChild("type", namespace);
+            String type = typeChild.getText();
+            if (type.equals("management.snmp")) {
+                throw new Exception("snmp management type is no longer supported."); 
+            } else if (type.equals("session")) {
+                throw new Exception("session service type is no longer supported.");
+            }
+        }
+        
     }
 
     /**
@@ -194,7 +209,7 @@ public class GatewayConfigParser {
         parseOptions.setLoadStripWhitespace();
         parseOptions.setLoadStripComments();
 
-        File translatedConfigFile = null;
+        File translatedConfigFile;
         try {
             translatedConfigFile = getTranslatedConfigFile(configFile);
         } catch (Exception e) {
@@ -419,7 +434,7 @@ public class GatewayConfigParser {
      * @return
      */
     private static InputStream bufferToTraceLog(InputStream input, String message, Logger log) {
-        InputStream output = input;
+        InputStream output;
         try {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int read;
@@ -508,6 +523,7 @@ public class GatewayConfigParser {
          *
          * @return <code>true</code> if processed without errors, <code>false</code> otherwise
          */
+        @Override
         public Boolean call() throws Exception {
             try {
                 SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -581,7 +597,7 @@ public class GatewayConfigParser {
                 };
                 parser.getXMLReader().setProperty("http://xml.org/sax/properties/lexical-handler", handler);
                 parser.getXMLReader().setProperty("http://apache.org/xml/properties/input-buffer-size",
-                        new Integer(souceInput.available()));
+                        souceInput.available());
                 parser.parse(souceInput, handler);
             } finally {
                 close();
@@ -616,6 +632,7 @@ public class GatewayConfigParser {
          *
          * @return <code>true</code> if processed without errors, <code>false</code> otherwise
          */
+        @Override
         public Boolean call() throws Exception {
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
             URL resource = classLoader.getResource(stylesheet);

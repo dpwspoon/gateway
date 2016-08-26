@@ -122,7 +122,7 @@ public final class ServiceConnectManager {
             if (logger.isWarnEnabled()) {
                 logger.warn(String.format(
                         "Configured prepared.connection.count %d for %s service has been increased to number of IO threads %d for extra efficiency",
-                        preparedConnectionCount, serviceCtx.getServiceType(), this.preparedConnectionCount, workerCount));
+                        preparedConnectionCount, serviceCtx.getServiceType(), workerCount));
             }
         }
         if (logger.isDebugEnabled()) {
@@ -165,23 +165,17 @@ public final class ServiceConnectManager {
         int remainder = preparedConnectionCount % workers.length;
         for (Worker worker : workers) {
             final int count = remainder-- > 0 ? minCountPerThread + 1 : minCountPerThread;
-            FutureTask<ConnectionPool> startConnectionPoolTask = new FutureTask<>(new Callable<ConnectionPool>() {
-
-                @Override
-                public ConnectionPool call() {
-                    ConnectionPool currentPool = connectionPool.get();
-                    if (currentPool == null) {
-                        // the first time the pool is started is needs to be created, subsequent times it should just be started
-                        // without re-creating.
-                        currentPool = new ConnectionPool(serviceCtx, connectHandler, connectURI, heartbeatFilter,
-                                connectListener, count, true);
-                        connectionPool.set(currentPool);
-                    }
-                    currentPool.start();
-                    return currentPool;
+            Runnable startConnectionPoolTask = () -> {
+                ConnectionPool currentPool = connectionPool.get();
+                if (currentPool == null) {
+                    // the first time the pool is started is needs to be created, subsequent times it should just be started
+                    // without re-creating.
+                    currentPool = new ConnectionPool(serviceCtx, connectHandler, connectURI, heartbeatFilter,
+                            connectListener, count, true);
+                    connectionPool.set(currentPool);
                 }
-
-            });
+                currentPool.start();
+            };
             worker.executeInIoThread(startConnectionPoolTask);
         }
     }
@@ -443,7 +437,7 @@ public final class ServiceConnectManager {
                 // was canceled and the task reference will be null, in which case we don't bother scheduling.
                 if (heartbeatTask.compareAndSet(currentHeartbeatTask, null)) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace(format("ServiceHeartBeat.run adding listener to connect future to reschedule task"));
+                        logger.trace("ServiceHeartBeat.run adding listener to connect future to reschedule task");
                     }
                     connectFuture.addListener(new IoFutureListener<ConnectFuture>() {
                         @Override
@@ -468,7 +462,7 @@ public final class ServiceConnectManager {
                     });
                 }
                 if (logger.isTraceEnabled()) {
-                    logger.trace(format("ServiceHeartBeat.run finished executing heartbeat"));
+                    logger.trace("ServiceHeartBeat.run finished executing heartbeat");
                 }
 
             }

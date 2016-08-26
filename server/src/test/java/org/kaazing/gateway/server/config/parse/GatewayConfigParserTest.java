@@ -31,9 +31,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.kaazing.gateway.server.config.nov2015.ClusterType;
-import org.kaazing.gateway.server.config.nov2015.GatewayConfigDocument;
-import org.kaazing.gateway.server.config.nov2015.ServiceType;
+import org.kaazing.gateway.server.config.june2016.ClusterType;
+import org.kaazing.gateway.server.config.june2016.GatewayConfigDocument;
+import org.kaazing.gateway.server.config.june2016.ServiceType;
 import org.kaazing.gateway.util.http.DefaultUtilityHttpClient;
 
 /**
@@ -297,7 +297,7 @@ public class GatewayConfigParserTest {
 
     @Test
     public void testCanConvertAwsHostToAwsHostnameIfAvailable() {
-        boolean onAWS = false;
+        boolean onAWS;
         boolean onTravisCI = false;
         DefaultUtilityHttpClient httpClient = new DefaultUtilityHttpClient();
         try {
@@ -409,7 +409,7 @@ public class GatewayConfigParserTest {
 
     @Test
     public void testCanConvertAwsInstanceIdIfAvailable() {
-        boolean onAWS = false;
+        boolean onAWS;
         boolean onTravisCI = false;
         DefaultUtilityHttpClient httpClient = new DefaultUtilityHttpClient();
         try {

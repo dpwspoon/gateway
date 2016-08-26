@@ -16,6 +16,7 @@
 package org.kaazing.gateway.transport.http;
 
 import static java.lang.String.format;
+import static org.kaazing.gateway.transport.BridgeSession.LOCAL_ADDRESS;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpProtocolCompatibilityFilter.HttpConditionalWrappedResponseFilter.conditionallyWrappedResponsesRequired;
 import static org.kaazing.gateway.util.InternalSystemProperty.HTTPXE_SPECIFICATION;
 
@@ -23,6 +24,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -106,14 +108,14 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
 
     // internal
     private IoHandler upgradeHandler;
-    private final UpgradeFuture upgradeFuture;
+    private final DefaultUpgradeFuture upgradeFuture;
     private final CommitFuture commitFuture;
     private final ResponseFuture responseFuture;
     private final AtomicBoolean committing;
     private final AtomicBoolean connectionClose;
     private ResultAwareLoginContext loginContext;
     private final AtomicBoolean shutdownWrite;
-    private Queue<IoBufferEx> deferredReads = new ConcurrentLinkedQueue<IoBufferEx>();
+    private Queue<IoBufferEx> deferredReads = new ConcurrentLinkedQueue<>();
 
 	private boolean isChunked;
 
@@ -121,7 +123,8 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
     private boolean httpxeSpecCompliant;
 
 	private int redirectsAllowed;
-    private ChallengeHandler nextChallengeHandler;
+	private ResourceAddress redirectlocalAddress;
+    private ResourceAddress redirectRemoteAddress;
 
     @SuppressWarnings("deprecation")
     private DefaultHttpSession(IoServiceEx service,
@@ -565,12 +568,12 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
 
     @Override
     public ResourceAddress getLocalAddress() {
-        return super.getLocalAddress();
+        return (this.redirectlocalAddress != null) ? this.redirectlocalAddress: super.getLocalAddress();
     }
 
     @Override
     public ResourceAddress getRemoteAddress() {
-        return super.getRemoteAddress();
+        return (this.redirectRemoteAddress != null) ? this.redirectRemoteAddress: super.getRemoteAddress();
     }
 
     public Queue<IoBufferEx> getDeferredReads() {
@@ -629,16 +632,31 @@ public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession
         return httpxeSpecCompliant;
     }
 
-    void resetParent(IoSessionEx newParent){
-        setParent(newParent);
+    public IoSessionEx setParent(IoSessionEx newParent){
+        this.setLocalAddress(LOCAL_ADDRESS.get(newParent));
+        // newParent.getRemoteAddress(); httpSession.setLocalAddress((ResourceAddress)redirectRemoteAddress);
+        upgradeFuture.setSession(newParent);
+        if (!SslUtils.isSecure(newParent) && secure) {
+            throw new InvalidParameterException("Can not switch from a secure session to a non secure session");
+        }
+
+        return super.setParent(newParent);
     }
 
-    public void nextChallengeHandlers(ChallengeHandler nextChallengeHandler) {
-        this.nextChallengeHandler = nextChallengeHandler;
+    int getAndDecrementRedirectsAllowed() {
+        int result = redirectsAllowed;
+        if (result > 0) {
+            redirectsAllowed--;
+        }
+        return result;
     }
 
-    public ChallengeHandler getNextChallengeHandler() {
-        return this.nextChallengeHandler;
+    public void setLocalAddress(ResourceAddress redirectlocalAddress) {
+        this.redirectlocalAddress = redirectlocalAddress;
+    }
+
+    public void setRemoteAddress(ResourceAddress redirectRemoteAddress) {
+        this.redirectRemoteAddress = redirectRemoteAddress;
     }
 
 }

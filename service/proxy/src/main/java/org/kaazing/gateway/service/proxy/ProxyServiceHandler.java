@@ -24,7 +24,6 @@ import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.session.IoSessionInitializer;
 import org.kaazing.gateway.transport.BridgeSession;
-import org.kaazing.gateway.transport.http.HttpAcceptor;
 import org.kaazing.mina.core.session.IoSessionEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class ProxyServiceHandler extends AbstractProxyAcceptHandler {
 
     public ProxyServiceHandler() {
         super();
-        extensions = new ArrayList<ProxyServiceExtensionSpi>();
+        extensions = new ArrayList<>();
     }
 
     // package private method for registering proxy service extensions so that
@@ -58,7 +57,6 @@ public class ProxyServiceHandler extends AbstractProxyAcceptHandler {
     @Override
     public void sessionOpened(final IoSession acceptSession) {
         if (!acceptSession.isClosing()) {
-            final Object serviceRegistration = acceptSession.getAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY);
             final String nextProtocol = BridgeSession.NEXT_PROTOCOL_KEY.get(acceptSession);
 
             // TODO: implement ServiceContext.connect(Collection<URI> connectURIs, connectHandler, sessionInitializer)
@@ -71,7 +69,6 @@ public class ProxyServiceHandler extends AbstractProxyAcceptHandler {
                     if (acceptSession.isClosing()) {
                         connectSession.close(true);
                     } else {
-                        connectSession.setAttribute(HttpAcceptor.SERVICE_REGISTRATION_KEY, serviceRegistration);
                         BridgeSession.NEXT_PROTOCOL_KEY.set(connectSession, nextProtocol);
 
                         // guarantee strongly-typed buffers; this is the connect-side where
@@ -126,6 +123,7 @@ public class ProxyServiceHandler extends AbstractProxyAcceptHandler {
             this.acceptSession = acceptSession;
         }
 
+        @Override
         public void operationComplete(ConnectFuture future) {
             if (future.isConnected()) {
                 IoSession connectedSession = future.getSession();

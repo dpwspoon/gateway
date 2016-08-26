@@ -24,6 +24,7 @@ import static org.kaazing.gateway.resource.address.uri.URIUtils.getPort;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getQuery;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getScheme;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getUserInfo;
+import static org.kaazing.gateway.service.util.ServiceUtils.LIST_SEPARATOR;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -37,7 +38,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,23 +65,23 @@ import org.kaazing.gateway.server.ExpiringState;
 import org.kaazing.gateway.server.Gateway;
 import org.kaazing.gateway.server.Launcher;
 import org.kaazing.gateway.server.config.SchemeConfig;
+import org.kaazing.gateway.server.config.june2016.AuthenticationType;
+import org.kaazing.gateway.server.config.june2016.AuthorizationConstraintType;
+import org.kaazing.gateway.server.config.june2016.ClusterConnectOptionsType;
+import org.kaazing.gateway.server.config.june2016.ClusterType;
+import org.kaazing.gateway.server.config.june2016.CrossSiteConstraintType;
+import org.kaazing.gateway.server.config.june2016.GatewayConfigDocument;
+import org.kaazing.gateway.server.config.june2016.LoginModuleOptionsType;
+import org.kaazing.gateway.server.config.june2016.LoginModuleType;
+import org.kaazing.gateway.server.config.june2016.MimeMappingType;
+import org.kaazing.gateway.server.config.june2016.RealmType;
+import org.kaazing.gateway.server.config.june2016.SecurityType;
+import org.kaazing.gateway.server.config.june2016.ServiceAcceptOptionsType;
+import org.kaazing.gateway.server.config.june2016.ServiceConnectOptionsType;
+import org.kaazing.gateway.server.config.june2016.ServiceDefaultsType;
+import org.kaazing.gateway.server.config.june2016.ServicePropertiesType;
+import org.kaazing.gateway.server.config.june2016.ServiceType;
 import org.kaazing.gateway.server.config.parse.DefaultSchemeConfig;
-import org.kaazing.gateway.server.config.nov2015.AuthenticationType;
-import org.kaazing.gateway.server.config.nov2015.AuthorizationConstraintType;
-import org.kaazing.gateway.server.config.nov2015.ClusterConnectOptionsType;
-import org.kaazing.gateway.server.config.nov2015.ClusterType;
-import org.kaazing.gateway.server.config.nov2015.CrossSiteConstraintType;
-import org.kaazing.gateway.server.config.nov2015.GatewayConfigDocument;
-import org.kaazing.gateway.server.config.nov2015.LoginModuleOptionsType;
-import org.kaazing.gateway.server.config.nov2015.LoginModuleType;
-import org.kaazing.gateway.server.config.nov2015.MimeMappingType;
-import org.kaazing.gateway.server.config.nov2015.RealmType;
-import org.kaazing.gateway.server.config.nov2015.SecurityType;
-import org.kaazing.gateway.server.config.nov2015.ServiceAcceptOptionsType;
-import org.kaazing.gateway.server.config.nov2015.ServiceConnectOptionsType;
-import org.kaazing.gateway.server.config.nov2015.ServiceDefaultsType;
-import org.kaazing.gateway.server.config.nov2015.ServicePropertiesType;
-import org.kaazing.gateway.server.config.nov2015.ServiceType;
 import org.kaazing.gateway.server.context.DependencyContext;
 import org.kaazing.gateway.server.context.GatewayContext;
 import org.kaazing.gateway.server.service.ServiceRegistry;
@@ -102,7 +102,6 @@ import org.kaazing.gateway.util.InternalSystemProperty;
 import org.kaazing.gateway.util.Utils;
 import org.kaazing.gateway.util.aws.AwsUtils;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
-import org.kaazing.gateway.util.ssl.SslCipherSuites;
 import org.slf4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -205,9 +204,6 @@ public class GatewayContextResolver<V> {
 
         this.transportContextsBySchemeName = new HashMap<>();
         this.transportContextsByName = new HashMap<>();
-
-        // Initialize the SslCipherSuites (pertains to KG-7059)
-        SslCipherSuites.init();
     }
 
     public GatewayContext resolve(GatewayConfigDocument gatewayConfigDoc)
@@ -352,6 +348,9 @@ public class GatewayContextResolver<V> {
         // Always add tcp
         schemeNames.add("tcp");
 
+        // Always add udp
+        schemeNames.add("udp");
+
         // override default scheme configuration
         for (SchemeConfig schemeConfig : schemeConfigs) {
             String schemeName = schemeConfig.getName();
@@ -474,9 +473,9 @@ public class GatewayContextResolver<V> {
             String[] balanceStrings = serviceConfig.getBalanceArray();
             String[] connectStrings = serviceConfig.getConnectArray();
             String serviceType = serviceConfig.getType();
-            Service serviceInstance = null;
+            Service serviceInstance;
 
-            Class<? extends Service> serviceClass = null;
+            Class<? extends Service> serviceClass;
             if (serviceType.startsWith(SERVICE_TYPE_CLASS_PREFIX)) {
                 String className = serviceType.substring(SERVICE_TYPE_CLASS_PREFIX.length());
                 try {
@@ -521,6 +520,16 @@ public class GatewayContextResolver<V> {
             Collection<String> requireRolesCollection = new LinkedList<>();
             for (AuthorizationConstraintType authConstraint : serviceConfig.getAuthorizationConstraintArray()) {
                 Collections.addAll(requireRolesCollection, authConstraint.getRequireRoleArray());
+            }
+            RealmContext realmContext = null;
+            String name = serviceConfig.getRealmName();
+            if (serviceConfig.isSetRealmName()) {
+                realmContext = realmsContext.getRealmContext(name);
+                if (realmContext != null && !name.equals("auth-required")) {
+                    if (requireRolesCollection.isEmpty()) {
+                        Collections.addAll(requireRolesCollection, "*");
+                    }
+                }
             }
             String[] requireRoles = requireRolesCollection.toArray(new String[requireRolesCollection.size()]);
 
@@ -727,7 +736,15 @@ public class GatewayContextResolver<V> {
                     }
                 }
                 if (isSimpleProperty) {
-                    properties.put(node.getLocalName(), nodeValue);
+                    // TODO; consider going to dynamically typed objects
+                    // (i.e. allowing Object as properties value)
+                    // For now if we see a property that is a list, we convert to comma separated list
+                    String existingValue = properties.get(node.getLocalName());
+                    if (existingValue == null) {
+                        properties.put(node.getLocalName(), nodeValue);
+                    } else {
+                        properties.put(node.getLocalName(), existingValue + LIST_SEPARATOR + nodeValue);
+                    }
                 }
             }
         }
@@ -1040,7 +1057,7 @@ public class GatewayContextResolver<V> {
             }
 
             //Login Module Inject Rule 4: Inject Timeout Module at Front of Chain
-            if (authType.isSetSessionTimeout()) {
+            if (authType.isSetSessionTimeout() && authType.getSessionTimeout() != null) {
                 Map<String, String> options = new HashMap<>();
                 if (authType.isSetSessionTimeout()) {
                     options.put("session-timeout", resolveTimeIntervalValue(authType.getSessionTimeout()));

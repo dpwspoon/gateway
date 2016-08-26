@@ -15,21 +15,22 @@
  */
 package org.kaazing.gateway.server.test.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 public class NestedServicePropertiesConfiguration implements
         Configuration<SuppressibleNestedServicePropertiesConfiguration> {
 
     private String configElementName;
     private final SuppressibleNestedServicePropertiesConfiguration _configuration;
-    private final Map<String, Suppressible<String>> suppressibleSimpleProperties = new HashMap<>();
-    private final Map<String, String> simpleProperties = Suppressibles.unsuppressibleMap(suppressibleSimpleProperties);
-    private final Stack<NestedServicePropertiesConfiguration> nestedServiceProperties =
-            new Stack<>();
+    private final Map<String, Suppressible<List<String>>> suppressibleSimpleProperties = new HashMap<>();
+    private final Map<String, List<String>> simpleProperties = Suppressibles.unsuppressibleMap(suppressibleSimpleProperties);
+    private final List<NestedServicePropertiesConfiguration> nestedServiceProperties = new ArrayList<>();
 
     public NestedServicePropertiesConfiguration(String configElementName) {
         this.configElementName = configElementName;
@@ -37,16 +38,25 @@ public class NestedServicePropertiesConfiguration implements
         _configuration.setSuppression(Suppressibles.getDefaultSuppressions());
     }
 
-    public Map<String, String> getSimpleProperties() {
+    public Map<String, List<String>> getSimpleProperties() {
         return simpleProperties;
     }
 
     public void addSimpleProperty(String key, String value) {
-        simpleProperties.put(key, value);
+        if (simpleProperties.containsKey(key)) {
+            simpleProperties.get(key).add(value);
+        } else {
+            List<String> newValue = new ArrayList<String>(Arrays.asList(value));
+            simpleProperties.put(key, newValue);
+        }
     }
 
     public Collection<NestedServicePropertiesConfiguration> getNestedProperties() {
         return nestedServiceProperties;
+    }
+
+    public void addNestedProperties(NestedServicePropertiesConfiguration configuration) {
+        nestedServiceProperties.add(configuration);
     }
 
     public String getConfigElementName() {
@@ -82,13 +92,20 @@ public class NestedServicePropertiesConfiguration implements
         }
 
         @Override
-        public Map<String, Suppressible<String>> getSimpleProperties() {
+        public Map<String, Suppressible<List<String> >> getSimpleProperties() {
             return suppressibleSimpleProperties;
         }
 
         @Override
         public void addSimpleProperty(String key, Suppressible<String> value) {
-            suppressibleSimpleProperties.put(key, value);
+            String v = value.value();
+            if (suppressibleSimpleProperties.containsKey(key)) {
+                suppressibleSimpleProperties.get(key).value().add(v);
+            } else {
+                List<String> newValue = new ArrayList<String>(Arrays.asList(v));
+                Suppressible<List<String>> supValue = new Suppressible<List<String>>(newValue, Suppressibles.getDefaultSuppressions());
+                suppressibleSimpleProperties.put(key, supValue);
+            }
         }
 
         @Override

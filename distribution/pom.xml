@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.kaazing</groupId>
         <artifactId>gateway</artifactId>
-        <version>ekwic-SNAPSHOT</version>
+        <version>develop-SNAPSHOT</version>
     </parent>
 
     <artifactId>gateway.distribution</artifactId>
@@ -109,6 +109,10 @@
             <groupId>org.kaazing</groupId>
             <artifactId>gateway.service.update.check.management</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
+            <artifactId>gateway.service.turn.proxy</artifactId>
+        </dependency>
 
         <!-- transport dependencies -->
         <dependency>
@@ -175,6 +179,14 @@
         </dependency>
         <dependency>
             <groupId>org.kaazing</groupId>
+            <artifactId>gateway.resource.address.wsdraft</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
+            <artifactId>gateway.resource.address.wsxdraft</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
             <artifactId>gateway.resource.address.pipe</artifactId>
         </dependency>
         <dependency>
@@ -191,6 +203,10 @@
         </dependency>
         <dependency>
             <groupId>org.kaazing</groupId>
+            <artifactId>gateway.resource.address.httpxdraft</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
             <artifactId>gateway.resource.address.rtmp</artifactId>
         </dependency>
         <dependency>
@@ -200,6 +216,10 @@
         <dependency>
             <groupId>org.kaazing</groupId>
             <artifactId>gateway.resource.address.wse</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
+            <artifactId>gateway.service.turn.rest</artifactId>
         </dependency>
     </dependencies>
 
@@ -248,6 +268,7 @@
                             <overWriteSnapshots>true</overWriteSnapshots>
                             <silent>false</silent>
                             <outputDirectory>target/sigar</outputDirectory>
+                            <excludes>**/log4j.jar</excludes>
                         </configuration>
                     </execution>
                 </executions>
@@ -300,7 +321,7 @@
 
         <!-- gateway.feature.version supplies a 2-digit version of the major/minor version of the Gateway. -->
         <gateway.feature.version>${project.version}</gateway.feature.version>
-        <gateway.edition.directory>kaazing-gateway-community-${project.version}</gateway.edition.directory>
+        <gateway.edition.directory>kaazing-community-gateway-${project.version}</gateway.edition.directory>
         <minimum.java.version>Java 7 (version 1.7.0_21)</minimum.java.version>
         <gateway.version>${project.version}</gateway.version>
     </properties>

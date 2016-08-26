@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.kaazing</groupId>
         <artifactId>gateway</artifactId>
-        <version>ekwic-SNAPSHOT</version>
+        <version>develop-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>gateway.service.http.proxy</artifactId>
@@ -30,6 +30,11 @@
         <dependency>
             <groupId>org.kaazing</groupId>
             <artifactId>gateway.service.proxy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kaazing</groupId>
+            <artifactId>gateway.util</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -63,7 +68,7 @@
         <dependency>
             <groupId>org.kaazing</groupId>
             <artifactId>gateway.test.ca</artifactId>
-            <version>1.0.0.24</version>
+            <version>[1.0.0.0,1.1.0.0)</version>
             <classifier>keystore</classifier>
             <scope>test</scope>
         </dependency>

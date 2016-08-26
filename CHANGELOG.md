@@ -1,13 +1,196 @@
 # Change Log
 
-## [Unreleased](https://github.com/kaazing/gateway/tree/HEAD)
+## [5.2.0](https://github.com/kaazing/gateway/tree/5.2.0) (2016-08-08)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.1.2...5.2.0)
 
-[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.55...HEAD)
+**Fixed bugs:**
+
+- Gateway Not Specification Compliant to Invalid Headers [\#637](https://github.com/kaazing/gateway/issues/637)
+- RFC 7232: Directory Service responds with 200 OK when If-Modified-Since matches Last-Modified from previous response [\#383](https://github.com/kaazing/gateway/issues/383)
+- WSN Connector: Missing `Connection` header in handshake response should not result in a successful connection [\#311](https://github.com/kaazing/gateway/issues/311)
+- WsnConnector does not reject a masked text or binary frame from the server [\#308](https://github.com/kaazing/gateway/issues/308)
+- WSN Connector: Gateway sends back invalid UTF-8 reason instead of just the CLOSE code 1002 [\#307](https://github.com/kaazing/gateway/issues/307)
+- WSN Connector, WSE connector: IllegalArgumentException is thrown when sending a frame with empty payload [\#306](https://github.com/kaazing/gateway/issues/306)
+- WSN Transport Bug : shouldEchoBinaryFrameWithPayloadLength0 and shouldEchoTextFrameWithPayloadLength0 [\#254](https://github.com/kaazing/gateway/issues/254)
+
+**Closed issues:**
+
+- Remove all but hostname must match gateway-config.xml balancer check [\#615](https://github.com/kaazing/gateway/issues/615)
 
 **Merged pull requests:**
 
+- reset all changes made by the revert commit\(https://github.com/kaazin… [\#671](https://github.com/kaazing/gateway/pull/671) ([AdrianCozma](https://github.com/AdrianCozma))
+- reset version to develop-SNAPSHOT, it was changed during a revert on … [\#670](https://github.com/kaazing/gateway/pull/670) ([AdrianCozma](https://github.com/AdrianCozma))
+- Implemented the new \<symbolic-link\> property for the Directory Service [\#669](https://github.com/kaazing/gateway/pull/669) ([msalavastru](https://github.com/msalavastru))
+- Update copyright stored in server.?pi/pom.xml [\#667](https://github.com/kaazing/gateway/pull/667) ([ahousing](https://github.com/ahousing))
+- Removing http transport dependency in proxy service [\#666](https://github.com/kaazing/gateway/pull/666) ([jitsni](https://github.com/jitsni))
+- Corrected namespace for management.xsd [\#664](https://github.com/kaazing/gateway/pull/664) ([DoruM](https://github.com/DoruM))
+- Revert "Corrected namespace for management.xsd" [\#663](https://github.com/kaazing/gateway/pull/663) ([AdrianCozma](https://github.com/AdrianCozma))
+- Corrected namespace for management.xsd [\#662](https://github.com/kaazing/gateway/pull/662) ([DoruM](https://github.com/DoruM))
+- Corrected namespace for management.xsd [\#659](https://github.com/kaazing/gateway/pull/659) ([DoruM](https://github.com/DoruM))
+- Disable TcpConnectorIT.shouldHandleServerClose [\#654](https://github.com/kaazing/gateway/pull/654) ([ahousing](https://github.com/ahousing))
+- Added validation for empty space after HTTP header field name [\#652](https://github.com/kaazing/gateway/pull/652) ([DoruM](https://github.com/DoruM))
+- Updated license for log4j-config [\#650](https://github.com/kaazing/gateway/pull/650) ([vishalsatish](https://github.com/vishalsatish))
+- reject masked frames sent by the server in a websocket connection [\#647](https://github.com/kaazing/gateway/pull/647) ([danibusu](https://github.com/danibusu))
+- Udp impl using netty [\#646](https://github.com/kaazing/gateway/pull/646) ([jitsni](https://github.com/jitsni))
+- Add checks for invalid UTF-8 reason on Close frame [\#641](https://github.com/kaazing/gateway/pull/641) ([DoruM](https://github.com/DoruM))
+- \[Work in progress\] add support for sending empty payload frame \(gateway issue \#254\) [\#640](https://github.com/kaazing/gateway/pull/640) ([danibusu](https://github.com/danibusu))
+
+## [5.1.2](https://github.com/kaazing/gateway/tree/5.1.2) (2016-07-20)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.1.1...5.1.2)
+
+**Fixed bugs:**
+
+- AcceptUriComparedToBalanceUriVisitor is comparing URIs prior to parameters being replaced, causing NPE that throws Parse Exception [\#612](https://github.com/kaazing/gateway/issues/612)
+- WSN Connector: Invalid value for the `Upgrade` header in handshake response must not result in a successful connection [\#312](https://github.com/kaazing/gateway/issues/312)
+- WsebAcceptorTest.shouldBindAWsAddress timeouts [\#287](https://github.com/kaazing/gateway/issues/287)
+
+**Merged pull requests:**
+
+- Revert "Pokemon exceptions" [\#645](https://github.com/kaazing/gateway/pull/645) ([dpwspoon](https://github.com/dpwspoon))
+- Un-suspended successful test case [\#642](https://github.com/kaazing/gateway/pull/642) ([DoruM](https://github.com/DoruM))
+- Checking if 'Connection' header is present when Gateway connects as a client [\#635](https://github.com/kaazing/gateway/pull/635) ([DoruM](https://github.com/DoruM))
+- Remove realm with no authorization constraint / login module passes [\#634](https://github.com/kaazing/gateway/pull/634) ([justinma246](https://github.com/justinma246))
+- RFC 7232: Directory Service responds with 200 OK when If-Modified-Since [\#633](https://github.com/kaazing/gateway/pull/633) ([DoruM](https://github.com/DoruM))
+- Revert "Login Module fix" [\#632](https://github.com/kaazing/gateway/pull/632) ([dpwspoon](https://github.com/dpwspoon))
+- Pokemon exceptions [\#631](https://github.com/kaazing/gateway/pull/631) ([DoruM](https://github.com/DoruM))
+- Remove overriding values in child poms for failsafe plugin [\#629](https://github.com/kaazing/gateway/pull/629) ([justinma246](https://github.com/justinma246))
+- Login Module fix [\#628](https://github.com/kaazing/gateway/pull/628) ([justinma246](https://github.com/justinma246))
+- Revert "Login Module passes when there is a realm and login module" [\#627](https://github.com/kaazing/gateway/pull/627) ([jitsni](https://github.com/jitsni))
+- PR for issue \#615: Remove all but hostname must match gateway-config.xml balancer check [\#623](https://github.com/kaazing/gateway/pull/623) ([msalavastru](https://github.com/msalavastru))
+- Adding get/setInternalInterestOps\(\) methods to AbstractNioChannel [\#621](https://github.com/kaazing/gateway/pull/621) ([jitsni](https://github.com/jitsni))
+- Checking for correct java version in scripts [\#620](https://github.com/kaazing/gateway/pull/620) ([justinma246](https://github.com/justinma246))
+- SNMP and sessionServiceType no longer supported [\#618](https://github.com/kaazing/gateway/pull/618) ([justinma246](https://github.com/justinma246))
+- Http connector follow redirect for maximum.redirects, also http acceptor send 302 for wsn and wsx [\#611](https://github.com/kaazing/gateway/pull/611) ([dpwspoon](https://github.com/dpwspoon))
+- Login Module passes when there is a realm and login module [\#604](https://github.com/kaazing/gateway/pull/604) ([justinma246](https://github.com/justinma246))
+
+## [5.1.1](https://github.com/kaazing/gateway/tree/5.1.1) (2016-06-27)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.1.0...5.1.1)
+
+**Fixed bugs:**
+
+- HttpDirectoryServiceIT.testUriWithParams fails with max-age mismatch [\#468](https://github.com/kaazing/gateway/issues/468)
+- JMX Session count is not correct on Echo Service [\#331](https://github.com/kaazing/gateway/issues/331)
+- Sporadic failure: Hangs on "transport.wsn.WsnAcceptorTest" [\#197](https://github.com/kaazing/gateway/issues/197)
+- Multiple Log4J in distribution  [\#80](https://github.com/kaazing/gateway/issues/80)
+- Sslv3Test\#connectSucceedsWithoutSslv3 fails intermittently [\#71](https://github.com/kaazing/gateway/issues/71)
+- transport.wsn DuplicateBindTest: test timed out [\#58](https://github.com/kaazing/gateway/issues/58)
+
+**Closed issues:**
+
+- Connect directly to ws service [\#590](https://github.com/kaazing/gateway/issues/590)
+- Java 7 throws unfriendly error [\#351](https://github.com/kaazing/gateway/issues/351)
+- Command center page throws an error when you open Configuration/Overview in Command center [\#320](https://github.com/kaazing/gateway/issues/320)
+- change "KAAZING" to "Kaazing" in all 5.0 docs [\#298](https://github.com/kaazing/gateway/issues/298)
+- log4j clean up [\#277](https://github.com/kaazing/gateway/issues/277)
+- WsebConnector doesn't send next protocol [\#266](https://github.com/kaazing/gateway/issues/266)
+- EE label in doc should have hint describing what it is [\#215](https://github.com/kaazing/gateway/issues/215)
+- Document using /dev/random vs /dev/urandom in production environments [\#170](https://github.com/kaazing/gateway/issues/170)
+
+**Merged pull requests:**
+
+- updated sonar user and password [\#609](https://github.com/kaazing/gateway/pull/609) ([AdrianCozma](https://github.com/AdrianCozma))
+- Fix for issue \#537: WsnAcceptorUserLoggingIT sporadic failures on missing close exception [\#608](https://github.com/kaazing/gateway/pull/608) ([msalavastru](https://github.com/msalavastru))
+- Added support for deeply nested properties to GatewayConfiguration for testing purposes [\#607](https://github.com/kaazing/gateway/pull/607) ([sanjay-saxena](https://github.com/sanjay-saxena))
+- Fix for issue \#518: Http proxy is adding its own unauthorized content to http response that are unauthorized [\#606](https://github.com/kaazing/gateway/pull/606) ([msalavastru](https://github.com/msalavastru))
+- Updated mina.netty version to resolve security scan \(note: we don't a… [\#603](https://github.com/kaazing/gateway/pull/603) ([dpwspoon](https://github.com/dpwspoon))
+- Early access features in Gateway [\#600](https://github.com/kaazing/gateway/pull/600) ([cmebarrow](https://github.com/cmebarrow))
+- Fix for issue 558 Directory service property directory must start with a / \#558 [\#599](https://github.com/kaazing/gateway/pull/599) ([msalavastru](https://github.com/msalavastru))
+- Fix for issue 80:  Multiple Log4J in distribution [\#598](https://github.com/kaazing/gateway/pull/598) ([msalavastru](https://github.com/msalavastru))
+- ws.inactivity.timeout populates http.keealive.timeout [\#597](https://github.com/kaazing/gateway/pull/597) ([jitsni](https://github.com/jitsni))
+- Disable WsnAcceptorUserLoggingIT.verifyPrincipalNameLoggedInLayersAbo… [\#596](https://github.com/kaazing/gateway/pull/596) ([ahousing](https://github.com/ahousing))
+- Updating slf4j to 1.7.21 version [\#593](https://github.com/kaazing/gateway/pull/593) ([jitsni](https://github.com/jitsni))
+- No need to override hashCode\(\) in OtherSslCipher [\#592](https://github.com/kaazing/gateway/pull/592) ([jitsni](https://github.com/jitsni))
+- Disable TcpConnectorIT.shouldEstablishConnection [\#591](https://github.com/kaazing/gateway/pull/591) ([ahousing](https://github.com/ahousing))
+- fixed travis file bug that wasn't building all branches [\#588](https://github.com/kaazing/gateway/pull/588) ([AdrianCozma](https://github.com/AdrianCozma))
+- Adding TLSv1.2 ciphers that are enabled by java 8 sun provider  [\#587](https://github.com/kaazing/gateway/pull/587) ([jitsni](https://github.com/jitsni))
+- changed the position of the sonar command to catch failures [\#584](https://github.com/kaazing/gateway/pull/584) ([AdrianCozma](https://github.com/AdrianCozma))
+- Cleanup [\#583](https://github.com/kaazing/gateway/pull/583) ([jitsni](https://github.com/jitsni))
+- Update pom.xml [\#582](https://github.com/kaazing/gateway/pull/582) ([dpwspoon](https://github.com/dpwspoon))
+- Cleanup [\#581](https://github.com/kaazing/gateway/pull/581) ([jitsni](https://github.com/jitsni))
+- Cleanup [\#579](https://github.com/kaazing/gateway/pull/579) ([jitsni](https://github.com/jitsni))
+- Cleanup [\#578](https://github.com/kaazing/gateway/pull/578) ([jitsni](https://github.com/jitsni))
+- WsPingMessage's empty buffer needs to be shared buffer [\#577](https://github.com/kaazing/gateway/pull/577) ([jitsni](https://github.com/jitsni))
+- Made authType.getSessionTimeout check for instance of != null as I wa… [\#569](https://github.com/kaazing/gateway/pull/569) ([dpwspoon](https://github.com/dpwspoon))
+- Added test file that checks the server's pom.xml has consistent manif… [\#564](https://github.com/kaazing/gateway/pull/564) ([Anisotrop](https://github.com/Anisotrop))
+
+## [5.1.0](https://github.com/kaazing/gateway/tree/5.1.0) (2016-05-17)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.55...5.1.0)
+
+**Closed issues:**
+
+- Extension filter is not removed when WSEB's TransportSession is closed [\#555](https://github.com/kaazing/gateway/issues/555)
+
+**Merged pull requests:**
+
+- Catchup release [\#576](https://github.com/kaazing/gateway/pull/576) ([dpwspoon](https://github.com/dpwspoon))
+- Adding a better log message when WsCheckAliveFilter closes ws session [\#573](https://github.com/kaazing/gateway/pull/573) ([jitsni](https://github.com/jitsni))
+- Fix for issue \#385 [\#571](https://github.com/kaazing/gateway/pull/571) ([msalavastru](https://github.com/msalavastru))
+- Removing IdleTimeoutFilter in wseb  [\#570](https://github.com/kaazing/gateway/pull/570) ([jitsni](https://github.com/jitsni))
+- Synchronizing the state during acceptor/connector initialization [\#567](https://github.com/kaazing/gateway/pull/567) ([jitsni](https://github.com/jitsni))
+- Resolved cipher suites if not already a String\[\] in SslResourceAddres… [\#566](https://github.com/kaazing/gateway/pull/566) ([dpwspoon](https://github.com/dpwspoon))
+- Update Stack Overflow link to use the Kaazing tag [\#565](https://github.com/kaazing/gateway/pull/565) ([robinzimmermann](https://github.com/robinzimmermann))
+- ignored sse test in general\(not just Jenkins\) [\#563](https://github.com/kaazing/gateway/pull/563) ([AdrianCozma](https://github.com/AdrianCozma))
+- ignored sseIe8HttpxeConnectAndGetData test for Jenkins builds [\#562](https://github.com/kaazing/gateway/pull/562) ([AdrianCozma](https://github.com/AdrianCozma))
+- Ignored DatagramPortUnreachableTest [\#561](https://github.com/kaazing/gateway/pull/561) ([AdrianCozma](https://github.com/AdrianCozma))
+- Catch up merge from release/5.1.0 branch [\#560](https://github.com/kaazing/gateway/pull/560) ([jitsni](https://github.com/jitsni))
+- Fix webservice url for community/enterprise. [\#559](https://github.com/kaazing/gateway/pull/559) ([Anisotrop](https://github.com/Anisotrop))
+- redirected failsafe reports to surefire directory as a workaround to … [\#557](https://github.com/kaazing/gateway/pull/557) ([AdrianCozma](https://github.com/AdrianCozma))
+- WSEB Extension filter's IoFilter\#onPostRemove\(\) is not invoked [\#556](https://github.com/kaazing/gateway/pull/556) ([jitsni](https://github.com/jitsni))
+- Making sure that next protocol is not null \(let the binding deal with… [\#554](https://github.com/kaazing/gateway/pull/554) ([jitsni](https://github.com/jitsni))
+- Fix for sporadic failure of HttpDirectoryServiceIT.testPostLargeData [\#553](https://github.com/kaazing/gateway/pull/553) ([mgherghe](https://github.com/mgherghe))
+- Removing the logic to force ciphers for applets [\#552](https://github.com/kaazing/gateway/pull/552) ([jitsni](https://github.com/jitsni))
+- Fixed HttpBalancerService to add bindings properly [\#551](https://github.com/kaazing/gateway/pull/551) ([sanjay-saxena](https://github.com/sanjay-saxena))
+- Thread unsafe processing in ProtocolCodecFilter during wseb realignment [\#548](https://github.com/kaazing/gateway/pull/548) ([jitsni](https://github.com/jitsni))
+- Ignored test JmxSessionPrincipalIT. [\#546](https://github.com/kaazing/gateway/pull/546) ([NicoletaOita](https://github.com/NicoletaOita))
+- Fix OpeningHandshakeIT [\#545](https://github.com/kaazing/gateway/pull/545) ([Anisotrop](https://github.com/Anisotrop))
+- Fix OpeningHandshakeIT [\#544](https://github.com/kaazing/gateway/pull/544) ([Anisotrop](https://github.com/Anisotrop))
+- Ignored test as suggested in ticket 434 [\#543](https://github.com/kaazing/gateway/pull/543) ([vstratan](https://github.com/vstratan))
+- Develop.catchup [\#541](https://github.com/kaazing/gateway/pull/541) ([dpwspoon](https://github.com/dpwspoon))
+- Updated k3po version [\#540](https://github.com/kaazing/gateway/pull/540) ([dpwspoon](https://github.com/dpwspoon))
+- Release/5.1.0 [\#539](https://github.com/kaazing/gateway/pull/539) ([robinzimmermann](https://github.com/robinzimmermann))
+- Applied filtering to windows edition [\#538](https://github.com/kaazing/gateway/pull/538) ([dpwspoon](https://github.com/dpwspoon))
+- Add filtered version to index.html [\#537](https://github.com/kaazing/gateway/pull/537) ([dpwspoon](https://github.com/dpwspoon))
+- Updated k3po version [\#536](https://github.com/kaazing/gateway/pull/536) ([dpwspoon](https://github.com/dpwspoon))
+- Ping/Pongs are not encoded in wsx [\#535](https://github.com/kaazing/gateway/pull/535) ([jitsni](https://github.com/jitsni))
+- Investigate.sporadic.failures.3 [\#534](https://github.com/kaazing/gateway/pull/534) ([dpwspoon](https://github.com/dpwspoon))
+- Selectively ignore certain tests on Linux [\#533](https://github.com/kaazing/gateway/pull/533) ([sanjay-saxena](https://github.com/sanjay-saxena))
+- updated travis.yml to make sonar analyses on master and release [\#532](https://github.com/kaazing/gateway/pull/532) ([AdrianCozma](https://github.com/AdrianCozma))
+- Add location paramter to websocket.org link [\#531](https://github.com/kaazing/gateway/pull/531) ([robinzimmermann](https://github.com/robinzimmermann))
+- Replace support link with Github issues link. Add panel headers [\#530](https://github.com/kaazing/gateway/pull/530) ([robinzimmermann](https://github.com/robinzimmermann))
+- Changed part of script to be http and not tcp [\#529](https://github.com/kaazing/gateway/pull/529) ([dpwspoon](https://github.com/dpwspoon))
+- Updated to K3po 3.0.0.-alpha-29. Fixed two scripts to address fragmen… [\#528](https://github.com/kaazing/gateway/pull/528) ([sanjay-saxena](https://github.com/sanjay-saxena))
+- Removed dynamically generated classes from sonar qube results.  This … [\#527](https://github.com/kaazing/gateway/pull/527) ([dpwspoon](https://github.com/dpwspoon))
+- Removed static from urlCacheControlMap and made it thread safe [\#526](https://github.com/kaazing/gateway/pull/526) ([mgherghe](https://github.com/mgherghe))
+- Changed gateway-config namespace and added default Cache-control: max-age=0 header [\#525](https://github.com/kaazing/gateway/pull/525) ([mgherghe](https://github.com/mgherghe))
+- Adding a test for legacy wsn draft handshake [\#524](https://github.com/kaazing/gateway/pull/524) ([jitsni](https://github.com/jitsni))
+- Investigate.sporadic.failures [\#523](https://github.com/kaazing/gateway/pull/523) ([dpwspoon](https://github.com/dpwspoon))
+- Revert "Removing draft resource address components from distribution" [\#522](https://github.com/kaazing/gateway/pull/522) ([dpwspoon](https://github.com/dpwspoon))
+- moved jacoco\(used for sonar test coverage\) to separate profile and up… [\#519](https://github.com/kaazing/gateway/pull/519) ([AdrianCozma](https://github.com/AdrianCozma))
+- added certificate to travis and enabled management tests for travis [\#518](https://github.com/kaazing/gateway/pull/518) ([AdrianCozma](https://github.com/AdrianCozma))
+- OpeningHandshakeIT.shouldEstablishConnectionWithRequestHeaderSecWebSo… [\#517](https://github.com/kaazing/gateway/pull/517) ([sanjay-saxena](https://github.com/sanjay-saxena))
+- Fixed issue that could cause sporadic failures [\#516](https://github.com/kaazing/gateway/pull/516) ([dpwspoon](https://github.com/dpwspoon))
+- Fixed condition where the write "something" was failing in the script… [\#515](https://github.com/kaazing/gateway/pull/515) ([dpwspoon](https://github.com/dpwspoon))
+- Fixed issue where fragmenentation on wire or k3po pipeline could caus… [\#514](https://github.com/kaazing/gateway/pull/514) ([dpwspoon](https://github.com/dpwspoon))
+- Add Mailchimp signup [\#513](https://github.com/kaazing/gateway/pull/513) ([robinzimmermann](https://github.com/robinzimmermann))
+- Improving out of order log message [\#512](https://github.com/kaazing/gateway/pull/512) ([jitsni](https://github.com/jitsni))
+- Http caching - k3po tests  [\#511](https://github.com/kaazing/gateway/pull/511) ([vstratan](https://github.com/vstratan))
+- Revert of Sec-WebSocket-Protocol enforcement in connector [\#510](https://github.com/kaazing/gateway/pull/510) ([dpwspoon](https://github.com/dpwspoon))
+- Revert "Validation of Sec-WebSocket-Protocol on the connector side" [\#509](https://github.com/kaazing/gateway/pull/509) ([dpwspoon](https://github.com/dpwspoon))
+- Updated the timeout to 30seconds to make the ClusterBalancerServiceIT… [\#507](https://github.com/kaazing/gateway/pull/507) ([sanjay-saxena](https://github.com/sanjay-saxena))
+- Removed.pointless.tests [\#506](https://github.com/kaazing/gateway/pull/506) ([dpwspoon](https://github.com/dpwspoon))
+- "Added Test cases for logging identity" [\#505](https://github.com/kaazing/gateway/pull/505) ([vstratan](https://github.com/vstratan))
+- ignore failures in travis until travis.yml is setup properly [\#504](https://github.com/kaazing/gateway/pull/504) ([dpwspoon](https://github.com/dpwspoon))
+- Reverting the change where ssl tests are run in forked mode. [\#503](https://github.com/kaazing/gateway/pull/503) ([jitsni](https://github.com/jitsni))
+- Adding a log message when binding is not found and 404 is sent [\#502](https://github.com/kaazing/gateway/pull/502) ([jitsni](https://github.com/jitsni))
+- Added on.client.message property to broadcast service, which when set… [\#501](https://github.com/kaazing/gateway/pull/501) ([dpwspoon](https://github.com/dpwspoon))
+- Changed headers last year to 2016 [\#499](https://github.com/kaazing/gateway/pull/499) ([vstratan](https://github.com/vstratan))
+- Adding a log message when binding is not found and 404 is sent [\#498](https://github.com/kaazing/gateway/pull/498) ([jitsni](https://github.com/jitsni))
+- Don't use IoBuffer as it uses AbstractIoBufferEx's IoBufferAllocator [\#497](https://github.com/kaazing/gateway/pull/497) ([jitsni](https://github.com/jitsni))
+- Update copyright to 2016, part 2 [\#496](https://github.com/kaazing/gateway/pull/496) ([ahousing](https://github.com/ahousing))
 - Be explicit about groupID in pom to workaround plugin bug [\#495](https://github.com/kaazing/gateway/pull/495) ([ahousing](https://github.com/ahousing))
 - Update copyright to 2016, update parent in pom.xml [\#494](https://github.com/kaazing/gateway/pull/494) ([ahousing](https://github.com/ahousing))
+- Added Test cases for logging identity  [\#450](https://github.com/kaazing/gateway/pull/450) ([vstratan](https://github.com/vstratan))
 
 ## [5.0.1.55](https://github.com/kaazing/gateway/tree/5.0.1.55) (2016-04-05)
 [Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.54...5.0.1.55)
@@ -398,6 +581,7 @@
 - AgronaMonitoringEntityFactoryTest fails the build \(on Mac OS x\) [\#171](https://github.com/kaazing/gateway/issues/171)
 - \(doc\) Add connect options to service defaults description [\#143](https://github.com/kaazing/gateway/issues/143)
 - \(doc\) Add links to admin-reference/p\_config\_multicast.md [\#134](https://github.com/kaazing/gateway/issues/134)
+- Create a single distribution file for all environments [\#20](https://github.com/kaazing/gateway/issues/20)
 
 **Merged pull requests:**
 
@@ -466,11 +650,13 @@
 
 **Fixed bugs:**
 
+- WSE not working in F5 BIG-IP topologies with multiple gateways on port - BUG \[Duplicate\] [\#187](https://github.com/kaazing/gateway/issues/187)
 - Update to latest community to consume fixes for animal sniffer plugin [\#176](https://github.com/kaazing/gateway/issues/176)
 - Log files are overflowing 4MB maximum on travis when tests fail [\#166](https://github.com/kaazing/gateway/issues/166)
 
 **Closed issues:**
 
+- NioDatagramAcceptorExIT.shouldConnect not all expectations were satisfied \[Duplicate\] [\#185](https://github.com/kaazing/gateway/issues/185)
 - Long start time on systems with low entropy \(containers\) due to calls to getSecureBytes. [\#167](https://github.com/kaazing/gateway/issues/167)
 - \(doc\) Doc markdown needs to use "bash" for the code type [\#124](https://github.com/kaazing/gateway/issues/124)
 
@@ -591,10 +777,6 @@
 ## [5.0.1.22](https://github.com/kaazing/gateway/tree/5.0.1.22) (2015-04-09)
 [Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.21...5.0.1.22)
 
-**Implemented enhancements:**
-
-- Configuration doesn't allow \<connect-options\> in \<service-defaults\> [\#64](https://github.com/kaazing/gateway/issues/64)
-
 **Fixed bugs:**
 
 - SseSameOriginIT.sseIe8HttpxeConnectAndGetData sometimes fails [\#60](https://github.com/kaazing/gateway/issues/60)
@@ -605,6 +787,7 @@
 
 - Use sequence numbers to detect out of order requests in wseb [\#73](https://github.com/kaazing/gateway/issues/73)
 - Add Visitor to reorder elements in accept/connect options [\#70](https://github.com/kaazing/gateway/issues/70)
+- Configuration doesn't allow \<connect-options\> in \<service-defaults\> [\#64](https://github.com/kaazing/gateway/issues/64)
 
 **Merged pull requests:**
 
@@ -615,7 +798,7 @@
 - Added timeout back into WsnConnectorTest [\#86](https://github.com/kaazing/gateway/pull/86) ([dpwspoon](https://github.com/dpwspoon))
 
 ## [5.0.1.21](https://github.com/kaazing/gateway/tree/5.0.1.21) (2015-04-03)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.20...5.0.1.21)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.20...5.0.1.21)
 
 **Fixed bugs:**
 
@@ -633,8 +816,8 @@
 - Wseb sequencing [\#82](https://github.com/kaazing/gateway/pull/82) ([jitsni](https://github.com/jitsni))
 - Added exec to linux startup script [\#81](https://github.com/kaazing/gateway/pull/81) ([dpwspoon](https://github.com/dpwspoon))
 
-## [gateway.distribution-5.0.1.20](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.20) (2015-03-26)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.19...gateway.distribution-5.0.1.20)
+## [5.0.1.20](https://github.com/kaazing/gateway/tree/5.0.1.20) (2015-03-26)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.19...5.0.1.20)
 
 **Fixed bugs:**
 
@@ -684,18 +867,18 @@
 - Add a Gitter chat badge to README.md [\#21](https://github.com/kaazing/gateway/pull/21) ([gitter-badger](https://github.com/gitter-badger))
 - Fixed README nits [\#19](https://github.com/kaazing/gateway/pull/19) ([vjwang](https://github.com/vjwang))
 
-## [gateway.distribution-5.0.1.19](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.19) (2015-01-09)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.18...gateway.distribution-5.0.1.19)
+## [5.0.1.19](https://github.com/kaazing/gateway/tree/5.0.1.19) (2015-01-09)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.18...5.0.1.19)
 
-## [gateway.distribution-5.0.1.18](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.18) (2014-12-20)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.17...gateway.distribution-5.0.1.18)
+## [5.0.1.18](https://github.com/kaazing/gateway/tree/5.0.1.18) (2014-12-20)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.17...5.0.1.18)
 
 **Merged pull requests:**
 
 - Got rid of copyright in pom because they are not auto updated from licen... [\#25](https://github.com/kaazing/gateway/pull/25) ([dpwspoon](https://github.com/dpwspoon))
 
-## [gateway.distribution-5.0.1.17](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.17) (2014-12-18)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.16...gateway.distribution-5.0.1.17)
+## [5.0.1.17](https://github.com/kaazing/gateway/tree/5.0.1.17) (2014-12-18)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.16...5.0.1.17)
 
 **Closed issues:**
 
@@ -706,20 +889,20 @@
 - Apply fix for http://jira.codehaus.org/browse/MASSEMBLY-728  [\#24](https://github.com/kaazing/gateway/pull/24) ([nowucca](https://github.com/nowucca))
 - Updated project to appendAssemblyId false so that artifacts don't need v... [\#22](https://github.com/kaazing/gateway/pull/22) ([dpwspoon](https://github.com/dpwspoon))
 
-## [gateway.distribution-5.0.1.16](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.16) (2014-12-17)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.15...gateway.distribution-5.0.1.16)
+## [5.0.1.16](https://github.com/kaazing/gateway/tree/5.0.1.16) (2014-12-17)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.15...5.0.1.16)
 
-## [gateway.distribution-5.0.1.15](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.15) (2014-12-17)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.1.14...gateway.distribution-5.0.1.15)
+## [5.0.1.15](https://github.com/kaazing/gateway/tree/5.0.1.15) (2014-12-17)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.1.14...5.0.1.15)
 
-## [gateway.distribution-5.0.1.14](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.1.14) (2014-12-16)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.16...gateway.distribution-5.0.1.14)
+## [5.0.1.14](https://github.com/kaazing/gateway/tree/5.0.1.14) (2014-12-16)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.16...5.0.1.14)
 
-## [gateway.distribution-5.0.0.16](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.16) (2014-12-16)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.15...gateway.distribution-5.0.0.16)
+## [5.0.0.16](https://github.com/kaazing/gateway/tree/5.0.0.16) (2014-12-16)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.15...5.0.0.16)
 
-## [gateway.distribution-5.0.0.15](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.15) (2014-12-12)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.14...gateway.distribution-5.0.0.15)
+## [5.0.0.15](https://github.com/kaazing/gateway/tree/5.0.0.15) (2014-12-12)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.14...5.0.0.15)
 
 **Merged pull requests:**
 
@@ -727,31 +910,31 @@
 - Changed filenames and port \# [\#16](https://github.com/kaazing/gateway/pull/16) ([vjwang](https://github.com/vjwang))
 - Updated naming and content [\#13](https://github.com/kaazing/gateway/pull/13) ([vjwang](https://github.com/vjwang))
 
-## [gateway.distribution-5.0.0.14](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.14) (2014-12-11)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.13...gateway.distribution-5.0.0.14)
+## [5.0.0.14](https://github.com/kaazing/gateway/tree/5.0.0.14) (2014-12-11)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.13...5.0.0.14)
 
 **Merged pull requests:**
 
 - KG-13558:  Add an echo service, update the 'It Works' page to connect to... [\#11](https://github.com/kaazing/gateway/pull/11) ([krismcqueen](https://github.com/krismcqueen))
 - Updated project to use kaazing sigar dist [\#7](https://github.com/kaazing/gateway/pull/7) ([dpwspoon](https://github.com/dpwspoon))
 
-## [gateway.distribution-5.0.0.13](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.13) (2014-12-10)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.12...gateway.distribution-5.0.0.13)
+## [5.0.0.13](https://github.com/kaazing/gateway/tree/5.0.0.13) (2014-12-10)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.12...5.0.0.13)
 
-## [gateway.distribution-5.0.0.12](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.12) (2014-12-10)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.11...gateway.distribution-5.0.0.12)
+## [5.0.0.12](https://github.com/kaazing/gateway/tree/5.0.0.12) (2014-12-10)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.11...5.0.0.12)
 
 **Merged pull requests:**
 
 - Updated name of bower-maven-plugin [\#6](https://github.com/kaazing/gateway/pull/6) ([dpwspoon](https://github.com/dpwspoon))
 
-## [gateway.distribution-5.0.0.11](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.11) (2014-12-04)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.10...gateway.distribution-5.0.0.11)
+## [5.0.0.11](https://github.com/kaazing/gateway/tree/5.0.0.11) (2014-12-04)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.10...5.0.0.11)
 
-## [gateway.distribution-5.0.0.10](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.10) (2014-12-04)
-[Full Changelog](https://github.com/kaazing/gateway/compare/gateway.distribution-5.0.0.9...gateway.distribution-5.0.0.10)
+## [5.0.0.10](https://github.com/kaazing/gateway/tree/5.0.0.10) (2014-12-04)
+[Full Changelog](https://github.com/kaazing/gateway/compare/5.0.0.9...5.0.0.10)
 
-## [gateway.distribution-5.0.0.9](https://github.com/kaazing/gateway/tree/gateway.distribution-5.0.0.9) (2014-12-04)
+## [5.0.0.9](https://github.com/kaazing/gateway/tree/5.0.0.9) (2014-12-04)
 **Merged pull requests:**
 
 - Updated project to use bower-dependency-maven-plugin to get bower compon... [\#5](https://github.com/kaazing/gateway/pull/5) ([dpwspoon](https://github.com/dpwspoon))
