@@ -99,7 +99,6 @@ public class HttpConnectorRule implements TestRule {
                 httpConnector = (HttpConnector)transportFactory.getTransport("http").getConnector();
                 httpConnector.setBridgeServiceFactory(serviceFactory);
                 httpConnector.setResourceAddressFactory(addressFactory);
-                httpConnector.setSchedulerProvider(provider);
 
                 base.evaluate();
             } finally {
@@ -115,5 +114,9 @@ public class HttpConnectorRule implements TestRule {
     public HttpConnectorRule setSchedulerProvider(SchedulerProvider provider) {
         this.provider = provider;
         return this;
+    }
+
+    public Map<String, Object> getConnectOptions() {
+        return connectOptions;
     }
 }

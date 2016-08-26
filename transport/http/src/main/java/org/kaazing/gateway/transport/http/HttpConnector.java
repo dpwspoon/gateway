@@ -22,7 +22,7 @@ import static java.util.EnumSet.complementOf;
 import static java.util.EnumSet.of;
 import static org.kaazing.gateway.resource.address.ResourceAddress.NEXT_PROTOCOL;
 import static org.kaazing.gateway.resource.address.ResourceAddress.QUALIFIER;
-import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.CHALLENGE_HANDLER_CLASSES;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATOR;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;
 import static org.kaazing.gateway.transport.BridgeSession.LOCAL_ADDRESS;
 import static org.kaazing.gateway.transport.http.HttpConnectFilter.CONTENT_LENGTH_ADJUSTMENT;
@@ -45,7 +45,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -79,14 +78,10 @@ import org.kaazing.gateway.transport.http.bridge.HttpMessage;
 import org.kaazing.gateway.transport.http.bridge.HttpResponseMessage;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBuffer;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBufferAllocator;
-import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.service.IoProcessorEx;
 import org.kaazing.mina.core.session.IoSessionEx;
-import org.kaazing.netx.http.auth.ChallengeHandler;
-import org.kaazing.netx.http.auth.ChallengeRequest;
-import org.kaazing.netx.http.auth.ChallengeResponse;
 
 public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
 
@@ -412,48 +407,22 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
 
             DefaultHttpSession httpSession = HTTP_SESSION_KEY.get(session);
             HttpMessage httpMessage = (HttpMessage) message;
-//<<<<<<< HEAD
-//            Set<String> headerNames = httpSession.getReadHeaderNames();
-//=======
 
             switch (httpMessage.getKind()) {
             case RESPONSE:
                 HttpResponseMessage httpResponse = (HttpResponseMessage) httpMessage;
                 HttpStatus httpStatus = httpResponse.getStatus();
 
-                // Handle temporary redirect (status 302), for example from http load balancer service
-//                if (httpStatus == HttpStatus.REDIRECT_FOUND && httpSession.getAndDecrementRedirectsAllowed() > 0) {
-//                    String location = httpResponse.getHeader(HEADER_LOCATION);
-//                    ResourceAddress newConnectAddress =
-//                            addressFactory.newResourceAddress(URI.create(location), httpSession.getRemoteAddress());
-//                    Executor executor = org.kaazing.mina.core.session.AbstractIoSessionEx.CURRENT_WORKER.get();
-//                    if (session.getIoExecutor() != executor) {
-//                        throw new RuntimeException("Thread alignment violation when handling redirect");
-//                    }
-//                    connectInternal0(new DefaultConnectFuture(), newConnectAddress, httpSession.getHandler(),
-//                            new HttpSessionFactory() {
-//
-//                                @Override
-//                                public DefaultHttpSession get(IoSession parent) throws Exception {
-//                                    return httpSession;
-//                                }
-//
-//                            });
-//                    return;
-//                }
 
                 if (httpStatus == HttpStatus.CLIENT_UNAUTHORIZED) {
                     ResourceAddress remoteAddress = httpSession.getRemoteAddress();
-                    Collection<Class<? extends ChallengeHandler>> challengeHandlers =
-                            remoteAddress.getOption(CHALLENGE_HANDLER_CLASSES);
+                    Class<? extends Authenticator> authenticator =
+                            remoteAddress.getOption(AUTHENTICATOR);
                     // TODO, this will need to be thread aligned in edge case where it does not reuse the same tcp
                     // connection i.e connection: close
-                    if (challengeHandlers != null) {
+                    if (authenticator != null) {
                         String location = remoteAddress.getExternalURI();
                         String wwwAuthHeader = ((HttpResponseMessage) httpMessage).getHeader("WWW-Authenticate");
-                        if (!wwwAuthHeader.startsWith("Application")) {
-                            Matcher challengeMatcher = CHALLENGE_PATTERN.matcher(wwwAuthHeader);
-                            if (challengeMatcher.matches()) {
                                 PasswordAuthentication creds = Authenticator.requestPasswordAuthentication(remoteAddress.getResource().getHost(),
                                         InetAddress.getByName(remoteAddress.getResource().getHost()),
                                         remoteAddress.getResource().getPort(), "HTTP", wwwAuthHeader,
@@ -477,9 +446,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                                     });
                                     return;
                                 }
-                            } else {
-                                logger.warn(String.format("Can't parse WWW-Authenticate: %s", wwwAuthHeader));
-                            }
                         } else {
                             ChallengeRequest challengeRequest = new ChallengeRequest(location, wwwAuthHeader);
 
@@ -588,6 +554,7 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
 //                });
 //                return;
 //            }
+        
         private boolean shouldFollowRedirects(DefaultHttpSession httpSession) {
             Integer redirctBehavior = httpSession.getRemoteAddress().getOption(MAXIMUM_REDIRECTS);
             return redirctBehavior != null && redirctBehavior > 0;

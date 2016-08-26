@@ -16,7 +16,6 @@
 package org.kaazing.gateway.transport.http;
 
 import static java.lang.String.format;
-import static org.kaazing.gateway.transport.BridgeSession.LOCAL_ADDRESS;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpProtocolCompatibilityFilter.HttpConditionalWrappedResponseFilter.conditionallyWrappedResponsesRequired;
 import static org.kaazing.gateway.util.InternalSystemProperty.HTTPXE_SPECIFICATION;
 
@@ -42,12 +41,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.security.auth.Subject;
 
-import org.apache.mina.core.future.IoFuture;
-import org.apache.mina.core.future.IoFutureListener;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.service.IoProcessor;
 import org.kaazing.gateway.resource.address.ResourceAddress;
-import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.security.auth.context.ResultAwareLoginContext;
 import org.kaazing.gateway.transport.AbstractBridgeSession;
 import org.kaazing.gateway.transport.CommitFuture;
@@ -67,7 +63,6 @@ import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.service.IoProcessorEx;
 import org.kaazing.mina.core.service.IoServiceEx;
 import org.kaazing.mina.core.session.IoSessionEx;
-import org.kaazing.netx.http.auth.ChallengeHandler;
 
 // TODO: change to just support cookie list and internal differential for write
 public class DefaultHttpSession extends AbstractBridgeSession<DefaultHttpSession, HttpBuffer> implements HttpAcceptSession, HttpConnectSession {

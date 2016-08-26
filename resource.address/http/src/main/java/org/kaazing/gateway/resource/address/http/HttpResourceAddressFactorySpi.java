@@ -21,16 +21,16 @@ import static org.kaazing.gateway.resource.address.ResourceFactories.changeSchem
 import static org.kaazing.gateway.resource.address.ResourceFactories.keepAuthorityOnly;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATION_CONNECT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATION_IDENTIFIER;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATOR;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.BALANCE_ORIGINS;
-import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.CHALLENGE_HANDLER_CLASSES;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.ENCRYPTION_KEY_ALIAS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.GATEWAY_ORIGIN_SECURITY;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.INJECTABLE_HEADERS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE_CONNECTIONS;
-import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE_TIMEOUT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.LOGIN_CONTEXT_FACTORY;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.ORIGIN_SECURITY;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_COOKIE_NAMES;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_HEADER_NAMES;
@@ -47,9 +47,9 @@ import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.TEMP
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.TRANSPORT_NAME;
 
 import java.io.File;
+import java.net.Authenticator;
 import java.net.URI;
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,7 +65,6 @@ import org.kaazing.gateway.resource.address.ResourceOptions;
 import org.kaazing.gateway.resource.address.uri.URIUtils;
 import org.kaazing.gateway.security.CrossSiteConstraintContext;
 import org.kaazing.gateway.security.LoginContextFactory;
-import org.kaazing.netx.http.auth.ChallengeHandler;
 
 public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<HttpResourceAddress> {
 
@@ -245,9 +244,9 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
             options.setOption(REALM_USER_PRINCIPAL_CLASSES, realmUserPrincipalClasses);
         }
 
-        Collection<Class<? extends ChallengeHandler>> challengeHandlerClasses = (Collection<Class<? extends ChallengeHandler>>) optionsByName.remove(CHALLENGE_HANDLER_CLASSES.name());
-        if (challengeHandlerClasses != null) {
-            options.setOption(CHALLENGE_HANDLER_CLASSES, challengeHandlerClasses);
+        Class<? extends Authenticator> authenticator = (Class<? extends Authenticator>) optionsByName.remove(AUTHENTICATOR.name());
+        if (authenticator != null) {
+            options.setOption(AUTHENTICATOR, authenticator);
         }
 
         IdentityResolver httpIdentityResolver = (IdentityResolver) optionsByName.remove(IDENTITY_RESOLVER.name());
@@ -347,7 +346,6 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
         address.setOption0(SERVICE_DOMAIN, options.getOption(SERVICE_DOMAIN));
         address.setOption0(SERVER_HEADER_ENABLED, options.getOption(SERVER_HEADER_ENABLED));
         address.setOption0(REALM_USER_PRINCIPAL_CLASSES, options.getOption(REALM_USER_PRINCIPAL_CLASSES));
-        address.setOption0(CHALLENGE_HANDLER_CLASSES, options.getOption(CHALLENGE_HANDLER_CLASSES));
         if (address.getOption(IDENTITY_RESOLVER) == null) {
              Collection<Class<? extends Principal>> realmUserPrincipalClasses = address.getOption(REALM_USER_PRINCIPAL_CLASSES);
              if (realmUserPrincipalClasses != null && realmUserPrincipalClasses.size() > 0) {

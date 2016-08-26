@@ -29,7 +29,6 @@ import static org.kaazing.gateway.resource.address.ResourceAddress.TRANSPORT_URI
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.DEFAULT_HTTP_KEEPALIVE_CONNECTIONS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE_CONNECTIONS;
-import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.HTTP_REDIRECT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE_TIMEOUT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.LOGIN_CONTEXT_FACTORY;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;

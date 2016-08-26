@@ -22,7 +22,6 @@ import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,7 +41,6 @@ import org.kaazing.gateway.transport.http.HttpConnectorRule;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
-import org.kaazing.netx.http.auth.ChallengeHandler;
 
 public class AuthenticatorIT {
 
@@ -66,6 +64,7 @@ public class AuthenticatorIT {
     @Specification("basic.challenge.and.accept")
     @Test
     public void basicChallengeAndAccept() throws Exception {
+        // TODO, move authenticator to connect options
         Authenticator.setDefault(new Authenticator(){
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
@@ -90,10 +89,7 @@ public class AuthenticatorIT {
                 oneOf(handler).sessionClosed(with(any(IoSession.class)));
             }
         });
-        ArrayList<Class<? extends ChallengeHandler>> challengeHandlers = new ArrayList<>();
-        challengeHandlers.add(TestChallengeHandler.class);
         Map<String, Object> connectOptions = new HashMap<>();
-        connectOptions.put("http.challengeHandler", challengeHandlers);
 
         connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
             @Override
