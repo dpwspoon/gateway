@@ -577,10 +577,8 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
         public V putIfAbsent(K key, V value, long ttl, TimeUnit timeunit) {
             removeExpiredEntries();
             V result = this.map.putIfAbsent(key, value);
-            System.out.println(result);
             if(result == null){
                 this.mapToExpiration.put(key, currentTimeMillis() + MILLISECONDS.convert(ttl, timeunit));
-                System.out.println(mapToExpiration);
             }
             return result;
         }

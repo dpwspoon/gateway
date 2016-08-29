@@ -77,7 +77,7 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
 
     private static final Map<String, List<ResourceFactory>> RESOURCE_FACTORIES_BY_KEY
             = new HashMap<>();
-
+    
     static {
         // go backwards so we can set alternate addresses correctly
         List<ResourceFactory> insecureAlternateResourceFactories = Collections.singletonList(

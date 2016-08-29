@@ -36,6 +36,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
+import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.transport.http.HttpConnectSession;
 import org.kaazing.gateway.transport.http.HttpConnectorRule;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
@@ -64,23 +65,8 @@ public class AuthenticatorIT {
     @Specification("basic.challenge.and.accept")
     @Test
     public void basicChallengeAndAccept() throws Exception {
+        connector.getConnectOptions().put("http.authenticator", "class:org.kaazing.gateway.transport.http.security.auth.connector.SampleAuthenticator");
         // TODO, move authenticator to connect options
-        Authenticator.setDefault(new Authenticator(){
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                String host = this.getRequestingHost();
-                int port = this.getRequestingPort();
-                String prompt = this.getRequestingPrompt();
-                String protocol = this.getRequestingProtocol();
-                String scheme = this.getRequestingScheme();
-                InetAddress site = this.getRequestingSite();
-                URL url = this.getRequestingURL();
-                RequestorType type = this.getRequestorType();
-                System.out.println("canAuthenticate: \n" + host + "\n" + port + "\n" + prompt + "\n" + protocol + "\n" + scheme
-                        + "\n" + site + "\n" + url + "\n" + type + "\n");
-                return new PasswordAuthentication("joe", new char[] {'w', 'e', 'l', 'c', 'o', 'm', 'e'});
-            }
-        });
         final IoHandler handler = context.mock(IoHandler.class);
         context.checking(new Expectations() {
             {

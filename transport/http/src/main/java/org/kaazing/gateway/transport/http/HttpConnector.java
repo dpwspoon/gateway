@@ -39,16 +39,12 @@ import java.net.InetAddress;
 import java.net.PasswordAuthentication;
 import java.net.SocketAddress;
 import java.net.URI;
-import java.net.URL;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-import java.util.regex.Matcher;
 
 import javax.annotation.Resource;
 
@@ -81,7 +77,6 @@ import org.kaazing.gateway.transport.http.bridge.HttpResponseMessage;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBuffer;
 import org.kaazing.gateway.transport.http.bridge.filter.HttpBufferAllocator;
 import org.kaazing.gateway.transport.http.security.auth.WWWAuthChallenge;
-import org.kaazing.gateway.transport.http.security.auth.WWWAuthenticateHeaderUtils;
 import org.kaazing.mina.core.buffer.IoBufferAllocatorEx;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 import org.kaazing.mina.core.service.IoProcessorEx;
@@ -98,7 +93,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
     private BridgeServiceFactory bridgeServiceFactory;
     ResourceAddressFactory addressFactory;
     private final PersistentConnectionPool persistentConnectionsStore;
-    private Properties configuration;
 
     public HttpConnector() {
         super(new DefaultIoSessionConfigEx());
@@ -120,11 +114,6 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
     @Resource(name = "resourceAddressFactory")
     public void setResourceAddressFactory(ResourceAddressFactory resourceAddressFactory) {
         this.addressFactory = resourceAddressFactory;
-    }
-
-    @Resource(name = "configuration")
-    public void setConfiguration(Properties configuration) {
-        this.configuration = configuration;
     }
 
     @Override

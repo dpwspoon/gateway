@@ -76,7 +76,7 @@ public class NegotiateHttpChallengeFactoryTest {
                 atLeast(1).of(address).getOption(HttpResourceAddress.REALM_CHALLENGE_SCHEME);
                 will(returnValue(authenticationScheme));
 
-                allowing(address).getOption(HttpResourceAddress.AUTHENTICATOR);
+                allowing(address).getOption(HttpResourceAddress.AUTHENTICATION_CONNECT);
                 will(returnValue(authConnect == null ? null : URI.create(authConnect).toASCIIString()));
                 allowing(address).getOption(HttpResourceAddress.AUTHENTICATION_IDENTIFIER);
                 will(returnValue(authIdentifier));
