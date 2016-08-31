@@ -18,6 +18,9 @@ package org.kaazing.gateway.transport.http.security.auth;
 
 import static java.lang.String.format;
 
+import java.net.PasswordAuthentication;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +29,8 @@ public class WWWAuthChallenge {
     static final String TYPE_GROUP_NAME = "scheme";
     static final String REALM_GROUP_NAME = "realm";
     static final Pattern SCHEME_PATTERN =
-            Pattern.compile(format("(?<%s>[a-zA-Z_]+) realm=\"(?<%s>[^\\s]+)\".*", TYPE_GROUP_NAME, REALM_GROUP_NAME));
+            Pattern.compile(format("(?<%s>[a-zA-Z_]+) realm=\"(?<%s>[^\"]+)\".*", TYPE_GROUP_NAME, REALM_GROUP_NAME));
+    protected static final String[] SUPPORTED_SCHEMES = new String[]{"basic", "digest"};
 
     private final String challenge;
     private final String realm;
@@ -48,7 +52,25 @@ public class WWWAuthChallenge {
         return realm;
     }
 
-    public String getType() {
+    public String getScheme() {
         return type;
     }
+
+    public static String[] getSupportedSchemes() {
+        return SUPPORTED_SCHEMES;
+    }
+
+    public static String encodeAuthorizationHeader(String scheme, PasswordAuthentication value) {
+        if(value == null){
+            return null;
+        }else if("basic".equalsIgnoreCase(scheme)){
+            // https://tools.ietf.org/html/rfc7617
+            char[] pwd = value.getPassword();
+            String encodedBytes = Base64.getEncoder().encodeToString((value.getUserName() + ":" + new String(pwd)).getBytes());
+            Arrays.fill(pwd, ' ');
+            return "Basic " + encodedBytes;
+        }
+        return null;
+    }
+
 }

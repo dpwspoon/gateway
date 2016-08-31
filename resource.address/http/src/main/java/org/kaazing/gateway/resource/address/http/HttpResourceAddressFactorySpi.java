@@ -21,7 +21,6 @@ import static org.kaazing.gateway.resource.address.ResourceFactories.changeSchem
 import static org.kaazing.gateway.resource.address.ResourceFactories.keepAuthorityOnly;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATION_CONNECT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATION_IDENTIFIER;
-import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.AUTHENTICATOR;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.BALANCE_ORIGINS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.ENCRYPTION_KEY_ALIAS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.GATEWAY_ORIGIN_SECURITY;
@@ -31,6 +30,7 @@ import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.KEEP_ALIVE_TIMEOUT;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.LOGIN_CONTEXT_FACTORY;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAXIMUM_REDIRECTS;
+import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.MAX_AUTHENTICATION_ATTEMPTS;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.ORIGIN_SECURITY;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_COOKIE_NAMES;
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.REALM_AUTHENTICATION_HEADER_NAMES;
@@ -47,7 +47,6 @@ import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.TEMP
 import static org.kaazing.gateway.resource.address.http.HttpResourceAddress.TRANSPORT_NAME;
 
 import java.io.File;
-import java.net.Authenticator;
 import java.net.URI;
 import java.security.Principal;
 import java.util.Collection;
@@ -244,9 +243,12 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
             options.setOption(REALM_USER_PRINCIPAL_CLASSES, realmUserPrincipalClasses);
         }
 
-        Class<? extends Authenticator> authenticator = (Class<? extends Authenticator>) optionsByName.remove(AUTHENTICATOR.name());
-        if (authenticator != null) {
-            options.setOption(AUTHENTICATOR, authenticator);
+        Object maxAuthenticationAttempts = optionsByName.remove(MAX_AUTHENTICATION_ATTEMPTS.name());
+        if (maxAuthenticationAttempts != null) {
+            if (maxAuthenticationAttempts instanceof String) {
+                maxAuthenticationAttempts = Integer.parseInt((String) maxAuthenticationAttempts);
+            }
+            options.setOption(MAX_AUTHENTICATION_ATTEMPTS, (Integer) maxAuthenticationAttempts);
         }
 
         IdentityResolver httpIdentityResolver = (IdentityResolver) optionsByName.remove(IDENTITY_RESOLVER.name());
@@ -346,6 +348,7 @@ public class HttpResourceAddressFactorySpi extends ResourceAddressFactorySpi<Htt
         address.setOption0(SERVICE_DOMAIN, options.getOption(SERVICE_DOMAIN));
         address.setOption0(SERVER_HEADER_ENABLED, options.getOption(SERVER_HEADER_ENABLED));
         address.setOption0(REALM_USER_PRINCIPAL_CLASSES, options.getOption(REALM_USER_PRINCIPAL_CLASSES));
+        address.setOption0(MAX_AUTHENTICATION_ATTEMPTS, options.getOption(MAX_AUTHENTICATION_ATTEMPTS));
         if (address.getOption(IDENTITY_RESOLVER) == null) {
              Collection<Class<? extends Principal>> realmUserPrincipalClasses = address.getOption(REALM_USER_PRINCIPAL_CLASSES);
              if (realmUserPrincipalClasses != null && realmUserPrincipalClasses.size() > 0) {

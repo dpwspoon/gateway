@@ -40,7 +40,7 @@ public class WWWAuthenticateHeaderUtilsTest {
         Assert.assertEquals(SINGLE_TYPE_WWW_AUTH_HEADER, result[0]);
 
         WWWAuthChallenge challenge = new WWWAuthChallenge(result[0]);
-        Assert.assertEquals("Basic", challenge.getType());
+        Assert.assertEquals("Basic", challenge.getScheme());
         Assert.assertEquals("factor1", challenge.getRealm());
         Assert.assertEquals(SINGLE_TYPE_WWW_AUTH_HEADER, challenge.getChallenge());
     }
@@ -52,7 +52,7 @@ public class WWWAuthenticateHeaderUtilsTest {
         Assert.assertEquals(SINGLE_TYPE_WWW_AUTH_HEADER_WITH_PARAMS, result[0]);
 
         WWWAuthChallenge challenge = new WWWAuthChallenge(result[0]);
-        Assert.assertEquals("Newauth", challenge.getType());
+        Assert.assertEquals("Newauth", challenge.getScheme());
         Assert.assertEquals("apps", challenge.getRealm());
         Assert.assertEquals(SINGLE_TYPE_WWW_AUTH_HEADER_WITH_PARAMS, challenge.getChallenge());
     }
@@ -67,11 +67,11 @@ public class WWWAuthenticateHeaderUtilsTest {
         Assert.assertEquals(expectedChallenge2, result[1]);
 
         WWWAuthChallenge challenge = new WWWAuthChallenge(result[0]);
-        Assert.assertEquals("Newauth", challenge.getType());
+        Assert.assertEquals("Newauth", challenge.getScheme());
         Assert.assertEquals("apps", challenge.getRealm());
         Assert.assertEquals(expectedChallenge1, challenge.getChallenge());
         challenge = new WWWAuthChallenge(result[1]);
-        Assert.assertEquals("Basic", challenge.getType());
+        Assert.assertEquals("Basic", challenge.getScheme());
         Assert.assertEquals("simple", challenge.getRealm());
         Assert.assertEquals(expectedChallenge2, challenge.getChallenge());
     }
@@ -84,11 +84,11 @@ public class WWWAuthenticateHeaderUtilsTest {
         List<WWWAuthChallenge> result = getChallenges(MULTIPLE_TYPE_WWW_AUTH_HEADER_WITH_PARAMS);
 
         WWWAuthChallenge challenge = result.get(0);
-        Assert.assertEquals("Newauth", challenge.getType());
+        Assert.assertEquals("Newauth", challenge.getScheme());
         Assert.assertEquals("apps", challenge.getRealm());
         Assert.assertEquals(expectedChallenge1, challenge.getChallenge());
         challenge = result.get(1);
-        Assert.assertEquals("Basic", challenge.getType());
+        Assert.assertEquals("Basic", challenge.getScheme());
         Assert.assertEquals("simple", challenge.getRealm());
         Assert.assertEquals(expectedChallenge2, challenge.getChallenge());
     }

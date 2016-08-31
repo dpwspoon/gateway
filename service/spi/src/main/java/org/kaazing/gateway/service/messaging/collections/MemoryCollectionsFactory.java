@@ -621,6 +621,7 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
         }
 
         private void removeExpiredEntries() {
+            // TODO, concurrency protection...?
             long ct = System.currentTimeMillis();
             this.mapToExpiration.entrySet().removeIf(e -> {
                 boolean found = e.getValue() < ct;

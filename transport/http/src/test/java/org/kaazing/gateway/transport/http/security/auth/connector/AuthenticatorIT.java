@@ -15,13 +15,13 @@
  */
 package org.kaazing.gateway.transport.http.security.auth.connector;
 
+import static org.junit.Assert.assertEquals;
 import static org.kaazing.gateway.transport.http.HttpMethod.GET;
+import static org.kaazing.gateway.transport.http.HttpStatus.CLIENT_UNAUTHORIZED;
+import static org.kaazing.gateway.transport.http.HttpStatus.SUCCESS_OK;
 import static org.kaazing.test.util.ITUtil.createRuleChain;
 
 import java.net.Authenticator;
-import java.net.InetAddress;
-import java.net.PasswordAuthentication;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +32,14 @@ import org.apache.mina.core.session.IoSessionInitializer;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.lib.concurrent.Synchroniser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
-import org.kaazing.gateway.resource.address.http.HttpResourceAddress;
 import org.kaazing.gateway.transport.http.HttpConnectSession;
 import org.kaazing.gateway.transport.http.HttpConnectorRule;
+import org.kaazing.gateway.transport.http.HttpSession;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
@@ -60,13 +61,18 @@ public class AuthenticatorIT {
     public void initialize() {
         context = new Mockery();
         context.setThreadingPolicy(new Synchroniser());
+        Authenticator.setDefault(new TestAuthenticator());
+    }
+
+    @After
+    public void cleanUp() {
+        Authenticator.setDefault(null);
     }
 
     @Specification("basic.challenge.and.accept")
     @Test
     public void basicChallengeAndAccept() throws Exception {
-        connector.getConnectOptions().put("http.authenticator", "class:org.kaazing.gateway.transport.http.security.auth.connector.SampleAuthenticator");
-        // TODO, move authenticator to connect options
+        connector.getConnectOptions().put("http.max.authentication.attempts", "1");
         final IoHandler handler = context.mock(IoHandler.class);
         context.checking(new Expectations() {
             {
@@ -77,7 +83,7 @@ public class AuthenticatorIT {
         });
         Map<String, Object> connectOptions = new HashMap<>();
 
-        connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+        ConnectFuture connectFuture = connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
             @Override
             public void initializeSession(IoSession session, ConnectFuture future) {
                 HttpConnectSession connectSession = (HttpConnectSession) session;
@@ -86,6 +92,35 @@ public class AuthenticatorIT {
         }, connectOptions);
 
         k3po.finish();
+        HttpSession connectSession = (HttpSession) connectFuture.getSession();
+        assertEquals(SUCCESS_OK, connectSession.getStatus());
+    }
+
+    @Specification("basic.challenge.twice")
+    @Test
+    public void wontChallengeMoreThenNumberOfAttempts() throws Exception {
+        connector.getConnectOptions().put("http.max.authentication.attempts", "1");
+        final IoHandler handler = context.mock(IoHandler.class);
+        context.checking(new Expectations() {
+            {
+                oneOf(handler).sessionCreated(with(any(IoSession.class)));
+                oneOf(handler).sessionOpened(with(any(IoSession.class)));
+                oneOf(handler).sessionClosed(with(any(IoSession.class)));
+            }
+        });
+        Map<String, Object> connectOptions = new HashMap<>();
+        
+        ConnectFuture connectFuture = connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+            @Override
+            public void initializeSession(IoSession session, ConnectFuture future) {
+                HttpConnectSession connectSession = (HttpConnectSession) session;
+                connectSession.setMethod(GET);
+            }
+        }, connectOptions);
+        
+        k3po.finish();
+        HttpSession connectSession = (HttpSession) connectFuture.getSession();
+        assertEquals(CLIENT_UNAUTHORIZED, connectSession.getStatus());
     }
 
 }

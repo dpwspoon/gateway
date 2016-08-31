@@ -16,7 +16,6 @@
 package org.kaazing.gateway.resource.address.http;
 
 import java.io.File;
-import java.net.Authenticator;
 import java.net.URI;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -67,7 +66,7 @@ public final class HttpResourceAddress extends ResourceAddress {
     public static final HttpResourceOption<Boolean> SERVER_HEADER_ENABLED = new HttpServerHeaderOption();
     public static final HttpResourceOption<Collection<Class<? extends Principal>>> REALM_USER_PRINCIPAL_CLASSES = new HttpRealmAuthenticationUserPrincipalClassesOption();
 
-    public static final ResourceOption<Class<? extends Authenticator>> AUTHENTICATOR = new AuthenticatorOption();
+    public static final ResourceOption<Integer> MAX_AUTHENTICATION_ATTEMPTS = new MaxAuthenticationAttemptsOption();
 
     private Boolean serverHeaderEnabled = SERVER_HEADER_ENABLED.defaultValue();
     private Boolean keepAlive = KEEP_ALIVE.defaultValue();
@@ -88,6 +87,7 @@ public final class HttpResourceAddress extends ResourceAddress {
     private File tempDirectory;
     private GatewayHttpOriginSecurity gatewayOriginSecurity;
     private Collection<String> balanceOrigins;
+    private Integer maxAuthenticationAttempts;
     
 
     private String authenticationConnect;
@@ -97,7 +97,6 @@ public final class HttpResourceAddress extends ResourceAddress {
 
     private Collection<Class<? extends Principal>> realmUserPrincipalClasses;
 
-    private Class<? extends Authenticator> authenticator;
 
 	HttpResourceAddress(ResourceAddressFactorySpi factory, String original, URI resource) {
 		super(factory, original, resource);
@@ -155,8 +154,8 @@ public final class HttpResourceAddress extends ResourceAddress {
                     return (V) serviceDomain;
                 case SERVER_HEADER:
                     return (V) serverHeaderEnabled;
-                case AUTHENTICATOR:
-                    return (V) authenticator;
+                case MAX_AUTHENTICATION_ATTEMPTS:
+                    return (V) maxAuthenticationAttempts;
                 case REALM_USER_PRINCIPAL_CLASSES:
                     return (V) realmUserPrincipalClasses;
             }
@@ -243,8 +242,8 @@ public final class HttpResourceAddress extends ResourceAddress {
                 case REALM_USER_PRINCIPAL_CLASSES:
                     realmUserPrincipalClasses = (Collection<Class<? extends Principal>>) value;
                     return;
-                case AUTHENTICATOR:
-                    authenticator = (Class<? extends Authenticator>) value;
+                case MAX_AUTHENTICATION_ATTEMPTS:
+                    maxAuthenticationAttempts = (Integer) value;
                     return;
             }
         }
@@ -270,7 +269,7 @@ public final class HttpResourceAddress extends ResourceAddress {
             LOGIN_CONTEXT_FACTORY, INJECTABLE_HEADERS,
             ORIGIN_SECURITY, TEMP_DIRECTORY, GATEWAY_ORIGIN_SECURITY, BALANCE_ORIGINS,
             AUTHENTICATION_CONNECT, AUTHENTICATION_IDENTIFIER, ENCRYPTION_KEY_ALIAS, SERVICE_DOMAIN, SERVER_HEADER,
-            REALM_USER_PRINCIPAL_CLASSES, AUTHENTICATOR ,MAX_REDIRECTS
+            REALM_USER_PRINCIPAL_CLASSES, AUTHENTICATOR ,MAX_REDIRECTS, MAX_AUTHENTICATION_ATTEMPTS;
         }
 
         private static final Map<String, ResourceOption<?>> OPTION_NAMES = new HashMap<>();
@@ -433,9 +432,9 @@ public final class HttpResourceAddress extends ResourceAddress {
         }
     }
  
-    private static final class AuthenticatorOption extends HttpResourceOption<Class<? extends Authenticator>> {
-        private AuthenticatorOption() {
-            super(Kind.AUTHENTICATOR, "authenticator", null);
+    private static final class MaxAuthenticationAttemptsOption extends HttpResourceOption<Integer> {
+        private MaxAuthenticationAttemptsOption() {
+            super(Kind.MAX_AUTHENTICATION_ATTEMPTS, "max.authentication.attempts", 0);
         }
     }
 

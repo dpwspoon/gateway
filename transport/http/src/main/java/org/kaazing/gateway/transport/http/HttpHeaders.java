@@ -18,6 +18,7 @@ package org.kaazing.gateway.transport.http;
 public interface HttpHeaders {
 
     String HEADER_AUTHORIZATION = "Authorization";
+    String HEADER_PROXY_AUTHORIZATION = "Proxy-Authorization";
     String HEADER_CONTENT_LENGTH = "Content-Length";
     String HEADER_CONTENT_TYPE = "Content-Type";
     String HEADER_DATE = "Date";
