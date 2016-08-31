@@ -106,7 +106,7 @@ import org.slf4j.Logger;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class GatewayContextResolver<V> {
+public class GatewayContextResolver {
     public static final String AUTHORIZATION_MODE_CHALLENGE = "challenge";
 
     /**
@@ -1076,14 +1076,6 @@ public class GatewayContextResolver<V> {
             return null;
         }
         return String.valueOf(l);
-    }
-
-    private String resolveAuthorizationMode(AuthenticationType.AuthorizationMode.Enum authorizationMode) {
-        if (authorizationMode == null) {
-            return AUTHORIZATION_MODE_CHALLENGE;
-        } else {
-            return authorizationMode.toString();
-        }
     }
 
     // NOTE: Code between the previous and next methods was moved from here to SecurityContextResolver

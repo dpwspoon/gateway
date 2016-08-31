@@ -45,3 +45,4 @@ public class TestAuthenticator extends Authenticator{
         return new PasswordAuthentication("joe", new char[] {'w', 'e', 'l', 'c', 'o', 'm', 'e'});
     }
 }
+
