@@ -44,5 +44,11 @@ public class TestAuthenticator extends Authenticator{
          type = this.getRequestorType();
         return new PasswordAuthentication("joe", new char[] {'w', 'e', 'l', 'c', 'o', 'm', 'e'});
     }
+
+    @Override
+    public String toString() {
+        return "host: " + host + ", " + "port: " + port + ", " + "prompt: " + prompt + ", " + "protocol: " + protocol + ", "
+                + "scheme: " + scheme + ", " + "site: " + site + ", " + "url: " + url + ", " + "type: " + type;
+    }
 }
 

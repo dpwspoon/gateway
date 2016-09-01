@@ -403,30 +403,17 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                     String authenticate = getAuthentication(httpSession, (HttpResponseMessage) httpMessage, SERVER);
                     if (authenticate != null) {
                         authenticate(httpSession, session, authenticate, SERVER);
-                        break;
+                    }else{
+                        HttpContentMessage httpContent = httpResponse.getContent();
+                        if (httpContent == null) {
+                            IoBufferAllocatorEx<? extends HttpBuffer> allocator = httpSession.getBufferAllocator();
+                            httpContent = new HttpContentMessage(allocator.wrap(allocator.allocate(0)), true);
+                        }
+                        fireContentReceived(httpSession, httpContent);
                     }
-                    HttpContentMessage httpContent = httpResponse.getContent();
-                    if (httpContent == null) {
-                        IoBufferAllocatorEx<? extends HttpBuffer> allocator = httpSession.getBufferAllocator();
-                        httpContent = new HttpContentMessage(allocator.wrap(allocator.allocate(0)), true);
-                    }
-                    fireContentReceived(httpSession, httpContent);
-                    break;
-                case CLIENT_PROXY_AUTHENTICATION_REQUIRED:
-                    authenticate = getAuthentication(httpSession, (HttpResponseMessage) httpMessage, PROXY);
-                    if (authenticate != null) {
-                        authenticate(httpSession, session, authenticate, PROXY);
-                        break;
-                    }
-                    httpContent = httpResponse.getContent();
-                    if (httpContent == null) {
-                        IoBufferAllocatorEx<? extends HttpBuffer> allocator = httpSession.getBufferAllocator();
-                        httpContent = new HttpContentMessage(allocator.wrap(allocator.allocate(0)), true);
-                    }
-                    fireContentReceived(httpSession, httpContent);
                     break;
                 default:
-                    httpContent = httpResponse.getContent();
+                    HttpContentMessage httpContent = httpResponse.getContent();
                     if (httpContent == null) {
                         IoBufferAllocatorEx<? extends HttpBuffer> allocator = httpSession.getBufferAllocator();
                         httpContent = new HttpContentMessage(allocator.wrap(allocator.allocate(0)), true);
@@ -485,7 +472,7 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
                                 InetAddress.getByName(remoteURI.getHost()),
                                 remoteURI.getPort(),
                                 "HTTP",
-                                challenge.getChallenge(),
+                                challenge.getChallenge().replaceFirst(scheme + " ", ""),
                                 scheme,
                                 remoteURI.toURL(),
                                 requestorType);

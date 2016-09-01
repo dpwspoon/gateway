@@ -23,8 +23,8 @@ import org.kaazing.gateway.service.messaging.collections.CollectionsFactory;
 
 import com.hazelcast.core.IMap;
 
-final class DefaultExpiringState extends ExpiringState {
-    private IMap<Object, Object> delegate;
+final class DefaultExpiringState implements ExpiringState {
+    private final IMap<Object, Object> delegate;
 
     protected DefaultExpiringState(CollectionsFactory collectionsFactory) {
         this.delegate = collectionsFactory.getMap(ExpiringState.NAME);

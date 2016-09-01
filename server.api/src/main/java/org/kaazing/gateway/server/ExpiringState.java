@@ -23,8 +23,9 @@ import java.util.concurrent.TimeUnit;
  * via the Map<String,?> options, under the name "ExpiringState".
  *
  */
-public abstract class ExpiringState {
+public interface ExpiringState {
 
+    // TODO remove internally
     public static final String NAME = "ExpiringState";
 
     /**

@@ -16,7 +16,6 @@
 
 package org.kaazing.gateway.transport.http;
 
-
 import org.apache.mina.core.session.IoSession;
 import org.kaazing.mina.core.session.IoSessionEx;
 

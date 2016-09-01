@@ -280,7 +280,7 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
     private class IMapImpl<K, V> implements IMap<K, V> {
 
         private final ConcurrentHashMap<K, V> map;
-        private final ConcurrentHashMap<K, Long> mapToExpiration;
+        private final ConcurrentHashMap<K, Long> keyExpirations;
         private final EntryListenerSupport<K,V> listenerSupport;
         private final ConcurrentMap<Object, Lock> locks;
         private final String name;
@@ -290,7 +290,7 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
             this.map = new ConcurrentHashMap<>();
             this.listenerSupport = new EntryListenerSupport<>();
             this.locks = new ConcurrentHashMap<>();
-            this.mapToExpiration = new ConcurrentHashMap<>();
+            this.keyExpirations = new ConcurrentHashMap<>();
         }
 
         @Override
@@ -564,21 +564,21 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
         }
 
         @Override
-        public boolean lockMap(long time, TimeUnit timeunit) {
+        public boolean lockMap(long time, TimeUnit unit) {
             throw new UnsupportedOperationException("lockMap");
         }
 
         @Override
-        public V put(K key, V value, long ttl, TimeUnit timeunit) {
+        public V put(K key, V value, long ttl, TimeUnit unit) {
             throw new UnsupportedOperationException("put");
         }
 
         @Override
-        public V putIfAbsent(K key, V value, long ttl, TimeUnit timeunit) {
+        public V putIfAbsent(K key, V value, long ttl, TimeUnit unit) {
             removeExpiredEntries();
             V result = this.map.putIfAbsent(key, value);
             if(result == null){
-                this.mapToExpiration.put(key, currentTimeMillis() + MILLISECONDS.convert(ttl, timeunit));
+                this.keyExpirations.put(key, currentTimeMillis() + unit.toMillis(ttl));
             }
             return result;
         }
@@ -609,11 +609,11 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
 	@SuppressWarnings("unchecked")
 	@Override
 	public V remove(Object key) {
+            removeExpiredEntries();
             V value = map.remove(key);
             boolean removed = (value !=  null);
             if (removed) {
-                this.mapToExpiration.remove(key);
-                removeExpiredEntries();
+                this.keyExpirations.remove(key);
                 EntryEvent<K, V> event = new EntryEvent<>(name, null, EntryEvent.TYPE_REMOVED, (K)key, value);
                 listenerSupport.entryRemoved(event);
             }
@@ -621,14 +621,14 @@ public class MemoryCollectionsFactory implements CollectionsFactory {
         }
 
         private void removeExpiredEntries() {
-            // TODO, concurrency protection...?
-            long ct = System.currentTimeMillis();
-            this.mapToExpiration.entrySet().removeIf(e -> {
-                boolean found = e.getValue() < ct;
-                if (found) {
+            long currentMillis = currentTimeMillis();
+            this.keyExpirations.entrySet().removeIf(e -> {
+                final Long expiration = e.getValue();
+                if (currentMillis >= expiration.longValue()) {
                     map.remove(e.getKey());
+                    return true;
                 }
-                return found;
+                return false;
             });
         }
 

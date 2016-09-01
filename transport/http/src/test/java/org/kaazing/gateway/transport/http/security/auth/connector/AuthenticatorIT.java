@@ -15,6 +15,7 @@
  */
 package org.kaazing.gateway.transport.http.security.auth.connector;
 
+import static java.net.Authenticator.setDefault;
 import static org.junit.Assert.assertEquals;
 import static org.kaazing.gateway.transport.http.HttpMethod.GET;
 import static org.kaazing.gateway.transport.http.HttpStatus.CLIENT_UNAUTHORIZED;
@@ -22,16 +23,23 @@ import static org.kaazing.gateway.transport.http.HttpStatus.SUCCESS_OK;
 import static org.kaazing.test.util.ITUtil.createRuleChain;
 
 import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandler;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.core.session.IoSessionInitializer;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
 import org.jmock.lib.concurrent.Synchroniser;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -40,9 +48,11 @@ import org.junit.rules.TestRule;
 import org.kaazing.gateway.transport.http.HttpConnectSession;
 import org.kaazing.gateway.transport.http.HttpConnectorRule;
 import org.kaazing.gateway.transport.http.HttpSession;
+import org.kaazing.gateway.transport.http.HttpStatus;
 import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
+import org.kaazing.mina.core.buffer.IoBufferEx;
 
 public class AuthenticatorIT {
 
@@ -51,22 +61,104 @@ public class AuthenticatorIT {
 
     @Rule
     public TestRule chain = createRuleChain(connector, k3po);
-    
-    @Rule
-    public ResetAuthenticatorRule authenticator = new ResetAuthenticatorRule();
 
+    @Rule
+    public ResetAuthenticatorRule resetAuthenticatorRule = new ResetAuthenticatorRule();
+
+    AuthenticatorMock authenticator;
     private Mockery context;
+
+    public abstract class AuthenticatorMock extends Authenticator {
+        public abstract PasswordAuthentication getPasswordAuthentication();
+    }
 
     @Before
     public void initialize() {
-        context = new Mockery();
+        context = new Mockery() {
+            {
+                setImposteriser(ClassImposteriser.INSTANCE);
+            }
+        };
         context.setThreadingPolicy(new Synchroniser());
-        Authenticator.setDefault(new TestAuthenticator());
+        authenticator = context.mock(AuthenticatorMock.class);
+        // inner class this
+        setDefault(authenticator);
+    }
+    
+    @After
+    public void after(){
+        context.assertIsSatisfied();
     }
 
-    @After
-    public void cleanUp() {
-        Authenticator.setDefault(null);
+    private class CountDownALatch implements Action {
+
+        private CountDownLatch latch;
+
+        public CountDownALatch(CountDownLatch latch) {
+            this.latch = latch;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Unlocks a latch so no need for timeouts in test");
+        }
+
+        @Override
+        public Object invoke(Invocation invocation) throws Throwable {
+            latch.countDown();
+            return null;
+        }
+    }
+
+    private SessionWithStatus withHttpSessionOfStatus(HttpStatus status) {
+        return new SessionWithStatus(status);
+    }
+
+    private class SessionWithStatus extends BaseMatcher<HttpSession> {
+
+        private HttpStatus status;
+
+        public SessionWithStatus(HttpStatus status) {
+            this.status = status;
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            return item instanceof HttpSession && status.equals(((HttpSession) item).getStatus());
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("Matches HttpSession with status " + status);
+        }
+    }
+
+    @Specification("basic.challenge")
+    @Test
+    public void basicChallenge() throws Exception {
+        connector.getConnectOptions().put("http.max.authentication.attempts", "0");
+        final IoHandler handler = context.mock(IoHandler.class);
+        final CountDownLatch latch = new CountDownLatch(1);
+        context.checking(new Expectations() {
+            {
+                oneOf(handler).sessionCreated(with(any(IoSession.class)));
+                oneOf(handler).sessionOpened(with(any(IoSession.class)));
+                oneOf(handler).messageReceived(with(withHttpSessionOfStatus(CLIENT_UNAUTHORIZED)), with(any(IoBufferEx.class)));
+                oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                will(new CountDownALatch(latch));
+            }
+        });
+        Map<String, Object> connectOptions = new HashMap<>();
+        connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+            @Override
+            public void initializeSession(IoSession session, ConnectFuture future) {
+                HttpConnectSession connectSession = (HttpConnectSession) session;
+                connectSession.setMethod(GET);
+            }
+        }, connectOptions);
+
+        k3po.finish();
+        latch.await();
     }
 
     @Specification("basic.challenge.and.accept")
@@ -78,12 +170,15 @@ public class AuthenticatorIT {
             {
                 oneOf(handler).sessionCreated(with(any(IoSession.class)));
                 oneOf(handler).sessionOpened(with(any(IoSession.class)));
+                oneOf(handler).messageReceived(with(any(IoSession.class)), with(any(Object.class)));
                 oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                oneOf(authenticator).getPasswordAuthentication();
+                will(returnValue(new PasswordAuthentication("joe", new char[]{'w', 'e', 'l', 'c', 'o', 'm', 'e'})));
             }
         });
         Map<String, Object> connectOptions = new HashMap<>();
 
-        ConnectFuture connectFuture = connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+        connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
             @Override
             public void initializeSession(IoSession session, ConnectFuture future) {
                 HttpConnectSession connectSession = (HttpConnectSession) session;
@@ -92,8 +187,7 @@ public class AuthenticatorIT {
         }, connectOptions);
 
         k3po.finish();
-        HttpSession connectSession = (HttpSession) connectFuture.getSession();
-        assertEquals(SUCCESS_OK, connectSession.getStatus());
+        context.assertIsSatisfied();
     }
 
     @Specification("basic.challenge.twice")
@@ -106,21 +200,55 @@ public class AuthenticatorIT {
                 oneOf(handler).sessionCreated(with(any(IoSession.class)));
                 oneOf(handler).sessionOpened(with(any(IoSession.class)));
                 oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                oneOf(authenticator).getPasswordAuthentication();
+                will(returnValue(new PasswordAuthentication("joe", new char[]{'w', 'e', 'l', 'c', 'o', 'm', 'e'})));
             }
         });
         Map<String, Object> connectOptions = new HashMap<>();
-        
-        ConnectFuture connectFuture = connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
-            @Override
-            public void initializeSession(IoSession session, ConnectFuture future) {
-                HttpConnectSession connectSession = (HttpConnectSession) session;
-                connectSession.setMethod(GET);
-            }
-        }, connectOptions);
-        
+
+        ConnectFuture connectFuture =
+                connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+                    @Override
+                    public void initializeSession(IoSession session, ConnectFuture future) {
+                        HttpConnectSession connectSession = (HttpConnectSession) session;
+                        connectSession.setMethod(GET);
+                    }
+                }, connectOptions);
+
         k3po.finish();
         HttpSession connectSession = (HttpSession) connectFuture.getSession();
         assertEquals(CLIENT_UNAUTHORIZED, connectSession.getStatus());
+    }
+
+    @Specification("basic.challenge.twice")
+    @Test
+    public void willChallengeMultipleAttempts() throws Exception {
+        connector.getConnectOptions().put("http.max.authentication.attempts", "2");
+        final IoHandler handler = context.mock(IoHandler.class);
+        context.checking(new Expectations() {
+            {
+                oneOf(handler).sessionCreated(with(any(IoSession.class)));
+                oneOf(handler).sessionOpened(with(any(IoSession.class)));
+                oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                exactly(2).of(authenticator).getPasswordAuthentication();
+                will(returnValue(new PasswordAuthentication("joe", new char[]{'w', 'e', 'l', 'c', 'o', 'm', 'e'})));
+            }
+        });
+        Map<String, Object> connectOptions = new HashMap<>();
+
+        ConnectFuture connectFuture =
+                connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+                    @Override
+                    public void initializeSession(IoSession session, ConnectFuture future) {
+                        HttpConnectSession connectSession = (HttpConnectSession) session;
+                        connectSession.setMethod(GET);
+                    }
+                }, connectOptions);
+
+        k3po.finish();
+        connectFuture.await();
+        HttpSession connectSession = (HttpSession) connectFuture.getSession();
+        assertEquals(SUCCESS_OK, connectSession.getStatus());
     }
 
 }
