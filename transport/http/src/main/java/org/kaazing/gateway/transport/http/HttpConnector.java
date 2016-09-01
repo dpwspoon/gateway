@@ -16,7 +16,6 @@
 package org.kaazing.gateway.transport.http;
 
 import static java.lang.String.format;
-import static java.net.Authenticator.RequestorType.PROXY;
 import static java.net.Authenticator.RequestorType.SERVER;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.EnumSet.allOf;

@@ -26,7 +26,6 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandler;
@@ -36,6 +35,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.States;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -58,6 +58,7 @@ public class AuthenticatorIT {
 
     private final HttpConnectorRule connector = new HttpConnectorRule().setSchedulerProvider(new SchedulerProvider());
     private final K3poRule k3po = new K3poRule();
+    private States testState;
 
     @Rule
     public TestRule chain = createRuleChain(connector, k3po);
@@ -67,6 +68,8 @@ public class AuthenticatorIT {
 
     AuthenticatorMock authenticator;
     private Mockery context;
+
+    Synchroniser syncronizer;
 
     public abstract class AuthenticatorMock extends Authenticator {
         public abstract PasswordAuthentication getPasswordAuthentication();
@@ -79,35 +82,17 @@ public class AuthenticatorIT {
                 setImposteriser(ClassImposteriser.INSTANCE);
             }
         };
-        context.setThreadingPolicy(new Synchroniser());
+        testState = context.states("testState").startsAs("initial-state");
+        syncronizer = new Synchroniser();
+        context.setThreadingPolicy(syncronizer);
         authenticator = context.mock(AuthenticatorMock.class);
         // inner class this
         setDefault(authenticator);
     }
-    
+
     @After
-    public void after(){
+    public void after() {
         context.assertIsSatisfied();
-    }
-
-    private class CountDownALatch implements Action {
-
-        private CountDownLatch latch;
-
-        public CountDownALatch(CountDownLatch latch) {
-            this.latch = latch;
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            description.appendText("Unlocks a latch so no need for timeouts in test");
-        }
-
-        @Override
-        public Object invoke(Invocation invocation) throws Throwable {
-            latch.countDown();
-            return null;
-        }
     }
 
     private SessionWithStatus withHttpSessionOfStatus(HttpStatus status) {
@@ -138,14 +123,13 @@ public class AuthenticatorIT {
     public void basicChallenge() throws Exception {
         connector.getConnectOptions().put("http.max.authentication.attempts", "0");
         final IoHandler handler = context.mock(IoHandler.class);
-        final CountDownLatch latch = new CountDownLatch(1);
         context.checking(new Expectations() {
             {
                 oneOf(handler).sessionCreated(with(any(IoSession.class)));
                 oneOf(handler).sessionOpened(with(any(IoSession.class)));
                 oneOf(handler).messageReceived(with(withHttpSessionOfStatus(CLIENT_UNAUTHORIZED)), with(any(IoBufferEx.class)));
                 oneOf(handler).sessionClosed(with(any(IoSession.class)));
-                will(new CountDownALatch(latch));
+                then(testState.is("finished"));
             }
         });
         Map<String, Object> connectOptions = new HashMap<>();
@@ -158,7 +142,7 @@ public class AuthenticatorIT {
         }, connectOptions);
 
         k3po.finish();
-        latch.await();
+        syncronizer.waitUntil(testState.is("finished"));
     }
 
     @Specification("basic.challenge.and.accept")
@@ -170,10 +154,11 @@ public class AuthenticatorIT {
             {
                 oneOf(handler).sessionCreated(with(any(IoSession.class)));
                 oneOf(handler).sessionOpened(with(any(IoSession.class)));
-                oneOf(handler).messageReceived(with(any(IoSession.class)), with(any(Object.class)));
-                oneOf(handler).sessionClosed(with(any(IoSession.class)));
                 oneOf(authenticator).getPasswordAuthentication();
                 will(returnValue(new PasswordAuthentication("joe", new char[]{'w', 'e', 'l', 'c', 'o', 'm', 'e'})));
+                oneOf(handler).messageReceived(with(withHttpSessionOfStatus(SUCCESS_OK)), with(any(IoBufferEx.class)));
+                oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                then(testState.is("finished"));
             }
         });
         Map<String, Object> connectOptions = new HashMap<>();
@@ -187,7 +172,7 @@ public class AuthenticatorIT {
         }, connectOptions);
 
         k3po.finish();
-        context.assertIsSatisfied();
+        syncronizer.waitUntil(testState.is("finished"));
     }
 
     @Specification("basic.challenge.twice")
@@ -199,28 +184,28 @@ public class AuthenticatorIT {
             {
                 oneOf(handler).sessionCreated(with(any(IoSession.class)));
                 oneOf(handler).sessionOpened(with(any(IoSession.class)));
-                oneOf(handler).sessionClosed(with(any(IoSession.class)));
                 oneOf(authenticator).getPasswordAuthentication();
                 will(returnValue(new PasswordAuthentication("joe", new char[]{'w', 'e', 'l', 'c', 'o', 'm', 'e'})));
+                oneOf(handler).messageReceived(with(withHttpSessionOfStatus(CLIENT_UNAUTHORIZED)), with(any(IoBufferEx.class)));
+                oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                then(testState.is("finished"));
             }
         });
         Map<String, Object> connectOptions = new HashMap<>();
 
-        ConnectFuture connectFuture =
-                connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
-                    @Override
-                    public void initializeSession(IoSession session, ConnectFuture future) {
-                        HttpConnectSession connectSession = (HttpConnectSession) session;
-                        connectSession.setMethod(GET);
-                    }
-                }, connectOptions);
+        connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+            @Override
+            public void initializeSession(IoSession session, ConnectFuture future) {
+                HttpConnectSession connectSession = (HttpConnectSession) session;
+                connectSession.setMethod(GET);
+            }
+        }, connectOptions);
 
         k3po.finish();
-        HttpSession connectSession = (HttpSession) connectFuture.getSession();
-        assertEquals(CLIENT_UNAUTHORIZED, connectSession.getStatus());
+        syncronizer.waitUntil(testState.is("finished"));
     }
 
-    @Specification("basic.challenge.twice")
+    @Specification("basic.challenge.twice.and.accept")
     @Test
     public void willChallengeMultipleAttempts() throws Exception {
         connector.getConnectOptions().put("http.max.authentication.attempts", "2");
@@ -229,26 +214,25 @@ public class AuthenticatorIT {
             {
                 oneOf(handler).sessionCreated(with(any(IoSession.class)));
                 oneOf(handler).sessionOpened(with(any(IoSession.class)));
-                oneOf(handler).sessionClosed(with(any(IoSession.class)));
                 exactly(2).of(authenticator).getPasswordAuthentication();
                 will(returnValue(new PasswordAuthentication("joe", new char[]{'w', 'e', 'l', 'c', 'o', 'm', 'e'})));
+                oneOf(handler).messageReceived(with(withHttpSessionOfStatus(SUCCESS_OK)), with(any(IoBufferEx.class)));
+                oneOf(handler).sessionClosed(with(any(IoSession.class)));
+                then(testState.is("finished"));
             }
         });
         Map<String, Object> connectOptions = new HashMap<>();
 
-        ConnectFuture connectFuture =
-                connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
-                    @Override
-                    public void initializeSession(IoSession session, ConnectFuture future) {
-                        HttpConnectSession connectSession = (HttpConnectSession) session;
-                        connectSession.setMethod(GET);
-                    }
-                }, connectOptions);
+        connector.connect("http://localhost:8080/resource", handler, new IoSessionInitializer<ConnectFuture>() {
+            @Override
+            public void initializeSession(IoSession session, ConnectFuture future) {
+                HttpConnectSession connectSession = (HttpConnectSession) session;
+                connectSession.setMethod(GET);
+            }
+        }, connectOptions);
 
         k3po.finish();
-        connectFuture.await();
-        HttpSession connectSession = (HttpSession) connectFuture.getSession();
-        assertEquals(SUCCESS_OK, connectSession.getStatus());
+        syncronizer.waitUntil(testState.is("finished"));
     }
 
 }
