@@ -18,6 +18,7 @@ package org.kaazing.gateway.transport.http;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.service.IoHandler;
@@ -44,8 +45,8 @@ public class HttpConnectorRule implements TestRule {
 
     private ResourceAddressFactory addressFactory;
     private HttpConnector httpConnector;
-    private SchedulerProvider provider;
     private Map<String, Object> connectOptions = new HashMap<>();
+    private final Properties props = new Properties();
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -100,6 +101,8 @@ public class HttpConnectorRule implements TestRule {
                 httpConnector.setBridgeServiceFactory(serviceFactory);
                 httpConnector.setResourceAddressFactory(addressFactory);
 
+                httpConnector.setConfiguration(props);
+
                 base.evaluate();
             } finally {
                 tcpConnector.dispose();
@@ -111,12 +114,12 @@ public class HttpConnectorRule implements TestRule {
 
     }
 
-    public HttpConnectorRule setSchedulerProvider(SchedulerProvider provider) {
-        this.provider = provider;
-        return this;
-    }
-
     public Map<String, Object> getConnectOptions() {
         return connectOptions;
+    }
+
+    public HttpConnectorRule addProperty(String key, String value) {
+        props.put(key, value);
+        return this;
     }
 }

@@ -25,6 +25,7 @@ import static org.kaazing.gateway.resource.address.uri.URIUtils.getQuery;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getScheme;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getUserInfo;
 import static org.kaazing.gateway.service.util.ServiceUtils.LIST_SEPARATOR;
+import static org.kaazing.gateway.util.feature.EarlyAccessFeatures.LOGIN_MODULE_EXPIRING_STATE;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -52,7 +53,6 @@ import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.security.auth.login.Configuration;
 
-import org.apache.mina.util.ExpiringMap;
 import org.kaazing.gateway.resource.address.ResourceAddressFactory;
 import org.kaazing.gateway.security.AuthenticationContext;
 import org.kaazing.gateway.security.CrossSiteConstraintContext;
@@ -975,7 +975,9 @@ public class GatewayContextResolver {
                     // (see FileLoginModule for an example)
                     options.put(Gateway.GATEWAY_CONFIG_DIRECTORY_PROPERTY, configuration
                             .getProperty(Gateway.GATEWAY_CONFIG_DIRECTORY_PROPERTY));
-                    options.put(ExpiringState.NAME, new DefaultExpiringState(clusterContext.getCollectionsFactory()));
+                    if (LOGIN_MODULE_EXPIRING_STATE.isEnabled(configuration)) {
+                        options.put(ExpiringState.NAME, new DefaultExpiringState(clusterContext.getCollectionsFactory()));
+                    }
 
                     LoginModuleOptionsType rawOptions = loginModule.getOptions();
                     if (rawOptions != null) {

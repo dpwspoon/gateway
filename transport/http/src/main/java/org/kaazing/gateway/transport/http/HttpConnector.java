@@ -34,6 +34,7 @@ import static org.kaazing.gateway.transport.http.HttpUtils.hasCloseHeader;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpNextProtocolHeaderFilter.PROTOCOL_HTTPXE_1_1;
 import static org.kaazing.gateway.transport.http.bridge.filter.HttpProtocolFilter.PROTOCOL_HTTP_1_1;
 import static org.kaazing.gateway.transport.http.security.auth.WWWAuthenticateHeaderUtils.getChallenges;
+import static org.kaazing.gateway.util.feature.EarlyAccessFeatures.HTTP_AUTHENTICATOR;
 
 import java.io.IOException;
 import java.net.Authenticator;
@@ -457,7 +458,7 @@ public class HttpConnector extends AbstractBridgeConnector<DefaultHttpSession> {
             HttpResponseMessage httpMessage, RequestorType requestorType) {
             Integer maxAthenticates = new Integer((httpSession.getRemoteAddress().getOption(MAX_AUTHENTICATION_ATTEMPTS)));
             String result = null;
-            if (maxAthenticates > 0) {
+            if (maxAthenticates > 0 && HTTP_AUTHENTICATOR.isEnabled(configuration)) {
                 try {
                     ResourceAddress remoteAddress = httpSession.getRemoteAddress();
                     final URI remoteURI = remoteAddress.getResource();

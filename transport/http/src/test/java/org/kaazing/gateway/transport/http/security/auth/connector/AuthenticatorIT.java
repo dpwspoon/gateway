@@ -16,10 +16,10 @@
 package org.kaazing.gateway.transport.http.security.auth.connector;
 
 import static java.net.Authenticator.setDefault;
-import static org.junit.Assert.assertEquals;
 import static org.kaazing.gateway.transport.http.HttpMethod.GET;
 import static org.kaazing.gateway.transport.http.HttpStatus.CLIENT_UNAUTHORIZED;
 import static org.kaazing.gateway.transport.http.HttpStatus.SUCCESS_OK;
+import static org.kaazing.gateway.util.feature.EarlyAccessFeatures.HTTP_AUTHENTICATOR;
 import static org.kaazing.test.util.ITUtil.createRuleChain;
 
 import java.net.Authenticator;
@@ -36,8 +36,6 @@ import org.hamcrest.Description;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.States;
-import org.jmock.api.Action;
-import org.jmock.api.Invocation;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
@@ -49,14 +47,13 @@ import org.kaazing.gateway.transport.http.HttpConnectSession;
 import org.kaazing.gateway.transport.http.HttpConnectorRule;
 import org.kaazing.gateway.transport.http.HttpSession;
 import org.kaazing.gateway.transport.http.HttpStatus;
-import org.kaazing.gateway.util.scheduler.SchedulerProvider;
 import org.kaazing.k3po.junit.annotation.Specification;
 import org.kaazing.k3po.junit.rules.K3poRule;
 import org.kaazing.mina.core.buffer.IoBufferEx;
 
 public class AuthenticatorIT {
 
-    private final HttpConnectorRule connector = new HttpConnectorRule().setSchedulerProvider(new SchedulerProvider());
+    private final HttpConnectorRule connector = new HttpConnectorRule().addProperty(HTTP_AUTHENTICATOR.getPropertyName(), "true");
     private final K3poRule k3po = new K3poRule();
     private States testState;
 
