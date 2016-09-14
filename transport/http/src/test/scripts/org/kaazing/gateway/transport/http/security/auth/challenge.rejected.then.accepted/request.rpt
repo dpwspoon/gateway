@@ -1,8 +1,10 @@
 connect http://localhost:8080/index.html
        option transport tcp://localhost:8081
+       # TO gateway #1
 connected
 
 write method "GET"
+# probably don't even need authorized header
 write header "Authorized" "joe:welcome"
 write close
 
@@ -13,13 +15,16 @@ close
 connect await FIRST_REQUEST_COMPLETE
 write await CONNECT_TO_SECOND_GATEWAY
 
+
+
+
 connect http://localhost:8080/index.html
        option transport tcp://localhost:8082
+      # TO gateway #1
 connected
 
-
-
 write method "GET"
+# probably don't even need authorized header
 write header "Authorized" "joe:welcome"
 
 

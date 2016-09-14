@@ -19,11 +19,18 @@ import org.kaazing.test.util.ITUtil;
 import org.kaazing.test.util.ResolutionTestUtils;
 
 
+/*
+K3po Scripts
+
+                        >|<  cluster 1
+                          with login module that counts attempts via shared Expiring State
+1.   ------ >                                              increase count to 1
+                        >|<  cluster 2
+                          with login module that counts attempts via shared Expiring State
+2.   ------ >                                              sees count is 1 so pass login module 
 
 
-
-
-
+*/
 
 public class ExpiringStateIT {
 
@@ -64,6 +71,7 @@ public class ExpiringStateIT {
                   .type("directory")
                   .accept("tcp://localhost:8080")
                   .accept(acceptMemberLink)
+                  .realmName("demo")
                 .done()
                 .security()
                   .realm()
@@ -72,9 +80,9 @@ public class ExpiringStateIT {
                     .httpChallengeScheme("Basic")
                     .done()
                   .done()
-//                    .httpQueryParameter("token")
-//                .loginModule()
-//                .type("class:org.kaazing.gateway.management.test.util.TokenCustomLoginModule")
+                    .httpQueryParameter("token") // Don't think you need this
+                .loginModule()
+                .type("class:org.kaazing.gateway.management.test.util.TokenCustomLoginModule")
                 .done();
 
     }
@@ -85,8 +93,7 @@ public class ExpiringStateIT {
 
     @Test
     @Specification({
-            "challenge.rejected.then.accepted/request",
-            "challenge.rejected.then.accepted/response" })
+            "challenge.rejected.then.accepted/request"})
     public void expiringState() throws Exception {
 
 
