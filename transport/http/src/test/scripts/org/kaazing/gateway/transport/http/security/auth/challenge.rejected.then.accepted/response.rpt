@@ -1,10 +1,10 @@
-connect http://localhost:8080/index.html
-       option transport tcp://localhost:8081
-connected
+# connect http://localhost:8080/index.html
+#       option transport tcp://localhost:8081
+# connected
 
 read method "GET"
 read header "Host" "localhost:8080"
-read closed
+closed
 
 write status "200" "OK"
 write version "HTTP/1.1"
@@ -12,21 +12,21 @@ write header content-length
 write header "Content-Type" "text/html"
 write "<html><body>Hello World!</body></html>"
 read notify FIRST_REQUEST_COMPLETE
-write close
+close
 
-## Connect to cluster 2.  You will need to sync this on a barrier,
-# I'm not sure of connect barrier syntax off the top of my head
+
 connect http://localhost:8080/index.html
        option transport tcp://localhost:8082
 connected
 
+write notify CONNECT_TO_SECOND_GATEWAY
+
 read method "GET"
 read header "Host" "localhost:8080"
-read closed
 
 write status "200" "OK"
 write version "HTTP/1.1"
 write header content-length
 write header "Content-Type" "text/html"
 write "<html><body>Hello World!</body></html>"
-write close
+close
