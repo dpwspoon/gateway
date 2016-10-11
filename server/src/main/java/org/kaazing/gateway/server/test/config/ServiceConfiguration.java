@@ -32,7 +32,6 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
 
     private Suppressible<String> _name;
     private Suppressible<String> _type;
-    private Suppressible<String> _realmName;
     private Suppressible<String> _description;
 
     private final Set<Suppressible<String>> balances;
@@ -50,6 +49,8 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
     private final Map<String, Suppressible<List<String>>> properties;
     private final Map<String, List<String>> unsuppressibleProperties;
     private final List<NestedServicePropertiesConfiguration> nestedProperties;
+    private final List<Suppressible<String>> realmNames;
+    private final List<String> unsuppressibleRealmNames;
 
     public ServiceConfiguration() {
         _configuration = new SuppressibleServiceConfigurationImpl();
@@ -75,6 +76,9 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
 
         properties = new HashMap<>();
         unsuppressibleProperties = Suppressibles.unsuppressibleMap(properties);
+
+        realmNames = new ArrayList<>();
+        unsuppressibleRealmNames = Suppressibles.unsuppressibleList(realmNames);
 
         authorizationConstraints = new LinkedList<>();
         crossOriginConstraints = new LinkedList<>();
@@ -179,14 +183,11 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
 
     // realm name
     public void setRealmName(String realmName) {
-        this._realmName = new Suppressible<>(realmName);
+        this.unsuppressibleRealmNames.add(realmName);
     }
 
-    public String getRealmName() {
-        if (_realmName == null) {
-            return null;
-        }
-        return _realmName.value();
+    public List<String> getRealmName() {
+        return unsuppressibleRealmNames;
     }
 
     // type
@@ -258,7 +259,8 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
                 properties.get(key).value().add(v);
             } else {
                 List<String> newValue = new ArrayList<String>(Arrays.asList(v));
-                Suppressible<List<String>> supValue = new Suppressible<List<String>>(newValue, Suppressibles.getDefaultSuppressions());
+                Suppressible<List<String>> supValue =
+                        new Suppressible<List<String>>(newValue, Suppressibles.getDefaultSuppressions());
                 properties.put(key, supValue);
             }
         }
@@ -294,13 +296,13 @@ public class ServiceConfiguration implements Configuration<SuppressibleServiceCo
         }
 
         @Override
-        public Suppressible<String> getRealmName() {
-            return _realmName;
+        public List<Suppressible<String>> getRealmName() {
+            return realmNames;
         }
 
         @Override
         public void setRealmName(Suppressible<String> realmName) {
-            _realmName = realmName;
+            realmNames.add(realmName);
         }
 
         @Override

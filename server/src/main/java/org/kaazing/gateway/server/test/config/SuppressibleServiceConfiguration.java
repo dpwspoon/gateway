@@ -42,7 +42,7 @@ public abstract class SuppressibleServiceConfiguration implements SuppressibleCo
     public abstract void setName(Suppressible<String> name);
 
     // realm name
-    public abstract Suppressible<String> getRealmName();
+    public abstract List<Suppressible<String>> getRealmName();
 
     public abstract void setRealmName(Suppressible<String> realmName);
 

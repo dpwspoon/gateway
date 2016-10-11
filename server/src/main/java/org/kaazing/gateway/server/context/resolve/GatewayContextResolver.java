@@ -15,6 +15,8 @@
  */
 package org.kaazing.gateway.server.context.resolve;
 
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.buildURIAsString;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getAuthority;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getFragment;
@@ -25,6 +27,7 @@ import static org.kaazing.gateway.resource.address.uri.URIUtils.getQuery;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getScheme;
 import static org.kaazing.gateway.resource.address.uri.URIUtils.getUserInfo;
 import static org.kaazing.gateway.service.util.ServiceUtils.LIST_SEPARATOR;
+import static org.kaazing.gateway.util.InternalSystemProperty.TCP_PROCESSOR_COUNT;
 import static org.kaazing.gateway.util.feature.EarlyAccessFeatures.LOGIN_MODULE_EXPIRING_STATE;
 
 import java.io.File;
@@ -35,6 +38,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Key;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -520,16 +524,7 @@ public class GatewayContextResolver {
             for (AuthorizationConstraintType authConstraint : serviceConfig.getAuthorizationConstraintArray()) {
                 Collections.addAll(requireRolesCollection, authConstraint.getRequireRoleArray());
             }
-            RealmContext realmContext = null;
-            String name = serviceConfig.getRealmName();
-            if (serviceConfig.isSetRealmName()) {
-                realmContext = realmsContext.getRealmContext(name);
-                if (realmContext != null && !name.equals("auth-required")) {
-                    if (requireRolesCollection.isEmpty()) {
-                        Collections.addAll(requireRolesCollection, "*");
-                    }
-                }
-            }
+
             String[] requireRoles = requireRolesCollection.toArray(new String[requireRolesCollection.size()]);
 
             // Add the service-specific mime mappings on top of the service-defaults+hardcoded.
@@ -632,13 +627,19 @@ public class GatewayContextResolver {
                 }
             }
 
-            RealmContext serviceRealmContext = null;
-            final String realmName = serviceConfig.getRealmName();
-            if (serviceConfig.isSetRealmName()) {
-                serviceRealmContext = realmsContext.getRealmContext(realmName);
-                if (serviceRealmContext == null) {
-                    throw new IllegalArgumentException("Unrecognized realm name \"" + realmName + "\".");
-                }
+            List<RealmContext> serviceRealmContexts = null;
+
+            String invalidRealmName = stream(serviceConfig.getRealmNameArray())
+                    .filter(r -> realmsContext.getRealmContext(r) == null).findFirst().get();
+            if (invalidRealmName != null) {
+                throw new IllegalArgumentException("Unrecognized realm name \"" + invalidRealmName + "\".");
+            }
+
+            stream(serviceConfig.getRealmNameArray()).forEach(r -> serviceRealmContexts.add(realmsContext.getRealmContext(r)));
+
+            List<String> realmNames = Arrays.asList(serviceConfig.getRealmNameArray());
+            if (!realmNames.isEmpty() && requireRolesCollection.isEmpty()) {
+                requireRolesCollection.add("*");
             }
 
             ServiceAcceptOptionsType acceptOptions = serviceConfig.getAcceptOptions();
@@ -656,7 +657,7 @@ public class GatewayContextResolver {
 
             Key encryptionKey = null;
 
-            if (serviceRealmContext == null &&
+            if (serviceRealmContexts.isEmpty() &&
                     requireRolesCollection.size() > 0) {
 
                 throw new IllegalArgumentException("Authorization constraints require a " +
@@ -668,12 +669,12 @@ public class GatewayContextResolver {
                             tempDir, balanceURIs, acceptURIs, connectURIs,
                             properties, requireRoles,
                             mimeMappings, acceptConstraintsByURI, clusterContext,
-                            acceptOptionsContext, connectOptionsContext, serviceRealmContext,
+                            acceptOptionsContext, connectOptionsContext, serviceRealmContexts,
                             encryptionKey, schedulerProvider,
                             supportsAccepts(serviceType),
                             supportsConnects(serviceType),
                             supportsMimeMappings(serviceType),
-                            InternalSystemProperty.TCP_PROCESSOR_COUNT.getIntProperty(configuration),
+                            TCP_PROCESSOR_COUNT.getIntProperty(configuration),
                             transportFactory,
                             resourceAddressFactory);
 

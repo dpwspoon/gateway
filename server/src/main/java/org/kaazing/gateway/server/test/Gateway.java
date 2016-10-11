@@ -359,10 +359,8 @@ public class Gateway {
     }
 
     private void setRealmName(ServiceConfiguration service, ServiceType newService) {
-        String realmName = service.getRealmName();
-        if (realmName != null) {
-            newService.setRealmName(realmName);
-        }
+        List<String> realmNames = service.getRealmName();
+        newService.setRealmNameArray(realmNames.toArray(new String[realmNames.size()]));
     }
 
     private void setType(ServiceConfiguration service, ServiceType newService) {
