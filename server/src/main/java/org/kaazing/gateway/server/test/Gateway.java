@@ -85,6 +85,8 @@ public class Gateway {
     private final Launcher launcher = new Launcher(gatewayObserver);
     private volatile State state = State.STOPPED;
     private GatewayConfigDocument gatewayConfigXml;
+    private GatewayContextResolver resolver;
+    private GatewayConfiguration configuration;
 
     public void start(GatewayConfiguration configuration) throws Exception {
         switch (state) {
@@ -95,13 +97,19 @@ public class Gateway {
 
         switch (state) {
         case STARTING:
+            this.configuration = configuration;
             GatewayContext context = createGatewayContext(configuration);
             launcher.init(context);
             state = State.STARTED;
             break;
         }
     }
+    
 
+    public void restartServices(ServiceConfiguration serviceConfiguraltion){
+        resolver.resolveService(serviceConfiguration);
+    }
+    
     public GatewayConfigDocument getGatewayConfigXml() {
         return gatewayConfigXml;
     }
@@ -125,7 +133,7 @@ public class Gateway {
 
         MBeanServer jmxMBeanServer = configuration.getJmxMBeanServer();
 
-        GatewayContextResolver resolver = new GatewayContextResolver(securityResolver, webRootDir, tempDir,
+        resolver = new GatewayContextResolver(securityResolver, webRootDir, tempDir,
                 jmxMBeanServer);
         Properties properties = new Properties();
         properties.putAll(configuration.getProperties());

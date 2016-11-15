@@ -220,6 +220,7 @@ public class GatewayContextResolver {
     }
 
     public GatewayContext resolve(GatewayConfigDocument gatewayConfigDoc, Properties configuration) throws Exception {
+        // gatewayConfigDoc  <===>  
         GatewayConfigDocument.GatewayConfig gatewayConfig = gatewayConfigDoc.getGatewayConfig();
         Collection<? extends SchemeConfig> schemeConfigs = new LinkedList<>();
         SecurityType[] securityConfigs = gatewayConfig.getSecurityArray();
@@ -244,10 +245,10 @@ public class GatewayContextResolver {
         TransportFactory transportFactory = TransportFactory.newTransportFactory((Map) configuration);
         ServiceFactory serviceFactory = ServiceFactory.newServiceFactory();
         Collection<ServiceContext> services =
-                resolveServices(servicesByURI, webDir, tempDir, serviceConfigs, securityContext,
-                        realmsContext, clusterContext, serviceDefaults, schedulerProvider,
-                        dependencyContexts,
-                        configuration, transportFactory, serviceFactory, resourceAddressFactory, serviceDefaults);
+                resolveServices(servicesByURI, webDir, tempDir, serviceConfigs, realmsContext,
+                        clusterContext, serviceDefaults, schedulerProvider, configuration,
+                        transportFactory,
+                        serviceFactory, resourceAddressFactory, serviceDefaults);
         resolveTransports(transportFactory);
 
         BridgeServiceFactory bridgeServiceFactory = resolveBridgeServiceFactory(transportFactory);
@@ -441,16 +442,14 @@ public class GatewayContextResolver {
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<ServiceContext> resolveServices(ServiceRegistry serviceRegistry,
+    public Collection<ServiceContext> resolveServices(ServiceRegistry serviceRegistry,
                                                        File webDir,
                                                        File tempDir,
                                                        ServiceType[] serviceConfigs,
-                                                       SecurityContext securityContext,
                                                        RealmsContext realmsContext,
                                                        ClusterContext clusterContext,
                                                        ServiceDefaultsType defaultServiceConfig,
                                                        SchedulerProvider schedulerProvider,
-                                                       Map<String, Object> dependencyContexts,
                                                        Properties configuration,
                                                        TransportFactory transportFactory,
                                                        ServiceFactory serviceFactory,
